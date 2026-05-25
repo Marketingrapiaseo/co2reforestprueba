@@ -1,4 +1,4 @@
-// server.js - Versión completa con Google Sheets y CSP corregido
+// server.js - Versión completa con logs detallados y CSP corregido
 require('dotenv').config();
 
 const express = require('express');
@@ -37,12 +37,13 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-            scriptSrcAttr: ["'unsafe-inline'"],          // Permite onclick, onchange, etc.
+            scriptSrcAttr: ["'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
             connectSrc: ["'self'", "https://api-sandbox.wompi.co", "https://api.wompi.co"],
+            formAction: ["'self'", "https://checkout.wompi.co"],   // <--- NUEVA DIRECTIVA
         },
     },
 }));
@@ -93,7 +94,7 @@ async function sendToGoogleSheets(orderData) {
     }
 }
 
-// ========== RUTA DE PAGO ==========
+// ========== RUTA DE PAGO (CON LOGS DETALLADOS) ==========
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
@@ -103,8 +104,12 @@ app.post('/api/create-payment', limiter, [
     body('cliente.email').optional().isEmail().normalizeEmail(),
     body('cliente.cedula').optional().isString().isLength({ max: 20 })
 ], (req, res) => {
+    console.log("📥 POST /api/create-payment recibida");
+    console.log("Body:", JSON.stringify(req.body, null, 2));
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        console.warn("❌ Errores de validación:", errors.array());
         return res.status(400).json({ errors: errors.array() });
     }
 
@@ -115,7 +120,9 @@ app.post('/api/create-payment', limiter, [
     const cliente = req.body.cliente || { nombre: '', email: '', cedula: '' };
 
     const total = calcularTotal(a, b, c, placa);
+    console.log(`💰 Total calculado: ${total} COP`);
     if (total <= 0) {
+        console.warn("❌ Total inválido");
         return res.status(400).json({ error: 'El total debe ser mayor a cero' });
     }
 
