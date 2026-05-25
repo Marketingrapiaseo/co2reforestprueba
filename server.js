@@ -1,4 +1,4 @@
-// server.js - VERSIÓN CON CSP DESACTIVADO PARA PRUEBAS
+// server.js - Versión completa con Google Sheets
 require('dotenv').config();
 
 const express = require('express');
@@ -12,57 +12,49 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ========== ALMACENAMIENTO TEMPORAL DE ÓRDENES ==========
+const pendingOrders = new Map();
+
 // ========== VALIDAR VARIABLES DE ENTORNO ==========
 const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY;
 const WOMPI_INTEGRITY_SECRET = process.env.WOMPI_INTEGRITY_SECRET;
+const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL; // <-- Debes definirla en Render
 
 if (!WOMPI_PUBLIC_KEY || !WOMPI_INTEGRITY_SECRET) {
-    console.error("❌ ERROR CRÍTICO: Variables WOMPI_PUBLIC_KEY y WOMPI_INTEGRITY_SECRET no definidas en .env");
+    console.error("❌ ERROR CRÍTICO: Variables de Wompi no definidas en el entorno.");
     process.exit(1);
+}
+if (!GOOGLE_SCRIPT_URL) {
+    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida. Los datos NO se guardarán en Google Sheets.");
 }
 
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
-// ========== MIDDLEWARES ==========
-// Desactivar CSP completamente para permitir scripts inline y eventos onclick
+// ========== MIDDLEWARES DE SEGURIDAD ==========
 app.use(helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
 }));
 
-// CORS configurado
 const allowedOrigins = [
     'http://localhost:5500',
     'http://127.0.0.1:5500',
     'https://co2reforest.com',
-    'https://co2reforestprueba.onrender.com' 
+    'https://co2reforestprueba.onrender.com'
 ];
 
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        } else {
-            console.warn(`CORS bloqueado para origen: ${origin}`);
-            return callback(new Error('CORS no permitido desde este origen'), false);
-        }
-    },
-    optionsSuccessStatus: 200
-};
-
-app.use(cors(corsOptions));
+app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200 }));
 app.use(express.json());
-
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: { error: 'Demasiadas peticiones. Intenta de nuevo en 15 minutos.' }
-});
-
-// Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
+
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 
 // ========== FUNCIÓN DE CÁLCULO ==========
 function calcularTotal(a, b, c, placa) {
@@ -78,7 +70,26 @@ function calcularTotal(a, b, c, placa) {
     return total;
 }
 
-// RUTA DE PAGO
+// ========== ENVÍO A GOOGLE SHEETS ==========
+async function sendToGoogleSheets(orderData) {
+    if (!GOOGLE_SCRIPT_URL) return;
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orden: orderData })
+        });
+        const result = await response.json();
+        console.log(`📤 Envío a Google Sheets: ${result.status}`);
+        if (result.status !== 'success') {
+            console.error('Respuesta de Google Sheets:', result);
+        }
+    } catch (error) {
+        console.error("❌ Error enviando a Google Sheets:", error);
+    }
+}
+
+// ========== RUTA DE PAGO ==========
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
@@ -86,6 +97,7 @@ app.post('/api/create-payment', limiter, [
     body('placa').optional().isBoolean(),
     body('cliente.nombre').optional().isString().isLength({ max: 100 }),
     body('cliente.email').optional().isEmail().normalizeEmail(),
+    body('cliente.cedula').optional().isString().isLength({ max: 20 })
 ], (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -96,7 +108,7 @@ app.post('/api/create-payment', limiter, [
     const b = req.body.b || 0;
     const c = req.body.c || 0;
     const placa = !!req.body.placa;
-    const cliente = req.body.cliente || { nombre: '', email: '' };
+    const cliente = req.body.cliente || { nombre: '', email: '', cedula: '' };
 
     const total = calcularTotal(a, b, c, placa);
     if (total <= 0) {
@@ -108,7 +120,16 @@ app.post('/api/create-payment', limiter, [
     const integrityPayload = `${reference}${amountInCents}${CURRENCY}${WOMPI_INTEGRITY_SECRET}`;
     const signature = crypto.createHash('sha256').update(integrityPayload, 'utf8').digest('hex');
 
-    console.log(`📧 Nueva orden: ${cliente.email} | Ref: ${reference} | Total: ${total} COP`);
+    // Guardar la orden pendiente
+    const orderData = {
+        a, b, c, placa,
+        cliente: { nombre: cliente.nombre, email: cliente.email, cedula: cliente.cedula },
+        total,
+        referencia: reference,
+        fecha_creacion: new Date().toISOString()
+    };
+    pendingOrders.set(reference, orderData);
+    console.log(`📝 Orden pendiente guardada con referencia: ${reference}`);
 
     res.json({
         publicKey: WOMPI_PUBLIC_KEY,
@@ -116,17 +137,79 @@ app.post('/api/create-payment', limiter, [
         amountInCents: amountInCents.toString(),
         reference,
         signature,
-        redirectUrl: 'https://co2reforest.com/gracias.html'
+        redirectUrl: 'https://co2reforestprueba.onrender.com/gracias.html' // Ajusta si usas dominio propio
     });
 });
 
-// Manejador de errores global
+// ========== WEBHOOK DE WOMPI ==========
+app.post('/api/wompi-webhook', async (req, res) => {
+    // Responder inmediatamente para evitar reintentos
+    res.status(200).send('OK');
+
+    try {
+        const event = req.body;
+        console.log("📩 Webhook recibido:", event.event);
+
+        if (event.event === 'transaction.updated' && event.data.transaction.status === 'APPROVED') {
+            const transaction = event.data.transaction;
+            const transactionReference = transaction.reference;
+
+            console.log(`💰 Pago exitoso confirmado para la referencia: ${transactionReference}`);
+
+            const pendingOrder = pendingOrders.get(transactionReference);
+            if (pendingOrder) {
+                const now = new Date();
+                const orderToSend = {
+                    fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+                    nombre: pendingOrder.cliente.nombre,
+                    cedula: pendingOrder.cliente.cedula || 'No especificada',
+                    email: pendingOrder.cliente.email,
+                    paqueteA: pendingOrder.a,
+                    paqueteB: pendingOrder.b,
+                    paqueteC: pendingOrder.c,
+                    placa: pendingOrder.placa ? 'Sí' : 'No',
+                    total: pendingOrder.total,
+                    referencia: transactionReference
+                };
+                await sendToGoogleSheets(orderToSend);
+                pendingOrders.delete(transactionReference);
+                console.log(`✅ Orden ${transactionReference} registrada en Google Sheets`);
+            } else {
+                console.warn(`⚠️ No se encontraron datos locales para la referencia ${transactionReference}.`);
+            }
+        } else {
+            console.log(`ℹ️ Evento ignorado: ${event.event} con estado ${event.data.transaction?.status}`);
+        }
+    } catch (error) {
+        console.error("❌ Error procesando el webhook:", error);
+    }
+});
+
+// ========== ENDPOINT PARA PROBAR (OPCIONAL) ==========
+app.get('/api/test-google', async (req, res) => {
+    const testOrder = {
+        fechaHora: new Date().toLocaleString('es-CO'),
+        nombre: "Test Manual",
+        cedula: "123456789",
+        email: "test@test.com",
+        paqueteA: 1,
+        paqueteB: 0,
+        paqueteC: 0,
+        placa: "No",
+        total: 180000,
+        referencia: "TEST-001"
+    };
+    await sendToGoogleSheets(testOrder);
+    res.json({ status: 'enviado' });
+});
+
+// ========== MANEJADOR DE ERRORES GLOBAL ==========
 app.use((err, req, res, next) => {
     console.error('❌ Error interno:', err);
     res.status(500).json({ error: 'Error interno del servidor. Intenta de nuevo más tarde.' });
 });
 
-// Iniciar servidor
+// ========== INICIAR SERVIDOR ==========
 app.listen(PORT, () => {
     console.log(`✅ Servidor seguro corriendo en http://localhost:${PORT}`);
 });
