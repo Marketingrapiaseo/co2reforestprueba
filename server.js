@@ -1,4 +1,4 @@
-// server.js - VERSIÓN COMPLETA Y CORREGIDA
+// server.js - VERSIÓN CORREGIDA CON CSP PARA SCRIPTS INLINE
 require('dotenv').config();
 
 const express = require('express');
@@ -25,8 +25,19 @@ const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
 // ========== MIDDLEWARES ==========
-app.use(helmet());
+// Helmet con CSP para permitir scripts inline y estilos inline
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+}));
 
+// CORS configurado
 const allowedOrigins = [
     'http://localhost:5500',
     'http://127.0.0.1:5500',
@@ -49,13 +60,14 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
     message: { error: 'Demasiadas peticiones. Intenta de nuevo en 15 minutos.' }
 });
 
-// ========== SERVIR ARCHIVOS ESTÁTICOS (IMPORTANTE) ==========
+// ========== SERVIR ARCHIVOS ESTÁTICOS ==========
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ========== FUNCIÓN DE CÁLCULO ==========
