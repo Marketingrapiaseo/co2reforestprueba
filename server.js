@@ -123,4 +123,3 @@ app.use((err, req, res, next) => {
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`✅ Servidor seguro corriendo en http://localhost:${PORT}`);
-});
