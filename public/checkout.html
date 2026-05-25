@@ -131,7 +131,9 @@
         placa: cart.placa,
         cliente: cart.cliente 
       };
-      const response = await fetch('https://tu-app.onrender.com/api/create-payment', {
+      
+      // ✅ Usa la URL CORRECTA de tu servidor en Render
+      const response = await fetch('https://co2reforestprueba.onrender.com/api/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
