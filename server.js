@@ -1,4 +1,4 @@
-// server.js - Versión completa con Google Sheets
+// server.js - Versión completa con Google Sheets y CSP corregido
 require('dotenv').config();
 
 const express = require('express');
@@ -18,7 +18,7 @@ const pendingOrders = new Map();
 // ========== VALIDAR VARIABLES DE ENTORNO ==========
 const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY;
 const WOMPI_INTEGRITY_SECRET = process.env.WOMPI_INTEGRITY_SECRET;
-const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL; // <-- Debes definirla en Render
+const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL;
 
 if (!WOMPI_PUBLIC_KEY || !WOMPI_INTEGRITY_SECRET) {
     console.error("❌ ERROR CRÍTICO: Variables de Wompi no definidas en el entorno.");
@@ -31,14 +31,18 @@ if (!GOOGLE_SCRIPT_URL) {
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
-// ========== MIDDLEWARES DE SEGURIDAD ==========
+// ========== MIDDLEWARES DE SEGURIDAD (CSP CORREGIDO) ==========
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrcAttr: ["'unsafe-inline'"],          // Permite onclick, onchange, etc.
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://api-sandbox.wompi.co", "https://api.wompi.co"],
         },
     },
 }));
@@ -120,7 +124,7 @@ app.post('/api/create-payment', limiter, [
     const integrityPayload = `${reference}${amountInCents}${CURRENCY}${WOMPI_INTEGRITY_SECRET}`;
     const signature = crypto.createHash('sha256').update(integrityPayload, 'utf8').digest('hex');
 
-    // Guardar la orden pendiente
+    // Guardar orden pendiente
     const orderData = {
         a, b, c, placa,
         cliente: { nombre: cliente.nombre, email: cliente.email, cedula: cliente.cedula },
@@ -137,23 +141,19 @@ app.post('/api/create-payment', limiter, [
         amountInCents: amountInCents.toString(),
         reference,
         signature,
-        redirectUrl: 'https://co2reforestprueba.onrender.com/gracias.html' // Ajusta si usas dominio propio
+        redirectUrl: 'https://co2reforestprueba.onrender.com/gracias.html'
     });
 });
 
 // ========== WEBHOOK DE WOMPI ==========
 app.post('/api/wompi-webhook', async (req, res) => {
-    // Responder inmediatamente para evitar reintentos
     res.status(200).send('OK');
-
     try {
         const event = req.body;
         console.log("📩 Webhook recibido:", event.event);
-
         if (event.event === 'transaction.updated' && event.data.transaction.status === 'APPROVED') {
             const transaction = event.data.transaction;
             const transactionReference = transaction.reference;
-
             console.log(`💰 Pago exitoso confirmado para la referencia: ${transactionReference}`);
 
             const pendingOrder = pendingOrders.get(transactionReference);
@@ -185,7 +185,7 @@ app.post('/api/wompi-webhook', async (req, res) => {
     }
 });
 
-// ========== ENDPOINT PARA PROBAR (OPCIONAL) ==========
+// ========== ENDPOINT DE PRUEBA PARA GOOGLE SHEETS ==========
 app.get('/api/test-google', async (req, res) => {
     const testOrder = {
         fechaHora: new Date().toLocaleString('es-CO'),
