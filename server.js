@@ -1,4 +1,4 @@
-// server.js - VERSIÓN CORREGIDA Y SEGURA
+// server.js - VERSIÓN COMPLETA Y CORREGIDA
 require('dotenv').config();
 
 const express = require('express');
@@ -7,6 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,10 +25,8 @@ const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
 // ========== MIDDLEWARES ==========
-// Helmet para cabeceras seguras
 app.use(helmet());
 
-// CORS configurado correctamente
 const allowedOrigins = [
     'http://localhost:5500',
     'http://127.0.0.1:5500',
@@ -36,7 +35,6 @@ const allowedOrigins = [
 
 const corsOptions = {
     origin: function (origin, callback) {
-        // Permitir solicitudes sin origen (como Postman) solo en desarrollo
         if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) {
             return callback(null, true);
@@ -49,14 +47,16 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json(public));
+app.use(express.json());
 
-// Rate limiting: máximo 100 peticiones por IP cada 15 minutos
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
     message: { error: 'Demasiadas peticiones. Intenta de nuevo en 15 minutos.' }
 });
+
+// ========== SERVIR ARCHIVOS ESTÁTICOS (IMPORTANTE) ==========
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ========== FUNCIÓN DE CÁLCULO ==========
 function calcularTotal(a, b, c, placa) {
@@ -110,7 +110,7 @@ app.post('/api/create-payment', limiter, [
         amountInCents: amountInCents.toString(),
         reference,
         signature,
-        redirectUrl: 'hthttps://forest.infinityfreeapp.com/gracias.html'
+        redirectUrl: 'https://co2reforest.com/gracias.html'
     });
 });
 
@@ -123,3 +123,4 @@ app.use((err, req, res, next) => {
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`✅ Servidor seguro corriendo en http://localhost:${PORT}`);
+});
