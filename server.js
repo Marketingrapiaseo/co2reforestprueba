@@ -1,4 +1,4 @@
-// server.js - VERSIÓN CORREGIDA CON CSP PARA SCRIPTS INLINE
+// server.js - VERSIÓN CON CSP DESACTIVADO PARA PRUEBAS
 require('dotenv').config();
 
 const express = require('express');
@@ -25,16 +25,9 @@ const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
 // ========== MIDDLEWARES ==========
-// Helmet con CSP para permitir scripts inline y estilos inline
+// Desactivar CSP completamente para permitir scripts inline y eventos onclick
 app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", "data:", "https:"],
-        },
-    },
+    contentSecurityPolicy: false,
 }));
 
 // CORS configurado
@@ -67,7 +60,7 @@ const limiter = rateLimit({
     message: { error: 'Demasiadas peticiones. Intenta de nuevo en 15 minutos.' }
 });
 
-// ========== SERVIR ARCHIVOS ESTÁTICOS ==========
+// Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ========== FUNCIÓN DE CÁLCULO ==========
@@ -84,7 +77,7 @@ function calcularTotal(a, b, c, placa) {
     return total;
 }
 
-// ========== RUTA DE PAGO ==========
+// RUTA DE PAGO
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
