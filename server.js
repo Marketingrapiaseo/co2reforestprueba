@@ -49,7 +49,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json(public));
 
 // Rate limiting: máximo 100 peticiones por IP cada 15 minutos
 const limiter = rateLimit({
@@ -122,5 +122,5 @@ app.use((err, req, res, next) => {
 
 // Iniciar servidor
 app.listen(PORT, () => {
-    console.log(`✅ Servidor seguro corriendo en https://forest.infinityfreeapp.com/`);
+    console.log(`✅ Servidor seguro corriendo en http://localhost:${PORT}`);
 });
