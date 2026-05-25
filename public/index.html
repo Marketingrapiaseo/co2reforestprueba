@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CO2Reforest — Árboles Nativos Orinoquía · Ley 2173 · Res. 1491/2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Ajustes para el héroe: texto 20% más grande y desplazado 2cm a la derecha */
+  .hero-inner {
+    padding-left: 80px !important;
+    padding-right: 40px !important;
+    max-width: 680px !important;        /* Ligeramente más ancho para el texto más grande */
+    margin-left: 2cm !important;       /* Desplazamiento de 2cm a la derecha */
+  }
+  .hero h1 {
+    font-size: clamp(2.64rem, 6vw, 4.2rem) !important;  /* 20% más grande */
+  }
+  .hero-sub {
+    font-size: 1.27rem !important;     /* 20% más grande (1.06 * 1.2) */
+    line-height: 1.5 !important;
+    text-align: justify !important;
+  }
+  .hero-badge {
+    font-size: 0.888rem !important;    /* 20% más grande */
+    padding: 7px 22px !important;
+  }
+  .hero-kpis .kpi-n {
+    font-size: 2.4rem !important;      /* 20% más grande */
+  }
+  .hero-kpis .kpi-l {
+    font-size: 0.84rem !important;
+  }
+  .hero-btns .btn-p, .hero-btns .btn-s {
+    font-size: 1.116rem !important;    /* 20% más grande */
+    padding: 16px 34px !important;
+  }
+  @media (max-width: 900px) {
+    .hero-inner {
+      margin-left: 0 !important;
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+      text-align: center !important;
+      max-width: 100% !important;
+    }
+    .hero-sub {
+      text-align: center !important;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 7vw, 3rem) !important;
+    }
+    .hero-sub {
+      font-size: 1rem !important;
+    }
+  }
+</style>
+</head>
+<body>
+<!-- Modal especies -->
+<div id="modal-especie" class="modal">
+  <div class="modal-contenido">
+    <span class="modal-cerrar">&times;</span>
+    <div class="modal-imagen">
+      <img id="modal-img" src="" alt="Especie">
+    </div>
+    <div class="modal-info">
+      <h3 id="modal-nombre"></h3>
+      <p class="modal-sci" id="modal-sci"></p>
+      <div class="modal-stats">
+        <div><strong>Altura</strong> <span id="modal-altura"></span></div>
+        <div><strong>CO₂/árbol/año</strong> <span id="modal-co2"></span></div>
+        <div><strong>Precio/árbol</strong> <span id="modal-precio"></span></div>
+        <div><strong>Dato clave</strong> <span id="modal-dato"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navegación -->
+<nav>
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMjAgNTYiPgogIDxyZWN0IHg9IjgiIHk9IjI4IiB3aWR0aD0iNSIgaGVpZ2h0PSIxOCIgcng9IjIuNSIgZmlsbD0iIzFBNEEyRSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiMyRDdBNEYiIHRyYW5zZm9ybT0icm90YXRlKC00MiAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiM0Q0FGN0QiIHRyYW5zZm9ybT0icm90YXRlKC0xOCAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiMyRDdBNEYiIHRyYW5zZm9ybT0icm90YXRlKDYgMTAuNSAyNCkiLz4KICA8ZWxsaXBzZSBjeD0iMTAuNSIgY3k9IjI0IiByeD0iMiIgcnk9IjE1IiBmaWxsPSIjNENBRjdEIiB0cmFuc2Zvcm09InJvdGF0ZSgzMCAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiMyRDdBNEYiIHRyYW5zZm9ybT0icm90YXRlKDU0IDEwLjUgMjQpIi8+CiAgPHBhdGggZD0iTTIgNDYgUTEwLjUgNDIgMTkgNDYiIHN0cm9rZT0iIzFBNEEyRSIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDx0ZXh0IHg9IjI4IiB5PSIyOSIgZm9udC1mYW1pbHk9Ik1vbnRzZXJyYXQsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iIzFBNEEyRSI+Q088L3RleHQ+CiAgPHRleHQgeD0iNjMiIHk9IjM0IiBmb250LWZhbWlseT0iTW9udHNlcnJhdCxBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjMUE0QTJFIj4yPC90ZXh0PgogIDx0ZXh0IHg9IjI4IiB5PSI0NiIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM0Q0FGN0QiPlJlZm9yZXN0PC90ZXh0PgogIDx0ZXh0IHg9IjI4IiB5PSI1NCIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjQzg5NzJCIiBsZXR0ZXItc3BhY2luZz0iMS4yIj5PUklOT1FVw41BIMK3IExFWSAyMTczPC90ZXh0Pgo8L3N2Zz4=" alt="CO2Reforest" class="nav-logo">
+  <ul class="nav-links">
+    <li><a href="#paquetes">Paquetes</a></li>
+    <li><a href="#calculadora">Calculadora CO₂</a></li>
+    <li><a href="#especies">Especies</a></li>
+    <li><a href="#ley2173">Ley 2173</a></li>
+    <li><a href="#calculadora" class="nav-cta">Cotizar ahora →</a></li>
+  </ul>
+</nav>
+
+<!-- HERO con imagen a la derecha, texto más grande y desplazado -->
+<section class="hero">
+  <div class="hero-photo"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">🌿 Ley 2173 · Res. 1491/2025 · Semilla ICA</div>
+    <h1>Planta árboles nativos.<br><em>Mide tu impacto.</em><br>Cumple la ley.</h1>
+    <p class="hero-sub">
+      3 paquetes de 5 árboles nativos con CO₂ certificado, reportes ESG 
+      y <strong>hasta 20% de descuento por volumen</strong>. 
+      Vivero propio · Comunidad Sikuani · 100 ha Orinoquía.
+    </p>
+    <div class="hero-kpis">
+      <div class="kpi">
+        <div class="kpi-n">38.796</div>
+        <div class="kpi-l">Árboles disponibles</div>
+      </div>
+      <div class="sep"></div>
+      <div class="kpi">
+        <div class="kpi-n">1.711 t</div>
+        <div class="kpi-l">CO₂ capturado / año</div>
+      </div>
+      <div class="sep"></div>
+      <div class="kpi">
+        <div class="kpi-n">20%</div>
+        <div class="kpi-l">Descuento máximo</div>
+      </div>
+    </div>
+    <div class="hero-btns">
+      <a href="#calculadora" class="btn-p">Calcular mi descuento →</a>
+      <a href="#paquetes" class="btn-s">Ver los 3 paquetes</a>
+    </div>
+  </div>
+</section>
+
+<!-- PAQUETES -->
+<section class="sec sec-gray" id="paquetes">
+  <div class="wrap">
+    <p class="sec-tag">3 Paquetes Comerciales</p>
+    <h2 class="sec-title">Elige el paquete perfecto para tu empresa</h2>
+    <p class="sec-sub">Cada grupo incluye 5 árboles nativos certificados ICA, certificado oficial Ley 2173 y Resolución 1491/2025, reporte fotográfico geolocalizado y monitoreo semestral 2 años.</p>
+
+    <div class="res-banner">
+      <div class="res-icon">📜</div>
+      <div>
+        <div class="res-tag">Resolución 1491 de 2025 · Art. 10</div>
+        <div class="res-title">Áreas de Vida registradas en el REAA — Registro Único de Ecosistemas y Áreas Ambientales</div>
+        <div class="res-text">Las áreas de siembra de CO2Reforest están reportadas ante el Ministerio de Ambiente y Desarrollo Sostenible (MADS) para su registro en el REAA, conforme al Art. 10 de la Resolución 1491/2025. El censo forestal se actualiza cada 5 años con las autoridades ambientales. La información es pública en el portal de Datos Abiertos del Sector Ambiente.</div>
+      </div>
+    </div>
+
+    <div class="packs">
+      <div class="pk">
+        <div class="pk-img">
+          <img src="/imagenes/pack-a.jpg" alt="Pack A Bosque Llanero" loading="lazy">
+          <div class="pk-over">
+            <div class="pk-badge a">Pack A · 36.3% del inventario</div>
+            <div class="pk-title">🌳 Bosque Llanero</div>
+          </div>
+        </div>
+        <div class="pk-body">
+          <p class="pk-desc">El paquete ancla. 2 Morichos + Saladillo + Yopo + Cañofistol. Mayor disponibilidad y excelente relación costo-beneficio.</p>
+          <div class="chips"><span class="chip">2× Moriche</span><span class="chip">1× Saladillo</span><span class="chip">1× Yopo</span><span class="chip">1× Cañofistol</span></div>
+          <div class="co2box a">
+            <div><div class="co2n a">213 kg</div><div class="co2l">CO₂ / grupo / año</div></div>
+            <div style="margin-left:auto;text-align:right"><div style="font-size:.76rem;color:#5a7a5a">10 años</div><div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--green)">2.13 t CO₂</div></div>
+          </div>
+          <div class="pk-price"><div class="price-n a">$180.000</div><div class="price-s">/ grupo · IVA exento</div></div>
+          <a href="#calculadora" class="pk-btn a">Agregar a mi pedido</a>
+        </div>
+      </div>
+      <div class="pk">
+        <div class="pk-img">
+          <img src="/imagenes/pack-b.jpg" alt="Pack B Galería Riparia" loading="lazy">
+          <div class="pk-over">
+            <div class="pk-badge b">Pack B · 39.4% · Mayor CO₂</div>
+            <div class="pk-title">🌊 Galería Riparia</div>
+          </div>
+        </div>
+        <div class="pk-body">
+          <p class="pk-desc">Mayor captura de CO₂ del catálogo. Orejero como árbol ancla de ribera. Ideal para huella hídrica.</p>
+          <div class="chips"><span class="chip">2× Moriche</span><span class="chip">1× Saladillo</span><span class="chip">1× Cañofistol</span><span class="chip">1× Orejero ⭐</span></div>
+          <div class="co2box b">
+            <div><div class="co2n b">243 kg</div><div class="co2l">CO₂ / grupo / año</div></div>
+            <div style="margin-left:auto;text-align:right"><div style="font-size:.76rem;color:#5a7a5a">10 años</div><div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#2D5F8A">2.43 t CO₂</div></div>
+          </div>
+          <div class="pk-price"><div class="price-n b">$186.000</div><div class="price-s">/ grupo · IVA exento</div></div>
+          <a href="#calculadora" class="pk-btn b">Agregar a mi pedido</a>
+        </div>
+      </div>
+      <div class="pk">
+        <div class="pk-img">
+          <img src="/imagenes/pack-c.jpg" alt="Pack C Silvopastoril" loading="lazy">
+          <div class="pk-over">
+            <div class="pk-badge c">Pack C · 5 especies distintas</div>
+            <div class="pk-title">🐄 Silvopastoril</div>
+          </div>
+        </div>
+        <div class="pk-body">
+          <p class="pk-desc">El más biodiverso: 5 especies distintas. Aceite/Copaiba medicinal + Yopo fijador de N₂.</p>
+          <div class="chips"><span class="chip">1× Moriche</span><span class="chip">1× Saladillo</span><span class="chip">1× Yopo N₂</span><span class="chip">1× Cañofistol</span><span class="chip">1× Aceite ⭐</span></div>
+          <div class="co2box c">
+            <div><div class="co2n c">228 kg</div><div class="co2l">CO₂ / grupo / año</div></div>
+            <div style="margin-left:auto;text-align:right"><div style="font-size:.76rem;color:#5a7a5a">10 años</div><div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#7A4F1A">2.28 t CO₂</div></div>
+          </div>
+          <div class="pk-price"><div class="price-n c">$198.000</div><div class="price-s">/ grupo · IVA exento</div></div>
+          <a href="#calculadora" class="pk-btn c">Agregar a mi pedido</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALCULADORA con campos de cliente -->
+<section class="sec" id="calculadora">
+  <div class="wrap">
+    <p class="sec-tag" style="text-align:center">Herramienta Interactiva</p>
+    <h2 class="sec-title" style="text-align:center">Arma tu pedido y calcula tu descuento</h2>
+    <p class="sec-sub" style="text-align:center;margin:0 auto 44px">Escribe la cantidad directamente o usa los botones. Cada 10 grupos = 1% de descuento, hasta el 20% máximo con 200+ grupos.</p>
+    <div class="calc-box">
+      <div class="calc-grid">
+        <div>
+          <h2>Selecciona tus grupos</h2>
+          <p class="sub">Puedes escribir la cantidad directamente. Cada grupo = 5 árboles nativos certificados.</p>
+          <div class="disc-scale">
+            <div class="ds-title">Progreso del descuento por volumen</div>
+            <div class="ds-bar"><div class="ds-fill" id="dsf" style="width:0%"></div></div>
+            <div class="ds-lbls"><span>0 grupos · 0%</span><span>100 · 10%</span><span>200+ · 20% máx</span></div>
+          </div>
+          <div class="counters">
+            <div class="cr">
+              <div class="cr-label">
+                <div class="cr-name">🌳 Pack A — Bosque Llanero</div>
+                <div class="cr-price">$180.000 / grupo · 213 kg CO₂/año · máx 2.813</div>
+              </div>
+              <div class="counter">
+                <button class="cb" onclick="ch('a',-1)">−</button>
+                <input class="cnt-input" id="ia" type="number" value="0" min="0" max="2813" placeholder="0" oninput="setVal('a',this.value)">
+                <button class="cb" onclick="ch('a',1)">+</button>
+              </div>
+              <div class="cr-co2" id="ca">0 kg</div>
+            </div>
+            <div class="cr">
+              <div class="cr-label">
+                <div class="cr-name">🌊 Pack B — Galería Riparia</div>
+                <div class="cr-price">$186.000 / grupo · 243 kg CO₂/año · máx 3.058</div>
+              </div>
+              <div class="counter">
+                <button class="cb" onclick="ch('b',-1)">−</button>
+                <input class="cnt-input" id="ib" type="number" value="0" min="0" max="3058" placeholder="0" oninput="setVal('b',this.value)">
+                <button class="cb" onclick="ch('b',1)">+</button>
+              </div>
+              <div class="cr-co2" id="cb_">0 kg</div>
+            </div>
+            <div class="cr">
+              <div class="cr-label">
+                <div class="cr-name">🐄 Pack C — Silvopastoril</div>
+                <div class="cr-price">$198.000 / grupo · 228 kg CO₂/año · máx 1.888</div>
+              </div>
+              <div class="counter">
+                <button class="cb" onclick="ch('c',-1)">−</button>
+                <input class="cnt-input" id="ic" type="number" value="0" min="0" max="1888" placeholder="0" oninput="setVal('c',this.value)">
+                <button class="cb" onclick="ch('c',1)">+</button>
+              </div>
+              <div class="cr-co2" id="cc">0 kg</div>
+            </div>
+          </div>
+
+          <div class="placa-box">
+            <div class="placa-header">
+              <label class="placa-toggle">
+                <input type="checkbox" id="placa-chk" onchange="upd()">
+                <span class="placa-slider"></span>
+              </label>
+              <div class="placa-lbl">🪧 Placa personalizada (opcional)</div>
+            </div>
+            <div class="placa-sub">Una placa metálica con el nombre de tu empresa se instala en el área de siembra. Se cobra por pedido, no por árbol individual.</div>
+            <div class="placa-precio">+ $85.000 por pedido</div>
+          </div>
+          <div class="max-note">Disponible: A=2.813 · B=3.058 · C=1.888 grupos</div>
+        </div>
+
+        <div>
+          <div class="results">
+            <div class="r-title">📊 Tu cotización en tiempo real</div>
+            <div class="rrow"><span class="rl">Grupos totales</span><span class="rv big" id="rg">0</span></div>
+            <div class="rrow"><span class="rl">Árboles nativos plantados</span><span class="rv big" id="ra">0</span></div>
+            <div class="rrow"><span class="rl">CO₂ capturado / año</span><span class="rv" id="rc">0 kg</span></div>
+            <div class="rrow"><span class="rl">CO₂ acumulado en 10 años</span><span class="rv" id="rc10">0 kg</span></div>
+            <div class="rrow"><span class="rl">Equivale a retirar</span><span class="rv" id="rauto">0 autos/año</span></div>
+            <div class="dbadge" id="dbadge">
+              <div class="db-pct" id="dpct">0%</div>
+              <div class="db-lbl">descuento por volumen</div>
+            </div>
+            <div class="rrow"><span class="rl">Subtotal paquetes</span><span class="rv" id="rsub">$0</span></div>
+            <div class="rrow"><span class="rl">Descuento aplicado</span><span class="rv disc" id="rdisc">−$0</span></div>
+            <div class="rrow" id="rrow-placa" style="display:none"><span class="rl">🪧 Placa personalizada</span><span class="rv gold" id="rplaca">+$85.000</span></div>
+            <div class="total-box">
+              <div class="tb-lbl">TOTAL A PAGAR (IVA exento · Art. 476 E.T.)</div>
+              <div class="tb-total" id="rtotal">$0</div>
+              <div class="tb-note">Cotización sin compromiso · Respuesta en 24 h</div>
+            </div>
+
+            <!-- Campos para nombre y correo -->
+            <div style="margin-top: 24px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+              <div class="r-title" style="margin-bottom: 12px;">✉️ Datos para el comprobante</div>
+              <div style="margin-bottom: 12px;">
+                <input type="text" id="cliente-nombre" placeholder="Nombre completo (requerido)" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; font-family:'Inter',sans-serif;">
+              </div>
+              <div style="margin-bottom: 20px;">
+                <input type="email" id="cliente-email" placeholder="Correo electrónico (requerido)" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; font-family:'Inter',sans-serif;">
+              </div>
+              <div class="tb-note" style="text-align:center; margin-bottom: 8px;">Recibirás el comprobante y certificado a este correo</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+              <button id="btn-pagar" class="btn-p" style="width:100%; background:#C8972B;">Proceder al pago →</button>
+            </div>
+            <div class="pills" id="pills">
+              <span class="pill">Ingresa grupos para ver tus beneficios</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ESPECIES -->
+<section class="sec sec-gray" id="especies">
+  <div class="wrap">
+    <p class="sec-tag">6 Especies · Semilla ICA Certificada</p>
+    <h2 class="sec-title">Los guardianes de la Orinoquía</h2>
+    <p class="sec-sub">Cada árbol es una especie nativa seleccionada por su valor ecológico, adaptación a la sabana orinocense y capacidad de captura de CO₂ documentada.</p>
+    <div class="species">
+      <div class="sp"><div class="sp-img"><img src="/imagenes/moriche.jpg" alt="Moriche" loading="lazy"></div><div class="sp-body"><div class="sp-name">🌴 Moriche</div><div class="sp-sci">Mauritia flexuosa</div><div class="sp-stats"><div class="ss"><span class="sk">Altura</span><span class="sv">20–35 m</span></div><div class="ss"><span class="sk">CO₂/árbol/año</span><span class="sv">22 kg</span></div><div class="ss"><span class="sk">Precio/árbol</span><span class="sv">$30.000</span></div><div class="ss"><span class="sk">Dato clave</span><span class="sv">Árbol sagrado Sikuani</span></div></div></div></div>
+      <div class="sp"><div class="sp-img"><img src="/imagenes/orejero2.jpg" alt="Orejero" loading="lazy"></div><div class="sp-body"><div class="sp-name">🌲 Orejero</div><div class="sp-sci">Enterolobium cyclocarpum</div><div class="sp-stats"><div class="ss"><span class="sk">Altura</span><span class="sv">hasta 30 m</span></div><div class="ss"><span class="sk">CO₂/árbol/año</span><span class="sv">85 kg ⭐</span></div><div class="ss"><span class="sk">Precio/árbol</span><span class="sv">$48.000</span></div><div class="ss"><span class="sk">Dato clave</span><span class="sv">Mayor captura CO₂</span></div></div></div></div>
+      <div class="sp"><div class="sp-img"><img src="/imagenes/yopo.jpg" alt="Yopo" loading="lazy"></div><div class="sp-body"><div class="sp-name">🌿 Yopo</div><div class="sp-sci">Anadenanthera peregrina</div><div class="sp-stats"><div class="ss"><span class="sk">Altura</span><span class="sv">8–20 m</span></div><div class="ss"><span class="sk">CO₂/árbol/año</span><span class="sv">55 kg</span></div><div class="ss"><span class="sk">Precio/árbol</span><span class="sv">$42.000</span></div><div class="ss"><span class="sk">Dato clave</span><span class="sv">Fija N₂ atmosférico</span></div></div></div></div>
+      <div class="sp"><div class="sp-img"><img src="/imagenes/saladillo.jpg" alt="Saladillo" loading="lazy"></div><div class="sp-body"><div class="sp-name">🌱 Saladillo</div><div class="sp-sci">Caraipa llanorum</div><div class="sp-stats"><div class="ss"><span class="sk">Altura</span><span class="sv">10–20 m</span></div><div class="ss"><span class="sk">CO₂/árbol/año</span><span class="sv">37 kg</span></div><div class="ss"><span class="sk">Precio/árbol</span><span class="sv">$36.000</span></div><div class="ss"><span class="sk">Dato clave</span><span class="sv">Madera densa 0.65 g/cm³</span></div></div></div></div>
+      <div class="sp"><div class="sp-img"><img src="/imagenes/aceite-copaiba.jpg" alt="Aceite" loading="lazy"></div><div class="sp-body"><div class="sp-name">💧 Aceite / Copaiba</div><div class="sp-sci">Copaifera officinalis</div><div class="sp-stats"><div class="ss"><span class="sk">Altura</span><span class="sv">15–20 m</span></div><div class="ss"><span class="sk">CO₂/árbol/año</span><span class="sv">37 kg</span></div><div class="ss"><span class="sk">Precio/árbol</span><span class="sv">$48.000</span></div><div class="ss"><span class="sk">Dato clave</span><span class="sv">Resina medicinal valiosa</span></div></div></div></div>
+      <div class="sp"><div class="sp-img"><img src="/imagenes/canofistol.jpg" alt="Cañofistol" loading="lazy"></div><div class="sp-body"><div class="sp-name">🌸 Cañofistol</div><div class="sp-sci">Cassia grandis</div><div class="sp-stats"><div class="ss"><span class="sk">Altura</span><span class="sv">15–30 m</span></div><div class="ss"><span class="sk">CO₂/árbol/año</span><span class="sv">77 kg</span></div><div class="ss"><span class="sk">Precio/árbol</span><span class="sv">$42.000</span></div><div class="ss"><span class="sk">Dato clave</span><span class="sv">Florece y da sombra</span></div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LEY 2173 -->
+<section class="sec sec-cream" id="ley2173">
+  <div class="wrap">
+    <div class="ley-grid">
+      <div>
+        <div class="ley-tag">Marco Legal Vigente</div>
+        <div class="ley-title">Ley 2173 de 2021 +<br>Resolución 1491 de 2025</div>
+        <div style="margin: 15px 0 20px 0;">
+          <a href="https://www.minambiente.gov.co/wp-content/uploads/2024/07/LEY-2173-DEL-30-DE-DICIEMBRE-DE-2021.pdf" download class="btn-ley">
+            📄 Descargar Ley 2173 de 2021 (PDF)
+          </a>
+        </div>
+        <p class="ley-txt">La <strong>Ley 2173 de 2021</strong> obliga a medianas y grandes empresas colombianas a sembrar <strong>2 árboles nativos por cada empleado de planta</strong> por año, en las Áreas de Vida designadas.</p>
+        <p class="ley-txt">La <strong>Resolución 1491 del 14 de octubre de 2025</strong> del MADS reglamenta el registro, reporte y publicidad de las Áreas de Vida, garantizando trazabilidad total.</p>
+        <div class="ley-alert">
+          <div class="la-t">⚠️ Fórmula rápida Ley 2173</div>
+          <div class="la-b">Empleados de planta × 2 = árboles obligatorios / año<br>Árboles ÷ 5 = grupos que necesitas en CO2Reforest</div>
+        </div>
+        <div class="res-card">
+          <div class="res-card-tag">Art. 10 · Resolución 1491 de 2025</div>
+          <div class="res-card-title">Obligaciones de reporte y registro de Áreas de Vida</div>
+          <div class="res-items">
+            <div class="ri"><div class="ri-dot"></div><div class="ri-txt"><strong>Reporte obligatorio:</strong> Las Secretarías de Planeación municipales reportan las Áreas de Vida al MADS para registro en el REAA.</div></div>
+            <div class="ri"><div class="ri-dot"></div><div class="ri-txt"><strong>Censo forestal cada 5 años:</strong> Actualización conjunta con autoridades ambientales.</div></div>
+            <div class="ri"><div class="ri-dot"></div><div class="ri-txt"><strong>Datos abiertos:</strong> El MADS publica esta información en el portal de Datos Abiertos.</div></div>
+            <div class="ri"><div class="ri-dot"></div><div class="ri-txt"><strong>CO2Reforest cumple:</strong> Nuestras áreas están reportadas y en proceso de registro en el REAA.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ley-bens">
+        <div class="lb"><div class="lb-ico">📋</div><div><div class="lb-t">Certificado oficial</div><div class="lb-b">Con GPS de cada árbol, especies, fecha y CO₂. Válido ante ANLA, MADS y autoridades regionales.</div></div></div>
+        <div class="lb"><div class="lb-ico">🗺️</div><div><div class="lb-t">Área de Vida registrada · REAA</div><div class="lb-b">Área reportada al MADS conforme al Art. 10 Res. 1491/2025 y registrada en el REAA.</div></div></div>
+        <div class="lb"><div class="lb-ico">🌍</div><div><div class="lb-t">Reporte GRI / ODS</div><div class="lb-b">Datos listos: toneladas CO₂, hectáreas restauradas, biodiversidad, empleo indígena.</div></div></div>
+        <div class="lb"><div class="lb-ico">📸</div><div><div class="lb-t">Monitoreo 2 años</div><div class="lb-b">Informes fotográficos semestrales con estado y coordenadas de cada árbol.</div></div></div>
+        <div class="lb"><div class="lb-ico">🤝</div><div><div class="lb-t">Impacto Comunidad Sikuani</div><div class="lb-b">Tu compra apoya directamente a la comunidad indígena Sikuani con empleo digno.</div></div></div>
+        <div class="lb"><div class="lb-ico">💼</div><div><div class="lb-t">IVA exento · Art. 476 E.T.</div><div class="lb-b">Servicios de restauración ecológica exentos de IVA según el Estatuto Tributario colombiano.</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ESG -->
+<section class="sec sec-green">
+  <div class="wrap">
+    <p class="sec-tag">Beneficios para tu empresa</p>
+    <h2 class="sec-title wh" style="margin-bottom:8px">¿Qué obtiene tu empresa<br>al comprar un paquete?</h2>
+    <p class="sec-sub wh" style="margin-bottom:48px">Más que cumplir la ley — una historia de impacto real que diferencia tu marca.</p>
+    <div class="esg">
+      <div class="ec"><div class="ec-ico">🏆</div><div class="ec-t">Certificado oficial Ley 2173 + Res. 1491</div><div class="ec-b">Documento legal con GPS, especies y CO₂ verificado. Incluye número de registro en el REAA.</div></div>
+      <div class="ec"><div class="ec-ico">📱</div><div class="ec-t">Contenido para redes sociales</div><div class="ec-b">Fotos y video de tus árboles reales en la Orinoquía. Contenido auténtico para LinkedIn e Instagram.</div></div>
+      <div class="ec"><div class="ec-ico">🌿</div><div class="ec-t">CO₂ capturado verificable</div><div class="ec-b">213–243 kg CO₂ por grupo/año con datos científicos. Lista para GRI Standards y ODS 13/15.</div></div>
+      <div class="ec"><div class="ec-ico">🪧</div><div class="ec-t">Placa personalizada (opcional)</div><div class="ec-b">Una placa metálica con el logo de tu empresa en el área de siembra. Cobro único por pedido.</div></div>
+      <div class="ec"><div class="ec-ico">🔬</div><div class="ec-t">Semilla ICA · Vivero propio</div><div class="ec-b">Producción en el mismo predio. Trazabilidad completa semilla → árbol adulto.</div></div>
+      <div class="ec"><div class="ec-ico">📊</div><div class="ec-t">Reporte ESG + REAA</div><div class="ec-b">Informe completo: biodiversidad, empleo indígena, carbono, área en REAA. Compatible GRI, B Corp.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-final">
+  <div class="wrap cta-inner">
+    <div class="cta-title">¿Listo para plantar tu impacto<br>en la Orinoquía?</div>
+    <p class="cta-sub">Cada 10 grupos = 1% de descuento hasta el 20% máximo. Área registrada en el REAA conforme a Res. 1491/2025. Cotización en 24 horas.</p>
+    <div class="cta-btns">
+      <a href="#calculadora" class="btn-wh">Calcular mi pedido →</a>
+      <a href="mailto:ventas@co2reforest.com" class="btn-ow">✉️ ventas@co2reforest.com</a>
+      <a href="https://wa.me/573155928625" class="btn-ow">💬 WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMjAgNTYiPgogIDxyZWN0IHg9IjgiIHk9IjI4IiB3aWR0aD0iNSIgaGVpZ2h0PSIxOCIgcng9IjIuNSIgZmlsbD0id2hpdGUiLz4KICA8ZWxsaXBzZSBjeD0iMTAuNSIgY3k9IjI0IiByeD0iMiIgcnk9IjE1IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuNykiIHRyYW5zZm9ybT0icm90YXRlKC00MiAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IndoaXRlIiB0cmFuc2Zvcm09InJvdGF0ZSgtMTggMTAuNSAyNCkiLz4KICA8ZWxsaXBzZSBjeD0iMTAuNSIgY3k9IjI0IiByeD0iMiIgcnk9IjE1IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuNykiIHRyYW5zZm9ybT0icm90YXRlKDYgMTAuNSAyNCkiLz4KICA8ZWxsaXBzZSBjeD0iMTAuNSIgY3k9IjI0IiByeD0iMiIgcnk9IjE1IiBmaWxsPSJ3aGl0ZSIgdHJhbnNmb3JtPSJyb3RhdGUoMzAgMTAuNSAyNCkiLz4KICA8ZWxsaXBzZSBjeD0iMTAuNSIgY3k9IjI0IiByeD0iMiIgcnk9IjE1IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuNykiIHRyYW5zZm9ybT0icm90YXRlKDU0IDEwLjUgMjQpIi8+CiAgPHBhdGggZD0iTTIgNDYgUTEwLjUgNDIgMTkgNDYiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS41IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8dGV4dCB4PSIyOCIgeT0iMjkiIGZvbnQtZmFtaWx5PSJNb250c2VycmF0LEFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IndoaXRlIj5DTzwvdGV4dD4KICA8dGV4dCB4PSI2MyIgeT0iMzQiIGZvbnQtZmFtaWx5PSJNb250c2VycmF0LEFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IndoaXRlIj4yPC90ZXh0PgogIDx0ZXh0IHg9IjI4IiB5PSI0NiIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM0Q0FGN0QiPlJlZm9yZXN0PC90ZXh0PgogIDx0ZXh0IHg9IjI4IiB5PSI1NCIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjQzg5NzJCIiBsZXR0ZXItc3BhY2luZz0iMS4yIj5PUklOT1FVw41BIMK3IExFWSAyMTczPC90ZXh0Pgo8L3N2Zz4=" alt="CO2Reforest" class="f-logo">
+  <div class="f-contact">📧 ventas@co2reforest.com &nbsp;|&nbsp; 📱 +57 315 592 8625 &nbsp;|&nbsp; 🌐 co2reforest.com</div>
+  <div class="f-info">© 2026 CO2Reforest · Orinoquía Colombiana<br>Ley 2173/2021 · Res. 1491/2025 · IVA Exento Art.476 E.T. · SM</div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // Script para guardar carrito y datos de cliente
+  document.addEventListener('DOMContentLoaded', function() {
+    const btnPagar = document.getElementById('btn-pagar');
+    if (btnPagar) {
+      btnPagar.addEventListener('click', function() {
+        const nombre = document.getElementById('cliente-nombre').value.trim();
+        const email = document.getElementById('cliente-email').value.trim();
+        if (!nombre || !email) {
+          alert('Por favor, ingresa tu nombre completo y correo electrónico para continuar.');
+          return;
+        }
+        if (!email.includes('@') || !email.includes('.')) {
+          alert('Ingresa un correo electrónico válido.');
+          return;
+        }
+        const cartData = {
+          a: ST.a,
+          b: ST.b,
+          c: ST.c,
+          placa: document.getElementById('placa-chk').checked,
+          cliente: { nombre, email }
+        };
+        localStorage.setItem('co2reforest_cart', JSON.stringify(cartData));
+        window.location.href = 'checkout.html';
+      });
+    }
+  });
+</script>
+</body>
+</html>

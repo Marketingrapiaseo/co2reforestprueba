@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CO2Reforest — Pago recibido</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<section class="sec" style="min-height: 70vh; display: flex; align-items: center;">
+  <div class="wrap" style="text-align: center;">
+    <div class="hero-badge" style="margin: 0 auto 20px;">✅ Pago en proceso</div>
+    <h1 class="sec-title">¡Gracias por tu compromiso con la Orinoquía!</h1>
+    <p class="sec-sub" style="margin-bottom: 30px;">Hemos recibido tu pedido. En breve recibirás un correo con el certificado Ley 2173 y el reporte de registro REAA.</p>
+    <div class="res-banner" style="display: inline-block; text-align: left;">
+      <div><strong>ID de transacción:</strong> <span id="txid">---</span></div>
+      <div><strong>Estado:</strong> Pendiente de verificación por Wompi</div>
+      <div><strong>📧 Comprobante enviado a:</strong> <span id="correo-cliente"></span></div>
+    </div>
+    <div style="margin-top: 40px;">
+      <a href="index.html" class="btn-p">Volver al inicio</a>
+    </div>
+  </div>
+</section>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const txId = urlParams.get('id');
+  if (txId) document.getElementById('txid').innerText = txId;
+  else document.getElementById('txid').innerText = 'No disponible';
+
+  const cart = localStorage.getItem('co2reforest_cart');
+  if (cart) {
+    try {
+      const data = JSON.parse(cart);
+      if (data.cliente && data.cliente.email) {
+        document.getElementById('correo-cliente').innerText = data.cliente.email;
+      } else {
+        document.getElementById('correo-cliente').innerText = 'No especificado';
+      }
+    } catch(e) {}
+  } else {
+    document.getElementById('correo-cliente').innerText = 'No disponible';
+  }
+</script>
+</body>
+</html>
