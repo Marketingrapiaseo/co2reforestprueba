@@ -16,6 +16,7 @@
   .btn-guardar:hover { background: var(--gold); }
   .calculadora-section { display: none; }
   .alert { background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+  .error-alert { background: #f8d7da; color: #721c24; }
 </style>
 </head>
 <body>
@@ -231,9 +232,7 @@
     pillsDiv.innerHTML=bens.map(t=>`<span class="${cls(t)}">${t}</span>`).join('');
   }
 
-  // Google Apps Script URL
- const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyolX-yPZD-Pv9G8ANQykVEm3t43lw11hRe1CB5LgGftqma4HUMoET07Yji2MiPm2Bg/exec';
-
+  // En lugar de llamar directamente a Google Apps Script, llamamos a nuestro servidor
   document.getElementById('datos-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const nombre = document.getElementById('nombre').value.trim();
@@ -245,22 +244,13 @@
     }
     clientData = { nombre, cedula, email };
     localStorage.setItem('co2reforest_client', JSON.stringify(clientData));
+    
     try {
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
+      // Enviar a nuestro propio servidor (que luego reenviará a Google Sheets)
+      const response = await fetch('/api/guardar-datos-personales', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orden: {
-          fechaHora: new Date().toLocaleString('es-CO'),
-          nombre: nombre,
-          cedula: cedula,
-          email: email,
-          paqueteA: 0,
-          paqueteB: 0,
-          paqueteC: 0,
-          placa: 'Pendiente',
-          total: 0,
-          referencia: 'Formulario inicial'
-        }})
+        body: JSON.stringify(clientData)
       });
       const result = await response.json();
       if (result.status === 'success') {
@@ -268,11 +258,11 @@
         document.getElementById('calculadora-section').style.display = 'block';
         upd();
       } else {
-        alert('Error al guardar los datos. Intenta de nuevo.');
+        document.getElementById('form-message').innerHTML = '<div class="alert error-alert">❌ Error al guardar los datos. Intenta de nuevo.</div>';
       }
     } catch (error) {
       console.error(error);
-      alert('Error de conexión con el servidor');
+      document.getElementById('form-message').innerHTML = '<div class="alert error-alert">❌ Error de conexión con el servidor.</div>';
     }
   });
 
