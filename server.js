@@ -1,4 +1,3 @@
-// server.js - Versión definitiva con confirmación por redirect
 require('dotenv').config();
 
 const express = require('express');
@@ -12,7 +11,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const pendingOrders = new Map(); // referencia -> datos de la orden
+const pendingOrders = new Map();
 
 const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY;
 const WOMPI_INTEGRITY_SECRET = process.env.WOMPI_INTEGRITY_SECRET;
@@ -23,12 +22,13 @@ if (!WOMPI_PUBLIC_KEY || !WOMPI_INTEGRITY_SECRET) {
     process.exit(1);
 }
 if (!GOOGLE_SCRIPT_URL) {
-    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida. Los datos NO se guardarán.");
+    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida.");
 }
 
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
+// Middlewares
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -70,13 +70,13 @@ function calcularTotal(a, b, c, placa) {
     return total;
 }
 
-async function sendToGoogleSheets(orderData) {
+async function sendToGoogleSheets(orderData, isUpdate = false) {
     if (!GOOGLE_SCRIPT_URL) return;
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orden: orderData })
+            body: JSON.stringify({ orden: orderData, update: isUpdate })
         });
         const result = await response.json();
         console.log(`📤 Envío a Google Sheets: ${result.status}`);
@@ -85,7 +85,38 @@ async function sendToGoogleSheets(orderData) {
     }
 }
 
-// Endpoint para crear el pago
+// Endpoint para guardar solo datos personales (interés)
+app.post('/api/save-client', [
+    body('nombre').notEmpty(),
+    body('cedula').notEmpty(),
+    body('email').isEmail(),
+    body('telefono').notEmpty(),
+    body('ciudad').notEmpty(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const { nombre, cedula, email, telefono, ciudad } = req.body;
+    const orderData = {
+        fechaHora: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+        nombre,
+        cedula,
+        email,
+        telefono,
+        ciudad,
+        packA: 0,
+        packB: 0,
+        packC: 0,
+        placa: false,
+        textoPlaca: '',
+        total: 0,
+        estado: 'Solicitud'
+    };
+    await sendToGoogleSheets(orderData, false);
+    res.json({ status: 'success' });
+});
+
+// Endpoint para crear pago (almacena temporalmente)
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
@@ -95,7 +126,8 @@ app.post('/api/create-payment', limiter, [
     body('cliente.nombre').notEmpty(),
     body('cliente.cedula').notEmpty(),
     body('cliente.email').isEmail(),
-    body('cliente.direccion').notEmpty(),
+    body('cliente.telefono').notEmpty(),
+    body('cliente.ciudad').notEmpty(),
 ], (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -128,57 +160,47 @@ app.post('/api/create-payment', limiter, [
     });
 });
 
-// Endpoint para confirmar el pago desde gracias.html
+// Endpoint para confirmar pago y actualizar la fila existente en Google Sheets
 app.post('/api/confirm-payment', async (req, res) => {
     const { transactionId } = req.body;
-    if (!transactionId) {
-        return res.status(400).json({ error: 'Falta transactionId' });
-    }
+    if (!transactionId) return res.status(400).json({ error: 'Falta transactionId' });
 
     try {
-        // Consultar el estado de la transacción a Wompi
         const wompiResponse = await fetch(`https://api-sandbox.wompi.co/v1/transactions/${transactionId}`, {
             headers: { 'Authorization': `Bearer ${WOMPI_PUBLIC_KEY}` }
         });
         const wompiData = await wompiResponse.json();
-        
         if (!wompiData.data || wompiData.data.status !== 'APPROVED') {
             return res.status(400).json({ error: 'Pago no aprobado o no encontrado' });
         }
-
         const transaction = wompiData.data;
         const reference = transaction.reference;
         const pending = pendingOrders.get(reference);
-        if (!pending) {
-            return res.status(404).json({ error: 'Orden no encontrada' });
-        }
+        if (!pending) return res.status(404).json({ error: 'Orden no encontrada' });
 
-        // Guardar en Google Sheets
         const now = new Date();
         const orderToSend = {
+            email: pending.cliente.email,  // clave para encontrar la fila
             fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
-            nombre: pending.cliente.nombre,
-            cedula: pending.cliente.cedula,
-            email: pending.cliente.email,
-            direccion: pending.cliente.direccion,
             packA: pending.a,
             packB: pending.b,
             packC: pending.c,
             placa: pending.placa,
             textoPlaca: pending.textoPlaca || '',
-            total: pending.total
+            total: pending.total,
+            estado: 'Pagado'
         };
-        await sendToGoogleSheets(orderToSend);
+        await sendToGoogleSheets(orderToSend, true);  // true = actualizar fila existente
         pendingOrders.delete(reference);
-        console.log(`✅ Orden ${reference} confirmada y guardada`);
+        console.log(`✅ Orden ${reference} actualizada correctamente`);
         res.json({ status: 'success' });
     } catch (error) {
-        console.error("❌ Error en confirmación:", error);
+        console.error(error);
         res.status(500).json({ error: 'Error interno' });
     }
 });
 
-// Webhook (opcional, lo mantenemos por si llega)
+// Webhook opcional (misma lógica)
 app.post('/api/wompi-webhook', async (req, res) => {
     res.status(200).send('OK');
     try {
@@ -190,21 +212,19 @@ app.post('/api/wompi-webhook', async (req, res) => {
             if (pending) {
                 const now = new Date();
                 const orderToSend = {
-                    fechaHora: now.toLocaleString('es-CO'),
-                    nombre: pending.cliente.nombre,
-                    cedula: pending.cliente.cedula,
                     email: pending.cliente.email,
-                    direccion: pending.cliente.direccion,
+                    fechaHora: now.toLocaleString('es-CO'),
                     packA: pending.a,
                     packB: pending.b,
                     packC: pending.c,
                     placa: pending.placa,
                     textoPlaca: pending.textoPlaca || '',
-                    total: pending.total
+                    total: pending.total,
+                    estado: 'Pagado'
                 };
-                await sendToGoogleSheets(orderToSend);
+                await sendToGoogleSheets(orderToSend, true);
                 pendingOrders.delete(reference);
-                console.log(`✅ Webhook: Orden ${reference} guardada`);
+                console.log(`✅ Webhook: Orden ${reference} actualizada`);
             }
         }
     } catch (error) {
@@ -212,25 +232,4 @@ app.post('/api/wompi-webhook', async (req, res) => {
     }
 });
 
-// Endpoint de prueba
-app.get('/api/test-google', async (req, res) => {
-    const testOrder = {
-        fechaHora: new Date().toLocaleString('es-CO'),
-        nombre: "Test Manual",
-        cedula: "123456789",
-        email: "test@test.com",
-        direccion: "Calle Falsa 123",
-        packA: 1,
-        packB: 0,
-        packC: 0,
-        placa: false,
-        textoPlaca: "",
-        total: 180000
-    };
-    await sendToGoogleSheets(testOrder);
-    res.json({ status: 'enviado' });
-});
-
-app.listen(PORT, () => {
-    console.log(`✅ Servidor seguro corriendo en http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Servidor en puerto ${PORT}`));

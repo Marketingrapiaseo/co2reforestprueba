@@ -32,7 +32,7 @@
 <section class="sec" style="padding-top: 120px;">
   <div class="wrap">
     <p class="sec-tag">Paso 1 de 2</p>
-    <h2 class="sec-title">Datos personales y dirección</h2>
+    <h2 class="sec-title">Datos personales</h2>
     <div class="form-section">
       <div id="form-message"></div>
       <form id="datos-form">
@@ -49,8 +49,12 @@
           <input type="email" id="email" required>
         </div>
         <div class="form-group">
-          <label>Dirección *</label>
-          <input type="text" id="direccion" required>
+          <label>Teléfono *</label>
+          <input type="tel" id="telefono" required>
+        </div>
+        <div class="form-group">
+          <label>Ciudad *</label>
+          <input type="text" id="ciudad" required>
         </div>
         <button type="submit" class="btn-guardar">Guardar datos y continuar</button>
       </form>
@@ -116,7 +120,6 @@
               </div>
               <div class="placa-sub">Una placa metálica con el texto que ingreses se instalará en el área de siembra. Cobro único por pedido.</div>
               <div class="placa-precio">+ $85.000 por pedido</div>
-              <!-- Campo de texto de placa, oculto inicialmente -->
               <div id="placa-text-group" class="form-group hidden-placa-text" style="margin-top: 15px;">
                 <label>Texto para la placa personalizada</label>
                 <input type="text" id="textoPlaca" placeholder="Ej: 'Empresa XYZ - 2026'">
@@ -159,13 +162,12 @@
 </section>
 
 <script>
-  // Variables globales de la calculadora
   const ST={a:0,b:0,c:0};
   const MX={a:2813,b:3058,c:1888};
   const PR={a:180000,b:186000,c:198000};
   const CO={a:213,b:243,c:228};
   const PLACA=85000;
-  let clientData = { nombre: '', cedula: '', email: '', direccion: '', textoPlaca: '' };
+  let clientData = { nombre: '', cedula: '', email: '', telefono: '', ciudad: '', textoPlaca: '' };
 
   function fmt(n){return '$'+Math.round(n).toLocaleString('es-CO');}
   function fN(n){return Math.round(n).toLocaleString('es-CO');}
@@ -250,10 +252,9 @@
       textGroup.classList.add('hidden-placa-text');
       document.getElementById('textoPlaca').value = '';
     }
-    upd(); // actualizar total
+    upd();
   }
 
-  // Cargar datos previos si existen
   const saved = localStorage.getItem('co2reforest_client');
   if (saved) {
     try {
@@ -261,9 +262,9 @@
       if (old.nombre) document.getElementById('nombre').value = old.nombre;
       if (old.cedula) document.getElementById('cedula').value = old.cedula;
       if (old.email) document.getElementById('email').value = old.email;
-      if (old.direccion) document.getElementById('direccion').value = old.direccion;
+      if (old.telefono) document.getElementById('telefono').value = old.telefono;
+      if (old.ciudad) document.getElementById('ciudad').value = old.ciudad;
       if (old.textoPlaca) document.getElementById('textoPlaca').value = old.textoPlaca;
-      // Si tenía texto de placa y la placa estaba activada, mostrar el campo
       if (old.textoPlaca && old.textoPlaca !== '') {
         document.getElementById('placa-chk').checked = true;
         togglePlacaText();
@@ -276,17 +277,35 @@
     const nombre = document.getElementById('nombre').value.trim();
     const cedula = document.getElementById('cedula').value.trim();
     const email = document.getElementById('email').value.trim();
-    const direccion = document.getElementById('direccion').value.trim();
-    if (!nombre || !cedula || !email || !direccion) {
-      alert('Todos los campos obligatorios deben estar llenos.');
+    const telefono = document.getElementById('telefono').value.trim();
+    const ciudad = document.getElementById('ciudad').value.trim();
+    if (!nombre || !cedula || !email || !telefono || !ciudad) {
+      alert('Todos los campos son obligatorios.');
       return;
     }
     const textoPlaca = document.getElementById('textoPlaca').value.trim();
-    clientData = { nombre, cedula, email, direccion, textoPlaca };
+    clientData = { nombre, cedula, email, telefono, ciudad, textoPlaca };
     localStorage.setItem('co2reforest_client', JSON.stringify(clientData));
-    document.getElementById('form-message').innerHTML = '<div class="alert">✅ Datos guardados. Ahora selecciona tus packs.</div>';
-    document.getElementById('calculadora-section').style.display = 'block';
-    upd();
+    
+    // Guardar datos personales en Google Sheets inmediatamente
+    try {
+      const response = await fetch('/api/save-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, cedula, email, telefono, ciudad })
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        document.getElementById('form-message').innerHTML = '<div class="alert">✅ Datos guardados. Ahora selecciona tus packs.</div>';
+        document.getElementById('calculadora-section').style.display = 'block';
+        upd();
+      } else {
+        alert('Error al guardar los datos. Intenta de nuevo.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error de conexión');
+    }
   });
 
   document.getElementById('btn-pagar').addEventListener('click', () => {
@@ -305,7 +324,8 @@
         nombre: client.nombre,
         cedula: client.cedula,
         email: client.email,
-        direccion: client.direccion
+        telefono: client.telefono,
+        ciudad: client.ciudad
       }
     };
     localStorage.setItem('co2reforest_cart', JSON.stringify(cartData));
