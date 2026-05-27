@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CO2Reforest — Datos personales y selección de packs</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .form-section { background: #f8f9fa; border-radius: 20px; padding: 30px; margin-bottom: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--green); }
+  .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 1rem; }
+  .form-group input:focus { outline: none; border-color: var(--gold); }
+  .btn-guardar { background: var(--green); color: white; border: none; padding: 14px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+  .btn-guardar:hover { background: var(--gold); }
+  .calculadora-section { display: none; }
+  .alert { background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMjAgNTYiPgogIDxyZWN0IHg9IjgiIHk9IjI4IiB3aWR0aD0iNSIgaGVpZ2h0PSIxOCIgcng9IjIuNSIgZmlsbD0iIzFBNEEyRSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiMyRDdBNEYiIHRyYW5zZm9ybT0icm90YXRlKC00MiAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiM0Q0FGN0QiIHRyYW5zZm9ybT0icm90YXRlKC0xOCAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiMyRDdBNEYiIHRyYW5zZm9ybT0icm90YXRlKDYgMTAuNSAyNCkiLz4KICA8ZWxsaXBzZSBjeD0iMTAuNSIgY3k9IjI0IiByeD0iMiIgcnk9IjE1IiBmaWxsPSIjNENBRjdEIiB0cmFuc2Zvcm09InJvdGF0ZSgzMCAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiMyRDdBNEYiIHRyYW5zZm9ybT0icm90YXRlKDU0IDEwLjUgMjQpIi8+CiAgPHBhdGggZD0iTTIgNDYgUTEwLjUgNDIgMTkgNDYiIHN0cm9rZT0iIzFBNEEyRSIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDx0ZXh0IHg9IjI4IiB5PSIyOSIgZm9udC1mYW1pbHk9Ik1vbnRzZXJyYXQsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iIzFBNEEyRSI+Q088L3RleHQ+CiAgPHRleHQgeD0iNjMiIHk9IjM0IiBmb250LWZhbWlseT0iTW9udHNlcnJhdCxBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjMUE0QTJFIj4yPC90ZXh0PgogIDx0ZXh0IHg9IjI4IiB5PSI0NiIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM0Q0FGN0QiPlJlZm9yZXN0PC90ZXh0PgogIDx0ZXh0IHg9IjI4IiB5PSI1NCIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjQzg5NzJCIiBsZXR0ZXItc3BhY2luZz0iMS4yIj5PUklOT1FVw41BIMK3IExFWSAyMTczPC90ZXh0Pgo8L3N2Zz4=" alt="CO2Reforest" class="nav-logo">
+  <ul class="nav-links">
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="#calculadora">Calculadora</a></li>
+  </ul>
+</nav>
+
+<section class="sec" style="padding-top: 120px;">
+  <div class="wrap">
+    <p class="sec-tag">Paso 1 de 2</p>
+    <h2 class="sec-title">Datos personales</h2>
+    <div class="form-section">
+      <div id="form-message"></div>
+      <form id="datos-form">
+        <div class="form-group">
+          <label>Nombre completo *</label>
+          <input type="text" id="nombre" required>
+        </div>
+        <div class="form-group">
+          <label>Cédula *</label>
+          <input type="text" id="cedula" required>
+        </div>
+        <div class="form-group">
+          <label>Correo electrónico *</label>
+          <input type="email" id="email" required>
+        </div>
+        <button type="submit" class="btn-guardar">Guardar datos y continuar</button>
+      </form>
+    </div>
+
+    <div id="calculadora-section" class="calculadora-section">
+      <h2 class="sec-title" style="margin-top: 30px;">Paso 2: Selecciona tus grupos</h2>
+      <div class="calc-box">
+        <div class="calc-grid">
+          <div>
+            <h2>Selecciona tus grupos</h2>
+            <p class="sub">Cada grupo = 5 árboles nativos certificados.</p>
+            <div class="disc-scale">
+              <div class="ds-title">Progreso del descuento por volumen</div>
+              <div class="ds-bar"><div class="ds-fill" id="dsf" style="width:0%"></div></div>
+              <div class="ds-lbls"><span>0 grupos · 0%</span><span>100 · 10%</span><span>200+ · 20% máx</span></div>
+            </div>
+            <div class="counters">
+              <div class="cr">
+                <div class="cr-label">
+                  <div class="cr-name">🌳 Pack A — Bosque Llanero</div>
+                  <div class="cr-price">$180.000 / grupo · 213 kg CO₂/año · máx 2.813</div>
+                </div>
+                <div class="counter">
+                  <button class="cb" onclick="ch('a',-1)">−</button>
+                  <input class="cnt-input" id="ia" type="number" value="0" min="0" max="2813" placeholder="0" oninput="setVal('a',this.value)">
+                  <button class="cb" onclick="ch('a',1)">+</button>
+                </div>
+                <div class="cr-co2" id="ca">0 kg</div>
+              </div>
+              <div class="cr">
+                <div class="cr-label">
+                  <div class="cr-name">🌊 Pack B — Galería Riparia</div>
+                  <div class="cr-price">$186.000 / grupo · 243 kg CO₂/año · máx 3.058</div>
+                </div>
+                <div class="counter">
+                  <button class="cb" onclick="ch('b',-1)">−</button>
+                  <input class="cnt-input" id="ib" type="number" value="0" min="0" max="3058" placeholder="0" oninput="setVal('b',this.value)">
+                  <button class="cb" onclick="ch('b',1)">+</button>
+                </div>
+                <div class="cr-co2" id="cb_">0 kg</div>
+              </div>
+              <div class="cr">
+                <div class="cr-label">
+                  <div class="cr-name">🐄 Pack C — Silvopastoril</div>
+                  <div class="cr-price">$198.000 / grupo · 228 kg CO₂/año · máx 1.888</div>
+                </div>
+                <div class="counter">
+                  <button class="cb" onclick="ch('c',-1)">−</button>
+                  <input class="cnt-input" id="ic" type="number" value="0" min="0" max="1888" placeholder="0" oninput="setVal('c',this.value)">
+                  <button class="cb" onclick="ch('c',1)">+</button>
+                </div>
+                <div class="cr-co2" id="cc">0 kg</div>
+              </div>
+            </div>
+            <div class="placa-box">
+              <div class="placa-header">
+                <label class="placa-toggle">
+                  <input type="checkbox" id="placa-chk" onchange="upd()">
+                  <span class="placa-slider"></span>
+                </label>
+                <div class="placa-lbl">🪧 Placa personalizada (opcional)</div>
+              </div>
+              <div class="placa-sub">Una placa metálica con el nombre de tu empresa se instala en el área de siembra. Se cobra por pedido, no por árbol individual.</div>
+              <div class="placa-precio">+ $85.000 por pedido</div>
+            </div>
+            <div class="max-note">Disponible: A=2.813 · B=3.058 · C=1.888 grupos</div>
+          </div>
+          <div>
+            <div class="results">
+              <div class="r-title">📊 Tu cotización en tiempo real</div>
+              <div class="rrow"><span class="rl">Grupos totales</span><span class="rv big" id="rg">0</span></div>
+              <div class="rrow"><span class="rl">Árboles nativos plantados</span><span class="rv big" id="ra">0</span></div>
+              <div class="rrow"><span class="rl">CO₂ capturado / año</span><span class="rv" id="rc">0 kg</span></div>
+              <div class="rrow"><span class="rl">CO₂ acumulado en 10 años</span><span class="rv" id="rc10">0 kg</span></div>
+              <div class="rrow"><span class="rl">Equivale a retirar</span><span class="rv" id="rauto">0 autos/año</span></div>
+              <div class="dbadge" id="dbadge">
+                <div class="db-pct" id="dpct">0%</div>
+                <div class="db-lbl">descuento por volumen</div>
+              </div>
+              <div class="rrow"><span class="rl">Subtotal paquetes</span><span class="rv" id="rsub">$0</span></div>
+              <div class="rrow"><span class="rl">Descuento aplicado</span><span class="rv disc" id="rdisc">−$0</span></div>
+              <div class="rrow" id="rrow-placa" style="display:none"><span class="rl">🪧 Placa personalizada</span><span class="rv gold" id="rplaca">+$85.000</span></div>
+              <div class="total-box">
+                <div class="tb-lbl">TOTAL A PAGAR (IVA exento · Art. 476 E.T.)</div>
+                <div class="tb-total" id="rtotal">$0</div>
+                <div class="tb-note">Cotización sin compromiso · Respuesta en 24 h</div>
+              </div>
+              <div style="margin-top: 20px;">
+                <button id="btn-pagar" class="btn-p" style="width:100%; background:#C8972B;">Proceder al pago →</button>
+              </div>
+              <div class="pills" id="pills">
+                <span class="pill">Ingresa grupos para ver tus beneficios</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Variables globales de la calculadora
+  const ST={a:0,b:0,c:0};
+  const MX={a:2813,b:3058,c:1888};
+  const PR={a:180000,b:186000,c:198000};
+  const CO={a:213,b:243,c:228};
+  const PLACA=85000;
+  let clientData = { nombre: '', cedula: '', email: '' };
+
+  function fmt(n){return '$'+Math.round(n).toLocaleString('es-CO');}
+  function fN(n){return Math.round(n).toLocaleString('es-CO');}
+
+  function setVal(pk, rawVal){
+    let v = parseInt(rawVal)||0;
+    v = Math.max(0, Math.min(MX[pk], v));
+    ST[pk]=v;
+    upd();
+  }
+  function ch(pk,d){
+    ST[pk]=Math.max(0,Math.min(MX[pk],ST[pk]+d));
+    document.getElementById('i'+pk).value=ST[pk];
+    upd();
+  }
+  function upd(){
+    ['a','b','c'].forEach(pk=>{
+      const inp=document.getElementById('i'+pk);
+      if(document.activeElement!==inp) inp.value=ST[pk]||'';
+    });
+    const tg=ST.a+ST.b+ST.c;
+    const arb=tg*5;
+    const co2=ST.a*CO.a+ST.b*CO.b+ST.c*CO.c;
+    const sub=ST.a*PR.a+ST.b*PR.b+ST.c*PR.c;
+    let dp=0;
+    if(tg>=200) dp=20;
+    else if(tg>=100) dp=10;
+    else dp=Math.min(Math.floor(tg/10),20);
+    const dam=Math.round(sub*dp/100);
+    const conPlaca=document.getElementById('placa-chk').checked;
+    const tot=(sub-dam)+(conPlaca?PLACA:0);
+    const autos=(co2/4600).toFixed(1);
+    document.getElementById('ca').textContent=fN(ST.a*CO.a)+' kg';
+    document.getElementById('cb_').textContent=fN(ST.b*CO.b)+' kg';
+    document.getElementById('cc').textContent=fN(ST.c*CO.c)+' kg';
+    document.getElementById('rg').textContent=fN(tg);
+    document.getElementById('ra').textContent=fN(arb);
+    document.getElementById('rc').textContent=fN(co2)+' kg';
+    document.getElementById('rc10').textContent=fN(co2*10)+' kg';
+    document.getElementById('rauto').textContent=autos+' autos/año';
+    document.getElementById('dpct').textContent=dp+'%';
+    document.getElementById('rsub').textContent=fmt(sub);
+    document.getElementById('rdisc').textContent='−'+fmt(dam);
+    document.getElementById('rtotal').textContent=fmt(tot);
+    const rp=document.getElementById('rrow-placa');
+    if(rp) rp.style.display=conPlaca?'flex':'none';
+    const dsf=document.getElementById('dsf');
+    if(dsf) dsf.style.width=Math.min(tg/200*100,100)+'%';
+    const b=document.getElementById('dbadge');
+    if(b){
+      if(dp>=20) b.style.background='linear-gradient(135deg,#1A7A3A,#27ae60)';
+      else if(dp>=10) b.style.background='linear-gradient(135deg,#C8972B,#E8A020)';
+      else b.style.background='linear-gradient(135deg,#2D5F8A,#3a7ab8)';
+    }
+    const pillsDiv=document.getElementById('pills');
+    if(!tg){pillsDiv.innerHTML='<span class="pill">Ingresa grupos para ver tus beneficios</span>';return;}
+    let bens=[
+      fN(arb)+' árboles nativos',
+      fN(co2)+' kg CO₂/año',
+      'Certificado Ley 2173',
+      'Registro REAA · Res.1491/2025',
+      'Reporte GRI/ODS',
+      'Monitoreo 2 años',
+      'IVA exento'
+    ];
+    if(arb>=50) bens.push('Fotos geolocalizadas');
+    if(arb>=100) bens.push('Reporte ESG completo');
+    if(arb>=250) bens.push('Video del predio');
+    if(conPlaca) bens.push('🪧 Placa personalizada (+$85.000)');
+    if(dp>=10) bens.push('🎉 '+dp+'% descuento activo');
+    if(dp>=20) bens.push('🏆 Descuento máximo 20%');
+    const cls=(t)=>t.startsWith('🪧')?'pill opt':'pill';
+    pillsDiv.innerHTML=bens.map(t=>`<span class="${cls(t)}">${t}</span>`).join('');
+  }
+
+  // Google Apps Script URL
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzYHLVehUT07jEQJDQnTI_-F0qlRwzqnVqhyzw6vPkCtspP0x4EI8G-XBx_rxs1xGE/exec';
+
+  document.getElementById('datos-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nombre = document.getElementById('nombre').value.trim();
+    const cedula = document.getElementById('cedula').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (!nombre || !cedula || !email) {
+      alert('Todos los campos son obligatorios');
+      return;
+    }
+    clientData = { nombre, cedula, email };
+    localStorage.setItem('co2reforest_client', JSON.stringify(clientData));
+    try {
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orden: {
+          fechaHora: new Date().toLocaleString('es-CO'),
+          nombre: nombre,
+          cedula: cedula,
+          email: email,
+          paqueteA: 0,
+          paqueteB: 0,
+          paqueteC: 0,
+          placa: 'Pendiente',
+          total: 0,
+          referencia: 'Formulario inicial'
+        }})
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        document.getElementById('form-message').innerHTML = '<div class="alert">✅ Datos guardados correctamente. Ahora puedes seleccionar los packs.</div>';
+        document.getElementById('calculadora-section').style.display = 'block';
+        upd(); // inicializar la calculadora
+      } else {
+        alert('Error al guardar los datos. Intenta de nuevo.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error de conexión con el servidor');
+    }
+  });
+
+  document.getElementById('btn-pagar').addEventListener('click', () => {
+    const client = JSON.parse(localStorage.getItem('co2reforest_client'));
+    if (!client || !client.nombre) {
+      alert('Primero debes guardar tus datos personales');
+      return;
+    }
+    const cartData = {
+      a: ST.a,
+      b: ST.b,
+      c: ST.c,
+      placa: document.getElementById('placa-chk').checked,
+      cliente: client
+    };
+    localStorage.setItem('co2reforest_cart', JSON.stringify(cartData));
+    window.location.href = 'checkout.html';
+  });
+</script>
+</body>
+</html>
