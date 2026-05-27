@@ -73,8 +73,12 @@
         placa: !!data.placa,
         cliente: data.cliente || { nombre: '', email: '' }
       };
+      console.log("Carrito cargado:", cart);
       return true;
-    } catch(e) { return false; }
+    } catch(e) { 
+      console.error("Error al cargar carrito:", e);
+      return false; 
+    }
   }
 
   function renderSummary() {
@@ -124,6 +128,9 @@
     btn.textContent = 'Abriendo pasarela...';
 
     try {
+      const apiUrl = '/api/create-payment';
+      console.log("📡 Enviando petición a:", apiUrl);
+      
       const payload = { 
         a: cart.a, 
         b: cart.b, 
@@ -131,15 +138,17 @@
         placa: cart.placa,
         cliente: cart.cliente 
       };
+      console.log("📦 Payload:", payload);
       
-      // ✅ Usa la URL CORRECTA de tu servidor en Render
-      const response = await fetch('https://co2reforestprueba.onrender.com/api/create-payment', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       
+      console.log("📬 Respuesta HTTP:", response.status);
       const data = await response.json();
+      console.log("📄 Datos respuesta:", data);
       
       if (!response.ok || !data.signature) {
         throw new Error(data.error || 'Error al validar la firma desde el servidor');
@@ -171,6 +180,7 @@
       form.submit();
 
     } catch (err) {
+      console.error("❌ Error en iniciarPago:", err);
       alert('Error de integración: ' + err.message);
       btn.disabled = false;
       btn.textContent = 'Confirmar y pagar con Wompi';
@@ -179,9 +189,11 @@
 
   if (loadCart()) {
     renderSummary();
-    document.getElementById('confirmar-pago').addEventListener('click', iniciarPago);
+    const btn = document.getElementById('confirmar-pago');
+    if (btn) btn.addEventListener('click', iniciarPago);
   } else {
-    document.getElementById('confirmar-pago').style.display = 'none';
+    const btn = document.getElementById('confirmar-pago');
+    if (btn) btn.style.display = 'none';
   }
 </script>
 </body>

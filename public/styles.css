@@ -28,7 +28,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
   top: 0;
   bottom: 0;
   width: 50%;
-  background: url('/imagenes/herooirinoquia.jpg') center/cover no-repeat;
+  background: url('/imagenes/heroorinoquia.jpg') center/cover no-repeat;
   clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
 }
 .hero-photo::after {
@@ -276,7 +276,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
 
 /* CTA */
 .cta-final{background:linear-gradient(135deg,var(--green),var(--mid));padding:88px 0;text-align:center;position:relative;overflow:hidden;}
-.cta-final::before{content:'';position:absolute;inset:0;background:url('/imagenes/cta-bg.jpg') center/cover;opacity:.08;}
+.cta-final::before{content:'';position:absolute;inset:0;background:url('/imagenes/cta.jpg') center/cover;opacity:.08;}
 .cta-inner{position:relative;z-index:1;}
 .cta-title{font-family:'Playfair Display',serif;font-size:2.7rem;font-weight:700;color:#fff;margin-bottom:14px;}
 .cta-sub{font-size:1.03rem;color:rgba(255,255,255,.75);max-width:500px;margin:0 auto 38px;line-height:1.7;}
