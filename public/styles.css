@@ -28,7 +28,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
   top: 0;
   bottom: 0;
   width: 50%;
-  background: url('/imagenes/heroorinoquia.jpg') center/cover no-repeat;
+  background: url('/imagenes/herooirinoquia.jpg') center/cover no-repeat;
   clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
 }
 .hero-photo::after {
@@ -77,7 +77,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
   line-height: 1.6;
   color: #3a5c3a;
   margin-bottom: 30px;
-  text-align: justify;  /* Justificado */
+  text-align: justify;
 }
 .hero-kpis {
   display: flex;
@@ -110,25 +110,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
   gap: 12px;
   flex-wrap: wrap;
 }
-/* Responsive */
 @media (max-width: 900px) {
-  .hero-photo {
-    display: none;
-  }
-  .hero-inner {
-    max-width: 100%;
-    padding: 60px 20px;
-    text-align: center;
-  }
-  .hero-sub {
-    text-align: center;
-  }
-  .hero-kpis {
-    justify-content: center;
-  }
-  .hero-btns {
-    justify-content: center;
-  }
+  .hero-photo { display: none; }
+  .hero-inner { max-width: 100%; padding: 60px 20px; text-align: center; }
+  .hero-sub { text-align: center; }
+  .hero-kpis { justify-content: center; }
+  .hero-btns { justify-content: center; }
 }
 .btn-p{background:var(--green);color:#fff;padding:14px 30px;border-radius:7px;font-weight:600;font-size:.93rem;text-decoration:none;display:inline-block;transition:all .25s;border:none;cursor:pointer;}
 .btn-p:hover{background:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,74,46,.28);}
@@ -320,7 +307,6 @@ footer{background:#0c1e0c;padding:36px 44px;display:flex;justify-content:space-b
 .modal-stats div{display:flex;justify-content:space-between;border-bottom:1px solid #e0e0e0;padding:8px 0;font-size:0.95rem;}
 .modal-stats strong{color:var(--green);}
 
-/* RESPONSIVE */
 @media(max-width:900px){
   nav{padding:10px 18px;} .nav-links{display:none;}
   .hero-inner{padding:56px 22px;}
