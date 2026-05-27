@@ -142,17 +142,18 @@ app.post('/api/wompi-webhook', async (req, res) => {
             if (pend) {
                 const now = new Date();
                 const orderToSend = {
-                    fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
-                    nombre: pend.cliente.nombre,
-                    cedula: pend.cliente.cedula,
-                    email: pend.cliente.email,
-                    direccion: pend.cliente.direccion,
-                    packA: pend.a,
-                    packB: pend.b,
-                    packC: pend.c,
-                    textoPlaca: pend.textoPlaca || '',
-                    total: pend.total
-                };
+    fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+    nombre: pend.cliente.nombre,
+    cedula: pend.cliente.cedula,
+    email: pend.cliente.email,
+    direccion: pend.cliente.direccion,
+    packA: pend.a,
+    packB: pend.b,
+    packC: pend.c,
+    placa: pend.placa,             
+    textoPlaca: pend.textoPlaca || '',
+    total: pend.total
+};
                 await sendToGoogleSheets(orderToSend);
                 pendingOrders.delete(ref);
                 console.log(`✅ Orden ${ref} registrada en Google Sheets`);

@@ -16,6 +16,7 @@
   .btn-guardar:hover { background: var(--gold); }
   .calculadora-section { display: none; }
   .alert { background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+  .hidden-placa-text { display: none; }
 </style>
 </head>
 <body>
@@ -50,10 +51,6 @@
         <div class="form-group">
           <label>Dirección *</label>
           <input type="text" id="direccion" required>
-        </div>
-        <div class="form-group">
-          <label>Texto para la placa personalizada (opcional)</label>
-          <input type="text" id="textoPlaca" placeholder="Ej: 'Empresa XYZ - 2026'">
         </div>
         <button type="submit" class="btn-guardar">Guardar datos y continuar</button>
       </form>
@@ -112,13 +109,18 @@
             <div class="placa-box">
               <div class="placa-header">
                 <label class="placa-toggle">
-                  <input type="checkbox" id="placa-chk" onchange="upd()">
+                  <input type="checkbox" id="placa-chk" onchange="togglePlacaText()">
                   <span class="placa-slider"></span>
                 </label>
                 <div class="placa-lbl">🪧 Agregar placa personalizada (opcional)</div>
               </div>
-              <div class="placa-sub">Una placa metálica con el texto que ingresaste se instalará en el área de siembra. Cobro único por pedido.</div>
+              <div class="placa-sub">Una placa metálica con el texto que ingreses se instalará en el área de siembra. Cobro único por pedido.</div>
               <div class="placa-precio">+ $85.000 por pedido</div>
+              <!-- Campo de texto de placa, oculto inicialmente -->
+              <div id="placa-text-group" class="form-group hidden-placa-text" style="margin-top: 15px;">
+                <label>Texto para la placa personalizada</label>
+                <input type="text" id="textoPlaca" placeholder="Ej: 'Empresa XYZ - 2026'">
+              </div>
             </div>
             <div class="max-note">Disponible: A=2.813 · B=3.058 · C=1.888 grupos</div>
           </div>
@@ -239,6 +241,18 @@
     pillsDiv.innerHTML=bens.map(t=>`<span class="${cls(t)}">${t}</span>`).join('');
   }
 
+  function togglePlacaText() {
+    const chk = document.getElementById('placa-chk');
+    const textGroup = document.getElementById('placa-text-group');
+    if (chk.checked) {
+      textGroup.classList.remove('hidden-placa-text');
+    } else {
+      textGroup.classList.add('hidden-placa-text');
+      document.getElementById('textoPlaca').value = '';
+    }
+    upd(); // actualizar total
+  }
+
   // Cargar datos previos si existen
   const saved = localStorage.getItem('co2reforest_client');
   if (saved) {
@@ -249,6 +263,11 @@
       if (old.email) document.getElementById('email').value = old.email;
       if (old.direccion) document.getElementById('direccion').value = old.direccion;
       if (old.textoPlaca) document.getElementById('textoPlaca').value = old.textoPlaca;
+      // Si tenía texto de placa y la placa estaba activada, mostrar el campo
+      if (old.textoPlaca && old.textoPlaca !== '') {
+        document.getElementById('placa-chk').checked = true;
+        togglePlacaText();
+      }
     } catch(e) {}
   }
 
@@ -258,11 +277,11 @@
     const cedula = document.getElementById('cedula').value.trim();
     const email = document.getElementById('email').value.trim();
     const direccion = document.getElementById('direccion').value.trim();
-    const textoPlaca = document.getElementById('textoPlaca').value.trim();
     if (!nombre || !cedula || !email || !direccion) {
       alert('Todos los campos obligatorios deben estar llenos.');
       return;
     }
+    const textoPlaca = document.getElementById('textoPlaca').value.trim();
     clientData = { nombre, cedula, email, direccion, textoPlaca };
     localStorage.setItem('co2reforest_client', JSON.stringify(clientData));
     document.getElementById('form-message').innerHTML = '<div class="alert">✅ Datos guardados. Ahora selecciona tus packs.</div>';
