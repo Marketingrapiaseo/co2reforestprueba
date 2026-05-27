@@ -1,4 +1,4 @@
-// server.js - Con soporte para dirección y texto de placa
+// server.js - Versión definitiva con confirmación por redirect
 require('dotenv').config();
 
 const express = require('express');
@@ -12,24 +12,23 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const pendingOrders = new Map();
+const pendingOrders = new Map(); // referencia -> datos de la orden
 
 const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY;
 const WOMPI_INTEGRITY_SECRET = process.env.WOMPI_INTEGRITY_SECRET;
 const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL;
 
 if (!WOMPI_PUBLIC_KEY || !WOMPI_INTEGRITY_SECRET) {
-    console.error("❌ ERROR CRÍTICO: Variables de Wompi no definidas en el entorno.");
+    console.error("❌ ERROR: Variables de Wompi no definidas.");
     process.exit(1);
 }
 if (!GOOGLE_SCRIPT_URL) {
-    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida. Los datos NO se guardarán en Google Sheets.");
+    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida. Los datos NO se guardarán.");
 }
 
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
-// Middlewares
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -55,6 +54,7 @@ const allowedOrigins = [
 app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200 }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 
 function calcularTotal(a, b, c, placa) {
@@ -80,15 +80,12 @@ async function sendToGoogleSheets(orderData) {
         });
         const result = await response.json();
         console.log(`📤 Envío a Google Sheets: ${result.status}`);
-        if (result.status !== 'success') {
-            console.error('Respuesta de Google Sheets:', result);
-        }
     } catch (error) {
         console.error("❌ Error enviando a Google Sheets:", error);
     }
 }
 
-// Ruta de pago
+// Endpoint para crear el pago
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
@@ -111,7 +108,7 @@ app.post('/api/create-payment', limiter, [
     const cliente = req.body.cliente;
 
     const total = calcularTotal(a, b, c, placa);
-    if (total <= 0) return res.status(400).json({ error: 'El total debe ser mayor a cero' });
+    if (total <= 0) return res.status(400).json({ error: 'Total inválido' });
 
     const amountInCents = Math.round(total * 100);
     const reference = `CO2R-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
@@ -131,38 +128,87 @@ app.post('/api/create-payment', limiter, [
     });
 });
 
-// Webhook de Wompi
+// Endpoint para confirmar el pago desde gracias.html
+app.post('/api/confirm-payment', async (req, res) => {
+    const { transactionId } = req.body;
+    if (!transactionId) {
+        return res.status(400).json({ error: 'Falta transactionId' });
+    }
+
+    try {
+        // Consultar el estado de la transacción a Wompi
+        const wompiResponse = await fetch(`https://api-sandbox.wompi.co/v1/transactions/${transactionId}`, {
+            headers: { 'Authorization': `Bearer ${WOMPI_PUBLIC_KEY}` }
+        });
+        const wompiData = await wompiResponse.json();
+        
+        if (!wompiData.data || wompiData.data.status !== 'APPROVED') {
+            return res.status(400).json({ error: 'Pago no aprobado o no encontrado' });
+        }
+
+        const transaction = wompiData.data;
+        const reference = transaction.reference;
+        const pending = pendingOrders.get(reference);
+        if (!pending) {
+            return res.status(404).json({ error: 'Orden no encontrada' });
+        }
+
+        // Guardar en Google Sheets
+        const now = new Date();
+        const orderToSend = {
+            fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+            nombre: pending.cliente.nombre,
+            cedula: pending.cliente.cedula,
+            email: pending.cliente.email,
+            direccion: pending.cliente.direccion,
+            packA: pending.a,
+            packB: pending.b,
+            packC: pending.c,
+            placa: pending.placa,
+            textoPlaca: pending.textoPlaca || '',
+            total: pending.total
+        };
+        await sendToGoogleSheets(orderToSend);
+        pendingOrders.delete(reference);
+        console.log(`✅ Orden ${reference} confirmada y guardada`);
+        res.json({ status: 'success' });
+    } catch (error) {
+        console.error("❌ Error en confirmación:", error);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+
+// Webhook (opcional, lo mantenemos por si llega)
 app.post('/api/wompi-webhook', async (req, res) => {
     res.status(200).send('OK');
     try {
         const event = req.body;
         if (event.event === 'transaction.updated' && event.data.transaction.status === 'APPROVED') {
-            const ref = event.data.transaction.reference;
-            const pend = pendingOrders.get(ref);
-            if (pend) {
+            const transaction = event.data.transaction;
+            const reference = transaction.reference;
+            const pending = pendingOrders.get(reference);
+            if (pending) {
                 const now = new Date();
                 const orderToSend = {
-    fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
-    nombre: pend.cliente.nombre,
-    cedula: pend.cliente.cedula,
-    email: pend.cliente.email,
-    direccion: pend.cliente.direccion,
-    packA: pend.a,
-    packB: pend.b,
-    packC: pend.c,
-    placa: pend.placa,             
-    textoPlaca: pend.textoPlaca || '',
-    total: pend.total
-};
+                    fechaHora: now.toLocaleString('es-CO'),
+                    nombre: pending.cliente.nombre,
+                    cedula: pending.cliente.cedula,
+                    email: pending.cliente.email,
+                    direccion: pending.cliente.direccion,
+                    packA: pending.a,
+                    packB: pending.b,
+                    packC: pending.c,
+                    placa: pending.placa,
+                    textoPlaca: pending.textoPlaca || '',
+                    total: pending.total
+                };
                 await sendToGoogleSheets(orderToSend);
-                pendingOrders.delete(ref);
-                console.log(`✅ Orden ${ref} registrada en Google Sheets`);
-            } else {
-                console.warn(`⚠️ No se encontraron datos locales para la referencia ${ref}`);
+                pendingOrders.delete(reference);
+                console.log(`✅ Webhook: Orden ${reference} guardada`);
             }
         }
     } catch (error) {
-        console.error("❌ Error procesando el webhook:", error);
+        console.error(error);
     }
 });
 
@@ -177,7 +223,8 @@ app.get('/api/test-google', async (req, res) => {
         packA: 1,
         packB: 0,
         packC: 0,
-        textoPlaca: "Placa de prueba",
+        placa: false,
+        textoPlaca: "",
         total: 180000
     };
     await sendToGoogleSheets(testOrder);

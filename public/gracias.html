@@ -7,30 +7,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* Mejora de contraste en el banner verde */
-    .res-banner {
-      background: linear-gradient(135deg, #0d2e1a, #1A4A2E);
-      color: #ffffff;
-    }
-    .res-banner div {
-      color: #ffffff;
-    }
-    .res-banner .res-title,
-    .res-banner .res-text {
-      color: #ffffff;
-    }
-    .hero-badge {
-      background: #C8972B;
-      color: #1A4A2E;
-    }
-    .btn-p {
-      background: #C8972B;
-      color: #1A4A2E;
-    }
-    .btn-p:hover {
-      background: #1A4A2E;
-      color: #ffffff;
-    }
+    .res-banner { background: linear-gradient(135deg, #0d2e1a, #1A4A2E); color: #ffffff; }
+    .res-banner div { color: #ffffff; }
+    .hero-badge { background: #C8972B; color: #1A4A2E; }
+    .btn-p { background: #C8972B; color: #1A4A2E; }
+    .btn-p:hover { background: #1A4A2E; color: #ffffff; }
   </style>
 </head>
 <body>
@@ -38,10 +19,10 @@
   <div class="wrap" style="text-align: center;">
     <div class="hero-badge" style="margin: 0 auto 20px;">✅ Pago en proceso</div>
     <h1 class="sec-title">¡Gracias por tu compromiso con la Orinoquía!</h1>
-    <p class="sec-sub" style="margin-bottom: 30px;">Hemos recibido tu pedido. En breve recibirás un correo con el certificado Ley 2173 y el reporte de registro REAA.</p>
+    <p class="sec-sub" style="margin-bottom: 30px;" id="mensaje">Verificando tu pago...</p>
     <div class="res-banner" style="display: inline-block; text-align: left;">
       <div><strong>ID de transacción:</strong> <span id="txid">---</span></div>
-      <div><strong>Estado:</strong> Pendiente de verificación por Wompi</div>
+      <div><strong>Estado:</strong> <span id="estado">Verificando...</span></div>
       <div><strong>📧 Comprobante enviado a:</strong> <span id="correo-cliente"></span></div>
     </div>
     <div style="margin-top: 40px;">
@@ -55,18 +36,44 @@
   if (txId) document.getElementById('txid').innerText = txId;
   else document.getElementById('txid').innerText = 'No disponible';
 
+  // Recuperar el correo del cliente del localStorage
   const cart = localStorage.getItem('co2reforest_cart');
+  let clienteEmail = 'No disponible';
   if (cart) {
     try {
       const data = JSON.parse(cart);
-      if (data.cliente && data.cliente.email) {
-        document.getElementById('correo-cliente').innerText = data.cliente.email;
-      } else {
-        document.getElementById('correo-cliente').innerText = 'No especificado';
-      }
+      if (data.cliente && data.cliente.email) clienteEmail = data.cliente.email;
+      document.getElementById('correo-cliente').innerText = clienteEmail;
     } catch(e) {}
   } else {
     document.getElementById('correo-cliente').innerText = 'No disponible';
+  }
+
+  // Confirmar el pago con el servidor
+  if (txId) {
+    fetch('/api/confirm-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transactionId: txId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        document.getElementById('estado').innerText = 'Aprobado ✅';
+        document.getElementById('mensaje').innerText = 'Tu pedido ha sido registrado exitosamente. En breve recibirás un correo con el certificado.';
+      } else {
+        document.getElementById('estado').innerText = 'Error al confirmar';
+        document.getElementById('mensaje').innerText = 'Hubo un problema al registrar tu pedido. Por favor contacta a soporte.';
+        console.error(data);
+      }
+    })
+    .catch(err => {
+      document.getElementById('estado').innerText = 'Error de conexión';
+      console.error(err);
+    });
+  } else {
+    document.getElementById('estado').innerText = 'Sin ID de transacción';
+    document.getElementById('mensaje').innerText = 'No se pudo verificar el pago. Contacta a soporte.';
   }
 </script>
 </body>
