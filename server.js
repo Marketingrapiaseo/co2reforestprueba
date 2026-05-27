@@ -1,4 +1,4 @@
-// server.js - Versión completa con CORS de Google solucionado y CSP corregido
+// server.js - Versión completa con logs detallados para Google Sheets
 require('dotenv').config();
 
 const express = require('express');
@@ -43,7 +43,7 @@ app.use(helmet({
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
             connectSrc: ["'self'", "https://api-sandbox.wompi.co", "https://api.wompi.co", "https://script.google.com"],
-            formAction: ["'self'", "https://checkout.wompi.co"],   // Permitir envío a Wompi
+            formAction: ["'self'", "https://checkout.wompi.co"],
         },
     },
 }));
@@ -75,16 +75,29 @@ function calcularTotal(a, b, c, placa) {
     return total;
 }
 
-// ========== ENVÍO A GOOGLE SHEETS (DESDE EL SERVIDOR) ==========
+// ========== ENVÍO A GOOGLE SHEETS (MEJORADO CON LOGS) ==========
 async function sendToGoogleSheets(orderData) {
-    if (!GOOGLE_SCRIPT_URL) return;
+    if (!GOOGLE_SCRIPT_URL) {
+        console.error("❌ GOOGLE_SCRIPT_URL no definida. No se puede enviar.");
+        return;
+    }
+    console.log("📤 Enviando a Google Sheets. URL:", GOOGLE_SCRIPT_URL);
+    console.log("📦 Datos a enviar:", JSON.stringify({ orden: orderData }, null, 2));
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orden: orderData })
         });
-        const result = await response.json();
+        const text = await response.text();
+        console.log("📬 Respuesta cruda de Google Sheets:", text);
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            console.error("❌ La respuesta no es JSON válido:", text);
+            return;
+        }
         console.log(`📤 Envío a Google Sheets: ${result.status}`);
         if (result.status !== 'success') {
             console.error('Respuesta de Google Sheets:', result);
@@ -94,7 +107,7 @@ async function sendToGoogleSheets(orderData) {
     }
 }
 
-// ========== ENDPOINT PARA GUARDAR DATOS DEL FORMULARIO (evita CORS) ==========
+// ========== ENDPOINT PARA GUARDAR DATOS DEL FORMULARIO ==========
 app.post('/api/save-client', [
     body('nombre').notEmpty().isLength({ max: 100 }),
     body('cedula').notEmpty().isLength({ max: 20 }),
@@ -208,6 +221,7 @@ app.post('/api/wompi-webhook', async (req, res) => {
                     total: pendingOrder.total,
                     referencia: transactionReference
                 };
+                console.log("📤 Enviando orden completa a Google Sheets:", orderToSend);
                 await sendToGoogleSheets(orderToSend);
                 pendingOrders.delete(transactionReference);
                 console.log(`✅ Orden ${transactionReference} registrada en Google Sheets`);
