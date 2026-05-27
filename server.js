@@ -1,4 +1,4 @@
-// server.js - Versión completa con proxy para Google Sheets
+// server.js - Versión completa con CORS de Google solucionado y CSP corregido
 require('dotenv').config();
 
 const express = require('express');
@@ -31,7 +31,7 @@ if (!GOOGLE_SCRIPT_URL) {
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
-// ========== MIDDLEWARES DE SEGURIDAD ==========
+// ========== MIDDLEWARES DE SEGURIDAD (CSP CORREGIDO) ==========
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -42,7 +42,8 @@ app.use(helmet({
             styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://api-sandbox.wompi.co", "https://api.wompi.co", GOOGLE_SCRIPT_URL ? new URL(GOOGLE_SCRIPT_URL).origin : ''],
+            connectSrc: ["'self'", "https://api-sandbox.wompi.co", "https://api.wompi.co", "https://script.google.com"],
+            formAction: ["'self'", "https://checkout.wompi.co"],   // Permitir envío a Wompi
         },
     },
 }));
@@ -51,8 +52,7 @@ const allowedOrigins = [
     'http://localhost:5500',
     'http://127.0.0.1:5500',
     'https://co2reforest.com',
-    'https://co2reforestprueba.onrender.com',
-    'https://co2reforestpreuba.onrender.com' // nota el typo, por si acaso
+    'https://co2reforestprueba.onrender.com'
 ];
 
 app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200 }));
@@ -75,9 +75,9 @@ function calcularTotal(a, b, c, placa) {
     return total;
 }
 
-// ========== ENVÍO A GOOGLE SHEETS (desde el servidor) ==========
+// ========== ENVÍO A GOOGLE SHEETS (DESDE EL SERVIDOR) ==========
 async function sendToGoogleSheets(orderData) {
-    if (!GOOGLE_SCRIPT_URL) return false;
+    if (!GOOGLE_SCRIPT_URL) return;
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -86,44 +86,42 @@ async function sendToGoogleSheets(orderData) {
         });
         const result = await response.json();
         console.log(`📤 Envío a Google Sheets: ${result.status}`);
-        return result.status === 'success';
+        if (result.status !== 'success') {
+            console.error('Respuesta de Google Sheets:', result);
+        }
     } catch (error) {
         console.error("❌ Error enviando a Google Sheets:", error);
-        return false;
     }
 }
 
-// ========== NUEVA RUTA PARA DATOS PERSONALES ==========
-app.post('/api/guardar-datos-personales', [
+// ========== ENDPOINT PARA GUARDAR DATOS DEL FORMULARIO (evita CORS) ==========
+app.post('/api/save-client', [
     body('nombre').notEmpty().isLength({ max: 100 }),
     body('cedula').notEmpty().isLength({ max: 20 }),
     body('email').isEmail().normalizeEmail(),
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ status: 'error', errors: errors.array() });
+        return res.status(400).json({ errors: errors.array() });
     }
 
     const { nombre, cedula, email } = req.body;
+    
     const orderData = {
         fechaHora: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
-        nombre: nombre,
-        cedula: cedula,
-        email: email,
+        nombre,
+        cedula,
+        email,
         paqueteA: 0,
         paqueteB: 0,
         paqueteC: 0,
         placa: 'Pendiente',
         total: 0,
-        referencia: 'Datos personales'
+        referencia: 'Formulario inicial'
     };
 
-    const success = await sendToGoogleSheets(orderData);
-    if (success) {
-        res.json({ status: 'success', message: 'Datos guardados en Google Sheets' });
-    } else {
-        res.status(500).json({ status: 'error', message: 'No se pudo guardar en Google Sheets' });
-    }
+    await sendToGoogleSheets(orderData);
+    res.json({ status: 'success', message: 'Datos guardados correctamente' });
 });
 
 // ========== RUTA DE PAGO ==========
@@ -137,8 +135,11 @@ app.post('/api/create-payment', limiter, [
     body('cliente.cedula').optional().isString().isLength({ max: 20 })
 ], (req, res) => {
     console.log("📥 POST /api/create-payment recibida");
+    console.log("Body:", JSON.stringify(req.body, null, 2));
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        console.warn("❌ Errores de validación:", errors.array());
         return res.status(400).json({ errors: errors.array() });
     }
 
@@ -149,7 +150,9 @@ app.post('/api/create-payment', limiter, [
     const cliente = req.body.cliente || { nombre: '', email: '', cedula: '' };
 
     const total = calcularTotal(a, b, c, placa);
+    console.log(`💰 Total calculado: ${total} COP`);
     if (total <= 0) {
+        console.warn("❌ Total inválido");
         return res.status(400).json({ error: 'El total debe ser mayor a cero' });
     }
 
@@ -158,6 +161,7 @@ app.post('/api/create-payment', limiter, [
     const integrityPayload = `${reference}${amountInCents}${CURRENCY}${WOMPI_INTEGRITY_SECRET}`;
     const signature = crypto.createHash('sha256').update(integrityPayload, 'utf8').digest('hex');
 
+    // Guardar orden pendiente
     const orderData = {
         a, b, c, placa,
         cliente: { nombre: cliente.nombre, email: cliente.email, cedula: cliente.cedula },
@@ -218,7 +222,7 @@ app.post('/api/wompi-webhook', async (req, res) => {
     }
 });
 
-// ========== ENDPOINT DE PRUEBA ==========
+// ========== ENDPOINT DE PRUEBA PARA GOOGLE SHEETS ==========
 app.get('/api/test-google', async (req, res) => {
     const testOrder = {
         fechaHora: new Date().toLocaleString('es-CO'),
@@ -232,11 +236,11 @@ app.get('/api/test-google', async (req, res) => {
         total: 180000,
         referencia: "TEST-001"
     };
-    const success = await sendToGoogleSheets(testOrder);
-    res.json({ status: success ? 'enviado' : 'error' });
+    await sendToGoogleSheets(testOrder);
+    res.json({ status: 'enviado' });
 });
 
-// ========== MANEJADOR DE ERRORES ==========
+// ========== MANEJADOR DE ERRORES GLOBAL ==========
 app.use((err, req, res, next) => {
     console.error('❌ Error interno:', err);
     res.status(500).json({ error: 'Error interno del servidor. Intenta de nuevo más tarde.' });

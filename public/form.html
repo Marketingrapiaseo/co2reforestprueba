@@ -16,7 +16,6 @@
   .btn-guardar:hover { background: var(--gold); }
   .calculadora-section { display: none; }
   .alert { background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-  .error-alert { background: #f8d7da; color: #721c24; }
 </style>
 </head>
 <body>
@@ -232,7 +231,7 @@
     pillsDiv.innerHTML=bens.map(t=>`<span class="${cls(t)}">${t}</span>`).join('');
   }
 
-  // En lugar de llamar directamente a Google Apps Script, llamamos a nuestro servidor
+  // Enviar datos al servidor (evita CORS)
   document.getElementById('datos-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const nombre = document.getElementById('nombre').value.trim();
@@ -246,11 +245,10 @@
     localStorage.setItem('co2reforest_client', JSON.stringify(clientData));
     
     try {
-      // Enviar a nuestro propio servidor (que luego reenviará a Google Sheets)
-      const response = await fetch('/api/guardar-datos-personales', {
+      const response = await fetch('/api/save-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(clientData)
+        body: JSON.stringify({ nombre, cedula, email })
       });
       const result = await response.json();
       if (result.status === 'success') {
@@ -258,11 +256,11 @@
         document.getElementById('calculadora-section').style.display = 'block';
         upd();
       } else {
-        document.getElementById('form-message').innerHTML = '<div class="alert error-alert">❌ Error al guardar los datos. Intenta de nuevo.</div>';
+        alert('Error al guardar los datos. Intenta de nuevo.');
       }
     } catch (error) {
       console.error(error);
-      document.getElementById('form-message').innerHTML = '<div class="alert error-alert">❌ Error de conexión con el servidor.</div>';
+      alert('Error de conexión con el servidor');
     }
   });
 
