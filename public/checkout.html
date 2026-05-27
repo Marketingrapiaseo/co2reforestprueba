@@ -38,11 +38,12 @@
       <h3 style="margin:0 0 8px 0;">🧑‍💼 Datos del comprador</h3>
       <p><strong>Nombre:</strong> <span id="cliente-nombre"></span></p>
       <p><strong>Correo:</strong> <span id="cliente-email"></span></p>
+      <p><strong>Dirección:</strong> <span id="cliente-direccion"></span></p>
       <p class="tb-note" style="margin-top: 10px;">El comprobante de pago y el certificado serán enviados a este correo.</p>
     </div>
     
     <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; align-items: center; flex-wrap: wrap;">
-      <a href="index.html" class="btn-s">← Volver a la calculadora</a>
+      <a href="form.html" class="btn-s">← Volver a la calculadora</a>
       <button id="confirmar-pago" class="btn-pago">Confirmar y pagar con Wompi</button>
     </div>
   </div>
@@ -56,12 +57,12 @@
     c: { name: 'Pack C — Silvopastoril', price: 198000, co2: 228, especies: 'Moriche + Saladillo + Yopo + Cañofistol + Aceite' }
   };
 
-  let cart = { a: 0, b: 0, c: 0, placa: false, cliente: { nombre: '', email: '' } };
+  let cart = { a: 0, b: 0, c: 0, placa: false, cliente: { nombre: '', email: '', direccion: '' } };
 
   function loadCart() {
     const raw = localStorage.getItem('co2reforest_cart');
     if (!raw) {
-      document.getElementById('cart-summary').innerHTML = '<div style="text-align:center; padding: 40px;">No hay ningún pedido pendiente. <a href="index.html">Regresa a la calculadora</a></div>';
+      document.getElementById('cart-summary').innerHTML = '<div style="text-align:center; padding: 40px;">No hay ningún pedido pendiente. <a href="form.html">Regresa a la calculadora</a></div>';
       return false;
     }
     try {
@@ -71,7 +72,7 @@
         b: parseInt(data.b) || 0, 
         c: parseInt(data.c) || 0, 
         placa: !!data.placa,
-        cliente: data.cliente || { nombre: '', email: '' }
+        cliente: data.cliente || { nombre: '', email: '', direccion: '' }
       };
       console.log("Carrito cargado:", cart);
       return true;
@@ -118,6 +119,7 @@
     if (cart.cliente && cart.cliente.nombre) {
       document.getElementById('cliente-nombre').innerText = cart.cliente.nombre;
       document.getElementById('cliente-email').innerText = cart.cliente.email;
+      document.getElementById('cliente-direccion').innerText = cart.cliente.direccion || 'No especificada';
       document.getElementById('cliente-info-container').style.display = 'block';
     }
   }
@@ -129,16 +131,14 @@
 
     try {
       const apiUrl = '/api/create-payment';
-      console.log("📡 Enviando petición a:", apiUrl);
-      
       const payload = { 
         a: cart.a, 
         b: cart.b, 
         c: cart.c, 
         placa: cart.placa,
-        cliente: cart.cliente 
+        textoPlaca: cart.cliente.textoPlaca || '',
+        cliente: cart.cliente
       };
-      console.log("📦 Payload:", payload);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -146,9 +146,7 @@
         body: JSON.stringify(payload)
       });
       
-      console.log("📬 Respuesta HTTP:", response.status);
       const data = await response.json();
-      console.log("📄 Datos respuesta:", data);
       
       if (!response.ok || !data.signature) {
         throw new Error(data.error || 'Error al validar la firma desde el servidor');

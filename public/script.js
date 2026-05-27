@@ -4,12 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const cerrarModal = document.querySelector('.modal-cerrar');
 
   if (!modal || !cerrarModal) {
-    console.error('Modal no encontrado. Revisa que el HTML tenga el div con id="modal-especie".');
+    console.error('Modal no encontrado.');
     return;
   }
 
   function abrirModal(especieElement) {
-    // Obtener datos de la especie
     const nombre = especieElement.querySelector('.sp-name')?.innerText || '';
     const sci = especieElement.querySelector('.sp-sci')?.innerText || '';
     const stats = especieElement.querySelectorAll('.ss');
@@ -24,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     const imgSrc = especieElement.querySelector('.sp-img img')?.getAttribute('src') || '';
 
-    // Llenar el modal
     document.getElementById('modal-nombre').innerText = nombre;
     document.getElementById('modal-sci').innerText = sci;
     document.getElementById('modal-altura').innerText = altura;
@@ -33,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('modal-dato').innerText = dato;
     document.getElementById('modal-img').setAttribute('src', imgSrc);
 
-    // Mostrar modal
     modal.style.display = 'flex';
   }
 
@@ -45,9 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.target === modal) modal.style.display = 'none';
   });
 
-  // Asignar evento a cada tarjeta de especie
-  const especies = document.querySelectorAll('.sp');
-  especies.forEach(tarjeta => {
+  document.querySelectorAll('.sp').forEach(tarjeta => {
     tarjeta.style.cursor = 'pointer';
     tarjeta.addEventListener('click', () => abrirModal(tarjeta));
   });

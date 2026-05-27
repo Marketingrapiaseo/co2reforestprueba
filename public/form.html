@@ -10,8 +10,8 @@
   .form-section { background: #f8f9fa; border-radius: 20px; padding: 30px; margin-bottom: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
   .form-group { margin-bottom: 20px; }
   .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--green); }
-  .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 1rem; }
-  .form-group input:focus { outline: none; border-color: var(--gold); }
+  .form-group input, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 1rem; }
+  .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--gold); }
   .btn-guardar { background: var(--green); color: white; border: none; padding: 14px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
   .btn-guardar:hover { background: var(--gold); }
   .calculadora-section { display: none; }
@@ -31,7 +31,7 @@
 <section class="sec" style="padding-top: 120px;">
   <div class="wrap">
     <p class="sec-tag">Paso 1 de 2</p>
-    <h2 class="sec-title">Datos personales</h2>
+    <h2 class="sec-title">Datos personales y dirección</h2>
     <div class="form-section">
       <div id="form-message"></div>
       <form id="datos-form">
@@ -46,6 +46,14 @@
         <div class="form-group">
           <label>Correo electrónico *</label>
           <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+          <label>Dirección *</label>
+          <input type="text" id="direccion" required>
+        </div>
+        <div class="form-group">
+          <label>Texto para la placa personalizada (opcional)</label>
+          <input type="text" id="textoPlaca" placeholder="Ej: 'Empresa XYZ - 2026'">
         </div>
         <button type="submit" class="btn-guardar">Guardar datos y continuar</button>
       </form>
@@ -107,9 +115,9 @@
                   <input type="checkbox" id="placa-chk" onchange="upd()">
                   <span class="placa-slider"></span>
                 </label>
-                <div class="placa-lbl">🪧 Placa personalizada (opcional)</div>
+                <div class="placa-lbl">🪧 Agregar placa personalizada (opcional)</div>
               </div>
-              <div class="placa-sub">Una placa metálica con el nombre de tu empresa se instala en el área de siembra. Se cobra por pedido, no por árbol individual.</div>
+              <div class="placa-sub">Una placa metálica con el texto que ingresaste se instalará en el área de siembra. Cobro único por pedido.</div>
               <div class="placa-precio">+ $85.000 por pedido</div>
             </div>
             <div class="max-note">Disponible: A=2.813 · B=3.058 · C=1.888 grupos</div>
@@ -155,7 +163,7 @@
   const PR={a:180000,b:186000,c:198000};
   const CO={a:213,b:243,c:228};
   const PLACA=85000;
-  let clientData = { nombre: '', cedula: '', email: '' };
+  let clientData = { nombre: '', cedula: '', email: '', direccion: '', textoPlaca: '' };
 
   function fmt(n){return '$'+Math.round(n).toLocaleString('es-CO');}
   function fN(n){return Math.round(n).toLocaleString('es-CO');}
@@ -231,37 +239,35 @@
     pillsDiv.innerHTML=bens.map(t=>`<span class="${cls(t)}">${t}</span>`).join('');
   }
 
-  // Enviar datos al servidor (evita CORS)
+  // Cargar datos previos si existen
+  const saved = localStorage.getItem('co2reforest_client');
+  if (saved) {
+    try {
+      const old = JSON.parse(saved);
+      if (old.nombre) document.getElementById('nombre').value = old.nombre;
+      if (old.cedula) document.getElementById('cedula').value = old.cedula;
+      if (old.email) document.getElementById('email').value = old.email;
+      if (old.direccion) document.getElementById('direccion').value = old.direccion;
+      if (old.textoPlaca) document.getElementById('textoPlaca').value = old.textoPlaca;
+    } catch(e) {}
+  }
+
   document.getElementById('datos-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const nombre = document.getElementById('nombre').value.trim();
     const cedula = document.getElementById('cedula').value.trim();
     const email = document.getElementById('email').value.trim();
-    if (!nombre || !cedula || !email) {
-      alert('Todos los campos son obligatorios');
+    const direccion = document.getElementById('direccion').value.trim();
+    const textoPlaca = document.getElementById('textoPlaca').value.trim();
+    if (!nombre || !cedula || !email || !direccion) {
+      alert('Todos los campos obligatorios deben estar llenos.');
       return;
     }
-    clientData = { nombre, cedula, email };
+    clientData = { nombre, cedula, email, direccion, textoPlaca };
     localStorage.setItem('co2reforest_client', JSON.stringify(clientData));
-    
-    try {
-      const response = await fetch('/api/save-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, cedula, email })
-      });
-      const result = await response.json();
-      if (result.status === 'success') {
-        document.getElementById('form-message').innerHTML = '<div class="alert">✅ Datos guardados correctamente. Ahora puedes seleccionar los packs.</div>';
-        document.getElementById('calculadora-section').style.display = 'block';
-        upd();
-      } else {
-        alert('Error al guardar los datos. Intenta de nuevo.');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Error de conexión con el servidor');
-    }
+    document.getElementById('form-message').innerHTML = '<div class="alert">✅ Datos guardados. Ahora selecciona tus packs.</div>';
+    document.getElementById('calculadora-section').style.display = 'block';
+    upd();
   });
 
   document.getElementById('btn-pagar').addEventListener('click', () => {
@@ -275,7 +281,13 @@
       b: ST.b,
       c: ST.c,
       placa: document.getElementById('placa-chk').checked,
-      cliente: client
+      textoPlaca: client.textoPlaca,
+      cliente: {
+        nombre: client.nombre,
+        cedula: client.cedula,
+        email: client.email,
+        direccion: client.direccion
+      }
     };
     localStorage.setItem('co2reforest_cart', JSON.stringify(cartData));
     window.location.href = 'checkout.html';

@@ -1,4 +1,4 @@
-// server.js - Versión completa con logs detallados para Google Sheets
+// server.js - Con soporte para dirección y texto de placa
 require('dotenv').config();
 
 const express = require('express');
@@ -12,10 +12,8 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ========== ALMACENAMIENTO TEMPORAL DE ÓRDENES ==========
 const pendingOrders = new Map();
 
-// ========== VALIDAR VARIABLES DE ENTORNO ==========
 const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY;
 const WOMPI_INTEGRITY_SECRET = process.env.WOMPI_INTEGRITY_SECRET;
 const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL;
@@ -31,7 +29,7 @@ if (!GOOGLE_SCRIPT_URL) {
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
-// ========== MIDDLEWARES DE SEGURIDAD (CSP CORREGIDO) ==========
+// Middlewares
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -54,14 +52,11 @@ const allowedOrigins = [
     'https://co2reforest.com',
     'https://co2reforestprueba.onrender.com'
 ];
-
 app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200 }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 
-// ========== FUNCIÓN DE CÁLCULO ==========
 function calcularTotal(a, b, c, placa) {
     const subtotal = a * 180000 + b * 186000 + c * 198000;
     const grupos = a + b + c;
@@ -75,29 +70,15 @@ function calcularTotal(a, b, c, placa) {
     return total;
 }
 
-// ========== ENVÍO A GOOGLE SHEETS (MEJORADO CON LOGS) ==========
 async function sendToGoogleSheets(orderData) {
-    if (!GOOGLE_SCRIPT_URL) {
-        console.error("❌ GOOGLE_SCRIPT_URL no definida. No se puede enviar.");
-        return;
-    }
-    console.log("📤 Enviando a Google Sheets. URL:", GOOGLE_SCRIPT_URL);
-    console.log("📦 Datos a enviar:", JSON.stringify({ orden: orderData }, null, 2));
+    if (!GOOGLE_SCRIPT_URL) return;
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orden: orderData })
         });
-        const text = await response.text();
-        console.log("📬 Respuesta cruda de Google Sheets:", text);
-        let result;
-        try {
-            result = JSON.parse(text);
-        } catch (e) {
-            console.error("❌ La respuesta no es JSON válido:", text);
-            return;
-        }
+        const result = await response.json();
         console.log(`📤 Envío a Google Sheets: ${result.status}`);
         if (result.status !== 'success') {
             console.error('Respuesta de Google Sheets:', result);
@@ -107,82 +88,37 @@ async function sendToGoogleSheets(orderData) {
     }
 }
 
-// ========== ENDPOINT PARA GUARDAR DATOS DEL FORMULARIO ==========
-app.post('/api/save-client', [
-    body('nombre').notEmpty().isLength({ max: 100 }),
-    body('cedula').notEmpty().isLength({ max: 20 }),
-    body('email').isEmail().normalizeEmail(),
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { nombre, cedula, email } = req.body;
-    
-    const orderData = {
-        fechaHora: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
-        nombre,
-        cedula,
-        email,
-        paqueteA: 0,
-        paqueteB: 0,
-        paqueteC: 0,
-        placa: 'Pendiente',
-        total: 0,
-        referencia: 'Formulario inicial'
-    };
-
-    await sendToGoogleSheets(orderData);
-    res.json({ status: 'success', message: 'Datos guardados correctamente' });
-});
-
-// ========== RUTA DE PAGO ==========
+// Ruta de pago
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
     body('c').optional().isInt({ min: 0, max: 1888 }).toInt(),
     body('placa').optional().isBoolean(),
-    body('cliente.nombre').optional().isString().isLength({ max: 100 }),
-    body('cliente.email').optional().isEmail().normalizeEmail(),
-    body('cliente.cedula').optional().isString().isLength({ max: 20 })
+    body('textoPlaca').optional().isString(),
+    body('cliente.nombre').notEmpty(),
+    body('cliente.cedula').notEmpty(),
+    body('cliente.email').isEmail(),
+    body('cliente.direccion').notEmpty(),
 ], (req, res) => {
-    console.log("📥 POST /api/create-payment recibida");
-    console.log("Body:", JSON.stringify(req.body, null, 2));
-
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        console.warn("❌ Errores de validación:", errors.array());
-        return res.status(400).json({ errors: errors.array() });
-    }
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const a = req.body.a || 0;
     const b = req.body.b || 0;
     const c = req.body.c || 0;
     const placa = !!req.body.placa;
-    const cliente = req.body.cliente || { nombre: '', email: '', cedula: '' };
+    const textoPlaca = req.body.textoPlaca || '';
+    const cliente = req.body.cliente;
 
     const total = calcularTotal(a, b, c, placa);
-    console.log(`💰 Total calculado: ${total} COP`);
-    if (total <= 0) {
-        console.warn("❌ Total inválido");
-        return res.status(400).json({ error: 'El total debe ser mayor a cero' });
-    }
+    if (total <= 0) return res.status(400).json({ error: 'El total debe ser mayor a cero' });
 
     const amountInCents = Math.round(total * 100);
     const reference = `CO2R-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     const integrityPayload = `${reference}${amountInCents}${CURRENCY}${WOMPI_INTEGRITY_SECRET}`;
     const signature = crypto.createHash('sha256').update(integrityPayload, 'utf8').digest('hex');
 
-    // Guardar orden pendiente
-    const orderData = {
-        a, b, c, placa,
-        cliente: { nombre: cliente.nombre, email: cliente.email, cedula: cliente.cedula },
-        total,
-        referencia: reference,
-        fecha_creacion: new Date().toISOString()
-    };
-    pendingOrders.set(reference, orderData);
+    pendingOrders.set(reference, { a, b, c, placa, textoPlaca, cliente, total });
     console.log(`📝 Orden pendiente guardada con referencia: ${reference}`);
 
     res.json({
@@ -195,72 +131,58 @@ app.post('/api/create-payment', limiter, [
     });
 });
 
-// ========== WEBHOOK DE WOMPI ==========
+// Webhook de Wompi
 app.post('/api/wompi-webhook', async (req, res) => {
     res.status(200).send('OK');
     try {
         const event = req.body;
-        console.log("📩 Webhook recibido:", event.event);
         if (event.event === 'transaction.updated' && event.data.transaction.status === 'APPROVED') {
-            const transaction = event.data.transaction;
-            const transactionReference = transaction.reference;
-            console.log(`💰 Pago exitoso confirmado para la referencia: ${transactionReference}`);
-
-            const pendingOrder = pendingOrders.get(transactionReference);
-            if (pendingOrder) {
+            const ref = event.data.transaction.reference;
+            const pend = pendingOrders.get(ref);
+            if (pend) {
                 const now = new Date();
                 const orderToSend = {
                     fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
-                    nombre: pendingOrder.cliente.nombre,
-                    cedula: pendingOrder.cliente.cedula || 'No especificada',
-                    email: pendingOrder.cliente.email,
-                    paqueteA: pendingOrder.a,
-                    paqueteB: pendingOrder.b,
-                    paqueteC: pendingOrder.c,
-                    placa: pendingOrder.placa ? 'Sí' : 'No',
-                    total: pendingOrder.total,
-                    referencia: transactionReference
+                    nombre: pend.cliente.nombre,
+                    cedula: pend.cliente.cedula,
+                    email: pend.cliente.email,
+                    direccion: pend.cliente.direccion,
+                    packA: pend.a,
+                    packB: pend.b,
+                    packC: pend.c,
+                    textoPlaca: pend.textoPlaca || '',
+                    total: pend.total
                 };
-                console.log("📤 Enviando orden completa a Google Sheets:", orderToSend);
                 await sendToGoogleSheets(orderToSend);
-                pendingOrders.delete(transactionReference);
-                console.log(`✅ Orden ${transactionReference} registrada en Google Sheets`);
+                pendingOrders.delete(ref);
+                console.log(`✅ Orden ${ref} registrada en Google Sheets`);
             } else {
-                console.warn(`⚠️ No se encontraron datos locales para la referencia ${transactionReference}.`);
+                console.warn(`⚠️ No se encontraron datos locales para la referencia ${ref}`);
             }
-        } else {
-            console.log(`ℹ️ Evento ignorado: ${event.event} con estado ${event.data.transaction?.status}`);
         }
     } catch (error) {
         console.error("❌ Error procesando el webhook:", error);
     }
 });
 
-// ========== ENDPOINT DE PRUEBA PARA GOOGLE SHEETS ==========
+// Endpoint de prueba
 app.get('/api/test-google', async (req, res) => {
     const testOrder = {
         fechaHora: new Date().toLocaleString('es-CO'),
         nombre: "Test Manual",
         cedula: "123456789",
         email: "test@test.com",
-        paqueteA: 1,
-        paqueteB: 0,
-        paqueteC: 0,
-        placa: "No",
-        total: 180000,
-        referencia: "TEST-001"
+        direccion: "Calle Falsa 123",
+        packA: 1,
+        packB: 0,
+        packC: 0,
+        textoPlaca: "Placa de prueba",
+        total: 180000
     };
     await sendToGoogleSheets(testOrder);
     res.json({ status: 'enviado' });
 });
 
-// ========== MANEJADOR DE ERRORES GLOBAL ==========
-app.use((err, req, res, next) => {
-    console.error('❌ Error interno:', err);
-    res.status(500).json({ error: 'Error interno del servidor. Intenta de nuevo más tarde.' });
-});
-
-// ========== INICIAR SERVIDOR ==========
 app.listen(PORT, () => {
     console.log(`✅ Servidor seguro corriendo en http://localhost:${PORT}`);
 });
