@@ -48,7 +48,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
+  background: #ffffff;
   border: 1.5px solid var(--light);
   color: var(--green);
   padding: 6px 18px;
@@ -81,10 +81,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
 }
 .hero-kpis {
   display: flex;
-  gap: 30px;
+  gap: 15px;
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 40px;
+  margin-bottom: 100px;
 }
 .hero-kpis .kpi {
   text-align: center;
