@@ -55,7 +55,6 @@
     .btn-form:hover {
       background: var(--gold);
     }
-    /* Regiones */
     .region-block {
       background: #fff;
       border-radius: 28px;
@@ -110,6 +109,9 @@
     .hidden {
       display: none;
     }
+    /* Asegurar que los botones de la calculadora tengan cursor pointer */
+    .cb { cursor: pointer; user-select: none; }
+    .cnt-input { text-align: center; }
   </style>
 </head>
 <body>
@@ -166,51 +168,51 @@
       <h2 class="sec-title">Elige tu área de vida</h2>
       <p class="sec-sub">Cada región agrupa varias áreas de vida. Selecciona **una** de las áreas disponibles. Puedes cambiar tu selección en cualquier momento antes de continuar.</p>
       
-      <!-- Región 1: El capricho, Dafne y La cascada -->
+      <!-- Región 1 -->
       <div class="region-block">
         <img class="region-img" src="https://placehold.co/800x200?text=Región+1:+El+capricho,+Dafne,+La+cascada" alt="Región El capricho, Dafne, La cascada">
         <h3 class="region-title">🌿 El capricho, Dafne y La cascada</h3>
-        <div class="areas-grid" data-region="region1">
+        <div class="areas-grid">
           <div class="area-option" data-area="El capricho">🌳 El capricho</div>
           <div class="area-option" data-area="Dafne">💧 Dafne</div>
           <div class="area-option" data-area="La cascada">🏞️ La cascada</div>
         </div>
       </div>
 
-      <!-- Región 2: Azulejos y El caribe -->
+      <!-- Región 2 -->
       <div class="region-block">
         <img class="region-img" src="https://placehold.co/800x200?text=Región+2:+Azulejos+y+El+caribe" alt="Región Azulejos y El caribe">
         <h3 class="region-title">🏝️ Azulejos y El caribe</h3>
-        <div class="areas-grid" data-region="region2">
+        <div class="areas-grid">
           <div class="area-option" data-area="Azulejos">🏺 Azulejos</div>
           <div class="area-option" data-area="El caribe">🌊 El caribe</div>
         </div>
       </div>
 
-      <!-- Región 3: Guayandayes -->
+      <!-- Región 3 -->
       <div class="region-block">
         <img class="region-img" src="https://placehold.co/800x200?text=Región+3:+Guayandayes" alt="Región Guayandayes">
         <h3 class="region-title">🏞️ Guayandayes</h3>
-        <div class="areas-grid" data-region="region3">
+        <div class="areas-grid">
           <div class="area-option" data-area="Guayandayes">🌾 Guayandayes</div>
         </div>
       </div>
 
-      <!-- Región 4: Brillante y comarca -->
+      <!-- Región 4 -->
       <div class="region-block">
         <img class="region-img" src="https://placehold.co/800x200?text=Región+4:+Brillante+y+comarca" alt="Región Brillante y comarca">
         <h3 class="region-title">✨ Brillante y comarca</h3>
-        <div class="areas-grid" data-region="region4">
+        <div class="areas-grid">
           <div class="area-option" data-area="Brillante">⭐ Brillante</div>
           <div class="area-option" data-area="comarca">🗺️ comarca</div>
         </div>
       </div>
 
-      <!-- Región 5: Borinquen y tolemaida -->
+      <!-- Región 5 -->
       <div class="region-block">
         <img class="region-img" src="https://placehold.co/800x200?text=Región+5:+Borinquen+y+tolemaida" alt="Región Borinquen y tolemaida">
         <h3 class="region-title">🌳 Borinquen y tolemaida</h3>
-        <div class="areas-grid" data-region="region5">
+        <div class="areas-grid">
           <div class="area-option" data-area="Borinquen">🍃 Borinquen</div>
           <div class="area-option" data-area="tolemaida">🍂 tolemaida</div>
         </div>
@@ -321,8 +323,115 @@
   </div>
 </section>
 
-<script src="script.js"></script>
 <script>
+  // ==================== CALCULADORA ====================
+  const ST = { a: 0, b: 0, c: 0 };
+  const MX = { a: 2813, b: 3058, c: 1888 };
+  const PR = { a: 180000, b: 186000, c: 198000 };
+  const CO = { a: 213, b: 243, c: 228 };
+  const PLACA = 85000;
+
+  function fmt(n) { return '$' + Math.round(n).toLocaleString('es-CO'); }
+  function fN(n) { return Math.round(n).toLocaleString('es-CO'); }
+
+  function setVal(pk, rawVal) {
+    let v = parseInt(rawVal) || 0;
+    v = Math.max(0, Math.min(MX[pk], v));
+    ST[pk] = v;
+    upd();
+  }
+
+  function ch(pk, d) {
+    ST[pk] = Math.max(0, Math.min(MX[pk], ST[pk] + d));
+    const inp = document.getElementById('i' + pk);
+    if (inp) inp.value = ST[pk];
+    upd();
+  }
+
+  function upd() {
+    // Sincronizar inputs
+    ['a', 'b', 'c'].forEach(pk => {
+      const inp = document.getElementById('i' + pk);
+      if (inp && document.activeElement !== inp) inp.value = ST[pk] || '';
+    });
+
+    const tg = ST.a + ST.b + ST.c;
+    const arb = tg * 5;
+    const co2 = ST.a * CO.a + ST.b * CO.b + ST.c * CO.c;
+    const sub = ST.a * PR.a + ST.b * PR.b + ST.c * PR.c;
+    const dp = Math.min(Math.floor(tg / 10), 20);
+    const dam = Math.round(sub * dp / 100);
+    const conPlaca = document.getElementById('placa-chk') ? document.getElementById('placa-chk').checked : false;
+    const tot = (sub - dam) + (conPlaca ? PLACA : 0);
+    const autos = (co2 / 4600).toFixed(1);
+
+    // CO2 por pack
+    const caEl = document.getElementById('ca');
+    if (caEl) caEl.textContent = fN(ST.a * CO.a) + ' kg';
+    const cbEl = document.getElementById('cb_');
+    if (cbEl) cbEl.textContent = fN(ST.b * CO.b) + ' kg';
+    const ccEl = document.getElementById('cc');
+    if (ccEl) ccEl.textContent = fN(ST.c * CO.c) + ' kg';
+
+    const rgEl = document.getElementById('rg');
+    if (rgEl) rgEl.textContent = fN(tg);
+    const raEl = document.getElementById('ra');
+    if (raEl) raEl.textContent = fN(arb);
+    const rcEl = document.getElementById('rc');
+    if (rcEl) rcEl.textContent = fN(co2) + ' kg';
+    const rc10El = document.getElementById('rc10');
+    if (rc10El) rc10El.textContent = fN(co2 * 10) + ' kg';
+    const rautoEl = document.getElementById('rauto');
+    if (rautoEl) rautoEl.textContent = autos + ' autos/año';
+    const dpctEl = document.getElementById('dpct');
+    if (dpctEl) dpctEl.textContent = dp + '%';
+    const rsubEl = document.getElementById('rsub');
+    if (rsubEl) rsubEl.textContent = fmt(sub);
+    const rdiscEl = document.getElementById('rdisc');
+    if (rdiscEl) rdiscEl.textContent = '−' + fmt(dam);
+    const rtotalEl = document.getElementById('rtotal');
+    if (rtotalEl) rtotalEl.textContent = fmt(tot);
+
+    const rrowPlaca = document.getElementById('rrow-placa');
+    if (rrowPlaca) rrowPlaca.style.display = conPlaca ? 'flex' : 'none';
+
+    const dsfEl = document.getElementById('dsf');
+    if (dsfEl) dsfEl.style.width = Math.min(tg / 200 * 100, 100) + '%';
+
+    const dbadge = document.getElementById('dbadge');
+    if (dbadge) {
+      if (dp >= 20) dbadge.style.background = 'linear-gradient(135deg,#1A7A3A,#27ae60)';
+      else if (dp >= 10) dbadge.style.background = 'linear-gradient(135deg,#C8972B,#E8A020)';
+      else dbadge.style.background = 'linear-gradient(135deg,#2D5F8A,#3a7ab8)';
+    }
+
+    const pillsDiv = document.getElementById('pills');
+    if (pillsDiv) {
+      if (!tg) {
+        pillsDiv.innerHTML = '<span class="pill">Ingresa grupos para ver tus beneficios</span>';
+        return;
+      }
+      let bens = [
+        fN(arb) + ' árboles nativos',
+        fN(co2) + ' kg CO₂/año',
+        'Certificado Ley 2173',
+        'Registro REAA · Res.1491/2025',
+        'Reporte GRI/ODS',
+        'Monitoreo 2 años',
+        'IVA exento'
+      ];
+      if (arb >= 50) bens.push('Fotos geolocalizadas');
+      if (arb >= 100) bens.push('Reporte ESG completo');
+      if (arb >= 250) bens.push('Video del predio');
+      if (conPlaca) bens.push('🪧 Placa personalizada (+$85.000)');
+      if (dp >= 10) bens.push('🎉 ' + dp + '% descuento activo');
+      if (dp >= 20) bens.push('🏆 Descuento máximo 20%');
+      const cls = (t) => t.startsWith('🪧') ? 'pill opt' : 'pill';
+      pillsDiv.innerHTML = bens.map(t => `<span class="${cls(t)}">${t}</span>`).join('');
+    }
+  }
+
+  // ==================== FORMULARIO, REGIONES Y PAGO ====================
   let clienteData = null;
   let areaSeleccionada = null;
 
@@ -331,54 +440,54 @@
   const calculadoraSection = document.getElementById('calculadoraSection');
   const confirmarAreaBtn = document.getElementById('confirmarAreaBtn');
   const areaWarning = document.getElementById('areaWarning');
-
-  // Selección de área: al hacer clic en cualquier .area-option
   const areaOptions = document.querySelectorAll('.area-option');
+
   areaOptions.forEach(opt => {
     opt.addEventListener('click', (e) => {
       e.stopPropagation();
-      // Remover selección de todas
       areaOptions.forEach(o => o.classList.remove('selected'));
       opt.classList.add('selected');
       areaSeleccionada = opt.getAttribute('data-area');
       confirmarAreaBtn.disabled = false;
-      areaWarning.style.display = 'none';
+      if (areaWarning) areaWarning.style.display = 'none';
     });
   });
 
-  // Paso 1: formulario
-  clienteForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const nombre = document.getElementById('nombre').value.trim();
-    const cedula = document.getElementById('cedula').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const telefono = document.getElementById('telefono').value.trim();
-    const ciudad = document.getElementById('ciudad').value.trim();
-    if (!nombre || !cedula || !email || !telefono || !ciudad) {
-      alert('Por favor completa todos los campos.');
-      return;
-    }
-    clienteData = { nombre, cedula, email, telefono, ciudad };
-    localStorage.setItem('co2reforest_cliente', JSON.stringify(clienteData));
-    document.querySelector('.form-section').style.display = 'none';
-    regionesSection.classList.remove('hidden');
-    regionesSection.scrollIntoView({ behavior: 'smooth' });
-  });
+  if (clienteForm) {
+    clienteForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById('nombre').value.trim();
+      const cedula = document.getElementById('cedula').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const ciudad = document.getElementById('ciudad').value.trim();
+      if (!nombre || !cedula || !email || !telefono || !ciudad) {
+        alert('Por favor completa todos los campos.');
+        return;
+      }
+      clienteData = { nombre, cedula, email, telefono, ciudad };
+      localStorage.setItem('co2reforest_cliente', JSON.stringify(clienteData));
+      document.querySelector('.form-section').style.display = 'none';
+      regionesSection.classList.remove('hidden');
+      regionesSection.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 
-  // Confirmar área y mostrar calculadora
-  confirmarAreaBtn.addEventListener('click', () => {
-    if (!areaSeleccionada) {
-      areaWarning.style.display = 'block';
-      return;
-    }
-    localStorage.setItem('co2reforest_area', areaSeleccionada);
-    regionesSection.classList.add('hidden');
-    calculadoraSection.classList.remove('hidden');
-    if (typeof upd === 'function') upd();
-    calculadoraSection.scrollIntoView({ behavior: 'smooth' });
-  });
+  if (confirmarAreaBtn) {
+    confirmarAreaBtn.addEventListener('click', () => {
+      if (!areaSeleccionada) {
+        if (areaWarning) areaWarning.style.display = 'block';
+        return;
+      }
+      localStorage.setItem('co2reforest_area', areaSeleccionada);
+      regionesSection.classList.add('hidden');
+      calculadoraSection.classList.remove('hidden');
+      upd(); // inicializar calculadora
+      calculadoraSection.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 
-  // Paso final: guardar carrito completo y redirigir
+  // Botón de pago final
   document.addEventListener('DOMContentLoaded', () => {
     const btnPagarFinal = document.getElementById('btn-pagar-final');
     if (btnPagarFinal) {
@@ -406,6 +515,9 @@
       });
     }
   });
+
+  // Inicializar calculadora cuando se muestre
+  upd();
 </script>
 </body>
 </html>
