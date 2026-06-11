@@ -109,7 +109,6 @@
     .hidden {
       display: none;
     }
-    /* Asegurar que los botones de la calculadora tengan cursor pointer */
     .cb { cursor: pointer; user-select: none; }
     .cnt-input { text-align: center; }
   </style>
@@ -166,11 +165,11 @@
     <div id="regionesSection" class="hidden">
       <p class="sec-tag">Paso 2</p>
       <h2 class="sec-title">Elige tu área de vida</h2>
-      <p class="sec-sub">Cada región agrupa varias áreas de vida. Selecciona **una** de las áreas disponibles. Puedes cambiar tu selección en cualquier momento antes de continuar.</p>
+      <p class="sec-sub">Cada región agrupa varias áreas de vida. Selecciona **una** de las áreas disponibles.</p>
       
-      <!-- Región 1 -->
+      <!-- Región 1: El capricho, Dafne y La cascada -->
       <div class="region-block">
-        <img class="region-img" src="https://placehold.co/800x200?text=Región+1:+El+capricho,+Dafne,+La+cascada" alt="Región El capricho, Dafne, La cascada">
+        <img class="region-img" src="/imagenes/region1.jpg" alt="Región El capricho, Dafne, La cascada">
         <h3 class="region-title">🌿 El capricho, Dafne y La cascada</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="El capricho">🌳 El capricho</div>
@@ -179,9 +178,9 @@
         </div>
       </div>
 
-      <!-- Región 2 -->
+      <!-- Región 2: Azulejos y El caribe -->
       <div class="region-block">
-        <img class="region-img" src="https://placehold.co/800x200?text=Región+2:+Azulejos+y+El+caribe" alt="Región Azulejos y El caribe">
+        <img class="region-img" src="/imagenes/region2.jpg" alt="Región Azulejos y El caribe">
         <h3 class="region-title">🏝️ Azulejos y El caribe</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Azulejos">🏺 Azulejos</div>
@@ -189,18 +188,18 @@
         </div>
       </div>
 
-      <!-- Región 3 -->
+      <!-- Región 3: Guayandayes -->
       <div class="region-block">
-        <img class="region-img" src="https://placehold.co/800x200?text=Región+3:+Guayandayes" alt="Región Guayandayes">
+        <img class="region-img" src="/imagenes/region3.jpg" alt="Región Guayandayes">
         <h3 class="region-title">🏞️ Guayandayes</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Guayandayes">🌾 Guayandayes</div>
         </div>
       </div>
 
-      <!-- Región 4 -->
+      <!-- Región 4: Brillante y comarca -->
       <div class="region-block">
-        <img class="region-img" src="https://placehold.co/800x200?text=Región+4:+Brillante+y+comarca" alt="Región Brillante y comarca">
+        <img class="region-img" src="/imagenes/region4.jpg" alt="Región Brillante y comarca">
         <h3 class="region-title">✨ Brillante y comarca</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Brillante">⭐ Brillante</div>
@@ -208,9 +207,9 @@
         </div>
       </div>
 
-      <!-- Región 5 -->
+      <!-- Región 5: Borinquen y tolemaida -->
       <div class="region-block">
-        <img class="region-img" src="https://placehold.co/800x200?text=Región+5:+Borinquen+y+tolemaida" alt="Región Borinquen y tolemaida">
+        <img class="region-img" src="/imagenes/region5.jpg" alt="Región Borinquen y tolemaida">
         <h3 class="region-title">🌳 Borinquen y tolemaida</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Borinquen">🍃 Borinquen</div>
@@ -349,7 +348,6 @@
   }
 
   function upd() {
-    // Sincronizar inputs
     ['a', 'b', 'c'].forEach(pk => {
       const inp = document.getElementById('i' + pk);
       if (inp && document.activeElement !== inp) inp.value = ST[pk] || '';
@@ -365,7 +363,6 @@
     const tot = (sub - dam) + (conPlaca ? PLACA : 0);
     const autos = (co2 / 4600).toFixed(1);
 
-    // CO2 por pack
     const caEl = document.getElementById('ca');
     if (caEl) caEl.textContent = fN(ST.a * CO.a) + ' kg';
     const cbEl = document.getElementById('cb_');
@@ -431,7 +428,7 @@
     }
   }
 
-  // ==================== FORMULARIO, REGIONES Y PAGO ====================
+  // ==================== FORMULARIO Y REGIONES ====================
   let clienteData = null;
   let areaSeleccionada = null;
 
@@ -482,12 +479,12 @@
       localStorage.setItem('co2reforest_area', areaSeleccionada);
       regionesSection.classList.add('hidden');
       calculadoraSection.classList.remove('hidden');
-      upd(); // inicializar calculadora
+      upd();
       calculadoraSection.scrollIntoView({ behavior: 'smooth' });
     });
   }
 
-  // Botón de pago final
+  // Botón final de pago
   document.addEventListener('DOMContentLoaded', () => {
     const btnPagarFinal = document.getElementById('btn-pagar-final');
     if (btnPagarFinal) {
@@ -516,7 +513,6 @@
     }
   });
 
-  // Inicializar calculadora cuando se muestre
   upd();
 </script>
 </body>

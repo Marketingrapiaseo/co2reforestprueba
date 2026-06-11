@@ -212,7 +212,7 @@ app.post('/api/confirm-payment', async (req, res) => {
     }
 });
 
-// Webhook
+// Webhook (opcional)
 app.post('/api/wompi-webhook', async (req, res) => {
     res.status(200).send('OK');
     try {
