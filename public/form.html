@@ -60,14 +60,16 @@
       border-radius: 28px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.05);
       margin-bottom: 40px;
-      overflow: hidden;
+      /* Eliminamos overflow hidden para que la imagen no se recorte */
+      overflow: visible;
     }
-    /* 🔧 Ajuste: imagen respeta su tamaño real, ancho completo, altura automática */
+    /* Imagen completa, sin recortes, ajustada al ancho, altura automática */
     .region-img {
       width: 100%;
       height: auto;
       display: block;
       background-color: #c8e6d9;
+      border-radius: 28px 28px 0 0; /* opcional: mantiene el borde redondeado solo arriba */
     }
     .region-title {
       font-family: 'Playfair Display', serif;
@@ -171,7 +173,7 @@
       
       <!-- Región 1 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region1.jpg?t=1749999999" alt="El capricho, Dafne, La cascada" loading="eager">
+        <img class="region-img" src="/imagenes/region1.jpg?t=1750000000" alt="El capricho, Dafne, La cascada" loading="eager">
         <h3 class="region-title">🌿 El capricho, Dafne y La cascada</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="El capricho">🌳 El capricho</div>
@@ -182,7 +184,7 @@
 
       <!-- Región 2 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region2.jpg?t=1749999999" alt="Azulejos y El caribe" loading="eager">
+        <img class="region-img" src="/imagenes/region2.jpg?t=1750000000" alt="Azulejos y El caribe" loading="eager">
         <h3 class="region-title">🏝️ Azulejos y El caribe</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Azulejos">🏺 Azulejos</div>
@@ -192,7 +194,7 @@
 
       <!-- Región 3 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region3.jpg?t=1749999999" alt="Guayandayes" loading="eager">
+        <img class="region-img" src="/imagenes/region3.jpg?t=1750000000" alt="Guayandayes" loading="eager">
         <h3 class="region-title">🏞️ Guayandayes</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Guayandayes">🌾 Guayandayes</div>
@@ -201,7 +203,7 @@
 
       <!-- Región 4 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region4.jpg?t=1749999999" alt="Brillante y comarca" loading="eager">
+        <img class="region-img" src="/imagenes/region4.jpg?t=1750000000" alt="Brillante y comarca" loading="eager">
         <h3 class="region-title">✨ Brillante y comarca</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Brillante">⭐ Brillante</div>
@@ -211,7 +213,7 @@
 
       <!-- Región 5 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region5.jpg?t=1749999999" alt="Borinquen y tolemaida" loading="eager">
+        <img class="region-img" src="/imagenes/region5.jpg?t=1750000000" alt="Borinquen y tolemaida" loading="eager">
         <h3 class="region-title">🌳 Borinquen y tolemaida</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Borinquen">🍃 Borinquen</div>
