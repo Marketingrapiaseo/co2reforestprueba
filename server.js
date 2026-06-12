@@ -27,7 +27,6 @@ if (!GOOGLE_SCRIPT_URL) {
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
-// Middlewares
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -75,22 +74,22 @@ async function sendToGoogleSheets(orderData, isUpdate = false) {
         return false;
     }
     try {
+        console.log(`📤 Enviando a Google Sheets (update=${isUpdate})...`);
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orden: orderData, update: isUpdate })
         });
         const result = await response.json();
-        console.log(`📤 Envío a Google Sheets: ${result.status}`);
+        console.log(`📤 Respuesta de Google Sheets:`, result);
         if (result.status === 'success') return true;
         else throw new Error(result.message || 'Error desconocido');
     } catch (error) {
-        console.error("❌ Error enviando a Google Sheets:", error);
+        console.error("❌ Error detallado al enviar a Google Sheets:", error.message);
         return false;
     }
 }
 
-// Endpoint para guardar datos personales (estado "Solicitud")
 app.post('/api/save-client', [
     body('nombre').notEmpty(),
     body('cedula').notEmpty(),
@@ -126,7 +125,6 @@ app.post('/api/save-client', [
     }
 });
 
-// Endpoint para crear el pago
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
@@ -174,7 +172,6 @@ app.post('/api/create-payment', limiter, [
     });
 });
 
-// Endpoint para confirmar pago (recibe transactionId y el carrito completo)
 app.post('/api/confirm-payment', async (req, res) => {
     const { transactionId, cart } = req.body;
     if (!transactionId || !cart) {
@@ -182,31 +179,26 @@ app.post('/api/confirm-payment', async (req, res) => {
     }
 
     try {
-        // Verificar transacción en Wompi (opcional pero recomendado)
+        // Verificación opcional con Wompi
         if (WOMPI_PRIVATE_KEY) {
-            const wompiResponse = await fetch(`https://api.wompi.co/v1/transactions/${transactionId}`, {
-                headers: { 'Authorization': `Bearer ${WOMPI_PRIVATE_KEY}` }
-            });
-            const wompiData = await wompiResponse.json();
-            if (!wompiData.data || wompiData.data.status !== 'APPROVED') {
-                console.warn(`⚠️ Transacción ${transactionId} no aprobada o no encontrada, pero igual se registrará.`);
-            } else {
-                console.log(`✅ Transacción ${transactionId} verificada en Wompi: APROBADA`);
+            try {
+                const wompiResponse = await fetch(`https://api.wompi.co/v1/transactions/${transactionId}`, {
+                    headers: { 'Authorization': `Bearer ${WOMPI_PRIVATE_KEY}` }
+                });
+                const wompiData = await wompiResponse.json();
+                if (wompiData.data && wompiData.data.status === 'APPROVED') {
+                    console.log(`✅ Transacción ${transactionId} verificada en Wompi: APROBADA`);
+                } else {
+                    console.warn(`⚠️ Transacción ${transactionId} no aprobada o no encontrada.`);
+                }
+            } catch (err) {
+                console.warn(`⚠️ No se pudo verificar transacción en Wompi: ${err.message}`);
             }
         }
 
-        // Extraer datos del carrito enviado desde gracias.html
         const { a, b, c, placa, area, cliente } = cart;
-        const subtotal = (a||0)*180000 + (b||0)*186000 + (c||0)*198000;
-        const grupos = (a||0)+(b||0)+(c||0);
-        let porcentaje = 0;
-        if (grupos >= 200) porcentaje = 20;
-        else if (grupos >= 100) porcentaje = 10;
-        else porcentaje = Math.min(Math.floor(grupos / 10), 20);
-        const descuento = Math.round(subtotal * porcentaje / 100);
-        let total = subtotal - descuento;
-        if (placa) total += 85000;
-
+        const total = calcularTotal(a||0, b||0, c||0, placa||false);
+        
         const now = new Date();
         const orderToSend = {
             email: cliente.email,
@@ -228,10 +220,10 @@ app.post('/api/confirm-payment', async (req, res) => {
 
         const success = await sendToGoogleSheets(orderToSend, true);
         if (success) {
-            console.log(`✅ Pedido para ${cliente.email} actualizado correctamente con transacción ${transactionId}`);
+            console.log(`✅ Pedido para ${cliente.email} actualizado correctamente`);
             res.json({ status: 'success' });
         } else {
-            console.error(`❌ Falló la actualización en Google Sheets para el email ${cliente.email}`);
+            console.error(`❌ Falló la actualización en Google Sheets para ${cliente.email}`);
             res.status(500).json({ error: 'Error al actualizar el pedido en Google Sheets' });
         }
     } catch (error) {
@@ -240,17 +232,8 @@ app.post('/api/confirm-payment', async (req, res) => {
     }
 });
 
-// Webhook opcional
-app.post('/api/wompi-webhook', async (req, res) => {
+app.post('/api/wompi-webhook', (req, res) => {
     res.status(200).send('OK');
-    try {
-        const event = req.body;
-        if (event.event === 'transaction.updated' && event.data.transaction.status === 'APPROVED') {
-            console.log(`📢 Webhook: transacción ${event.data.transaction.id} aprobada.`);
-        }
-    } catch (error) {
-        console.error("Error en webhook:", error);
-    }
 });
 
 app.listen(PORT, () => console.log(`✅ Servidor en puerto ${PORT}`));
