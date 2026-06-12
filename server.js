@@ -27,7 +27,6 @@ if (!GOOGLE_SCRIPT_URL) {
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
-// Middlewares
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -75,14 +74,21 @@ async function sendToGoogleSheets(orderData, isUpdate = false) {
         return false;
     }
     try {
-        console.log(`📤 Enviando a Google Sheets (update=${isUpdate})...`);
+        console.log(`📤 Enviando a ${GOOGLE_SCRIPT_URL} (update=${isUpdate})...`);
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orden: orderData, update: isUpdate })
         });
-        const result = await response.json();
-        console.log(`📤 Respuesta de Google Sheets:`, result);
+        const text = await response.text(); // primero como texto para ver si es JSON válido
+        console.log(`📤 Respuesta RAW: ${text}`);
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch(e) {
+            console.error("❌ La respuesta no es JSON válido:", text);
+            throw new Error("Respuesta no JSON del script");
+        }
         if (result.status === 'success') return true;
         else throw new Error(result.message || 'Error desconocido');
     } catch (error) {
@@ -180,7 +186,7 @@ app.post('/api/confirm-payment', async (req, res) => {
     }
 
     try {
-        // Verificación opcional con Wompi
+        // Verificación opcional con Wompi (pero no es crítica)
         if (WOMPI_PRIVATE_KEY) {
             try {
                 const wompiResponse = await fetch(`https://api.wompi.co/v1/transactions/${transactionId}`, {
