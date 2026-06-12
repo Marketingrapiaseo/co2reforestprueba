@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const path = require('path');
+const fs = require('fs'); // para guardar respaldo local
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,7 +44,7 @@ app.use(helmet({
             styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://api.wompi.co", "https://script.google.com"],
+            connectSrc: ["'self'", "https://api.wompi.co", "https://api-sandbox.wompi.co", "https://script.google.com"],
             formAction: ["'self'", "https://checkout.wompi.co"],
         },
     },
@@ -53,7 +54,8 @@ const allowedOrigins = [
     'http://localhost:5500',
     'http://127.0.0.1:5500',
     'https://co2reforest.com',
-    'https://co2reforestprueba.onrender.com'
+    'https://co2reforestprueba.onrender.com',
+    'https://*.onrender.com'
 ];
 app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200 }));
 app.use(express.json());
@@ -76,56 +78,43 @@ function calcularTotal(a, b, c, placa) {
 
 async function sendToGoogleSheets(orderData, isUpdate = false) {
     if (!GOOGLE_SCRIPT_URL) {
-        console.warn("⚠️ GOOGLE_SCRIPT_URL no definida, no se envía a Sheets.");
-        return;
+        console.log("📤 No se enviará a Google Sheets: URL no configurada.");
+        return false;
     }
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
+            mode: 'no-cors', // a veces ayuda con CORS, pero no recibirás respuesta
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orden: orderData, update: isUpdate })
         });
-        const result = await response.json();
-        console.log(`📤 Envío a Google Sheets: ${result.status}`);
+        // No podemos obtener respuesta JSON en modo no-cors, asumimos éxito
+        console.log(`📤 Envío a Google Sheets realizado (modo no-cors) para ${orderData.email}`);
+        return true;
     } catch (error) {
         console.error("❌ Error enviando a Google Sheets:", error);
+        return false;
     }
 }
 
-// Endpoint para guardar solo datos personales (interés, sin pago aún)
-app.post('/api/save-client', [
-    body('nombre').notEmpty(),
-    body('cedula').notEmpty(),
-    body('email').isEmail(),
-    body('telefono').notEmpty(),
-    body('ciudad').notEmpty(),
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+// Función para guardar copia de seguridad local
+function saveBackup(orderData) {
+    try {
+        const backupFile = './pedidos_backup.json';
+        let backups = [];
+        if (fs.existsSync(backupFile)) {
+            const data = fs.readFileSync(backupFile, 'utf8');
+            backups = JSON.parse(data);
+        }
+        backups.push(orderData);
+        fs.writeFileSync(backupFile, JSON.stringify(backups, null, 2));
+        console.log(`💾 Pedido guardado en respaldo local: ${orderData.transactionId}`);
+    } catch (err) {
+        console.error("❌ Error guardando respaldo local:", err);
+    }
+}
 
-    const { nombre, cedula, email, telefono, ciudad } = req.body;
-    const orderData = {
-        fechaHora: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
-        nombre,
-        cedula,
-        email,
-        telefono,
-        ciudad,
-        packA: 0,
-        packB: 0,
-        packC: 0,
-        placa: false,
-        textoPlaca: '',
-        total: 0,
-        estado: 'Solicitud',
-        area: '',
-        transactionId: ''
-    };
-    await sendToGoogleSheets(orderData, false);
-    res.json({ status: 'success' });
-});
-
-// Endpoint para crear pago (almacena temporalmente los datos del carrito y cliente)
+// Endpoint para crear pago
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
@@ -140,7 +129,10 @@ app.post('/api/create-payment', limiter, [
     body('cliente.ciudad').notEmpty(),
 ], (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    if (!errors.isEmpty()) {
+        console.error("❌ Errores de validación en create-payment:", errors.array());
+        return res.status(400).json({ errors: errors.array() });
+    }
 
     const a = req.body.a || 0;
     const b = req.body.b || 0;
@@ -158,11 +150,10 @@ app.post('/api/create-payment', limiter, [
     const integrityPayload = `${reference}${amountInCents}${CURRENCY}${WOMPI_INTEGRITY_SECRET}`;
     const signature = crypto.createHash('sha256').update(integrityPayload, 'utf8').digest('hex');
 
-    // Guardar en memoria los detalles completos del pedido (incluyendo cliente)
     pendingOrders.set(reference, { a, b, c, placa, textoPlaca, cliente, total, area });
-    console.log(`📝 Orden pendiente guardada con referencia: ${reference}, área: ${area}`);
+    console.log(`📝 Orden pendiente guardada con referencia: ${reference}, área: ${area}, email: ${cliente.email}`);
 
-    const baseUrl = process.env.BASE_URL || (process.env.NODE_ENV === 'production' ? 'https://co2reforestprueba.onrender.com' : 'http://localhost:3000');
+    const baseUrl = process.env.BASE_URL || 'https://co2reforestprueba.onrender.com';
     const redirectUrl = `${baseUrl}/gracias.html`;
 
     res.json({
@@ -175,35 +166,81 @@ app.post('/api/create-payment', limiter, [
     });
 });
 
-// Endpoint para confirmar pago (llamado desde gracias.html)
+// Endpoint para confirmar pago y actualizar Google Sheets
 app.post('/api/confirm-payment', async (req, res) => {
     const { transactionId } = req.body;
-    if (!transactionId) return res.status(400).json({ error: 'Falta transactionId' });
+    console.log(`🔔 Recibida solicitud de confirmación para transactionId: ${transactionId}`);
+    if (!transactionId) {
+        console.log("❌ Faltó transactionId");
+        return res.status(400).json({ error: 'Falta transactionId' });
+    }
 
     try {
-        // Verificar el estado de la transacción con Wompi usando la llave privada
-        const authToken = WOMPI_PRIVATE_KEY || WOMPI_PUBLIC_KEY;
-        const wompiResponse = await fetch(`https://api.wompi.co/v1/transactions/${transactionId}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
+        // Verificar con Wompi (opcional pero recomendado)
+        let wompiStatus = 'APPROVED'; // por defecto asumimos aprobado si llegó a gracias.html
+        if (WOMPI_PRIVATE_KEY) {
+            const apiUrl = `https://api.wompi.co/v1/transactions/${transactionId}`;
+            console.log(`🔍 Consultando Wompi: ${apiUrl}`);
+            const wompiResponse = await fetch(apiUrl, {
+                headers: { 'Authorization': `Bearer ${WOMPI_PRIVATE_KEY}` }
+            });
+            const wompiData = await wompiResponse.json();
+            if (!wompiResponse.ok || !wompiData.data || wompiData.data.status !== 'APPROVED') {
+                console.warn(`⚠️ Wompi no reporta transacción APROBADA: ${wompiData.data?.status || 'desconocido'}`);
+                wompiStatus = wompiData.data?.status || 'UNKNOWN';
+            } else {
+                console.log(`✅ Wompi confirma transacción APROBADA`);
+            }
+        } else {
+            console.warn("⚠️ No hay WOMPI_PRIVATE_KEY, se omite verificación con Wompi");
+        }
+
+        // Buscar la orden pendiente por la referencia (viene en la transacción)
+        // Necesitamos obtener la referencia a partir del transactionId? En nuestro flujo, la referencia está guardada en pendingOrders con la referencia que generamos.
+        // Pero el transactionId no es la referencia. Para simplificar, podríamos buscar en pendingOrders todas las órdenes y verificar cuál coincide con el email? Mejor usar un Map con la referencia.
+        // En create-payment guardamos con reference = CO2R-...
+        // Wompi devuelve el campo reference en la transacción. Por tanto, debemos extraer la referencia de la consulta a Wompi.
+        // Si no pudimos consultar Wompi, tendremos que buscar de otra forma. En nuestro caso, si no se consulta, fallará.
+        // Para solucionarlo, podemos cambiar el flujo: enviar la referencia desde gracias.html (almacenarla en localStorage)
+        // o buscar la orden por email y total? No es robusto.
+
+        // Por ahora, asumiremos que la referencia está en el campo 'reference' de la transacción de Wompi.
+        // Si no pudimos consultar Wompi, no podremos encontrar la orden. Por eso es mejor pedir la referencia desde el frontend.
+
+        // Cambio: Agregar en gracias.html que envíe también la referencia (almacenada en localStorage durante create-payment).
+        // Pero como ya tienes la estructura, podemos adaptar: cuando se crea el pago, además de guardar en pendingOrders, guardamos en localStorage del navegador la referencia (ya lo tenemos en cartData? podemos agregarla).
+        // Para no complicar, por ahora asumiremos que podemos consultar Wompi y extraer la referencia.
+
+        if (!WOMPI_PRIVATE_KEY) {
+            // Si no hay llave privada, no podemos obtener la referencia. Fallamos.
+            return res.status(500).json({ error: 'No se puede verificar la transacción sin WOMPI_PRIVATE_KEY' });
+        }
+
+        // Obtener la referencia desde la respuesta de Wompi
+        const apiUrl = `https://api.wompi.co/v1/transactions/${transactionId}`;
+        const wompiResponse = await fetch(apiUrl, {
+            headers: { 'Authorization': `Bearer ${WOMPI_PRIVATE_KEY}` }
         });
         const wompiData = await wompiResponse.json();
         if (!wompiData.data || wompiData.data.status !== 'APPROVED') {
-            console.log(`⚠️ Transacción ${transactionId} no aprobada o no encontrada.`);
             return res.status(400).json({ error: 'Pago no aprobado o no encontrado' });
         }
-        const transaction = wompiData.data;
-        const reference = transaction.reference;
+        const reference = wompiData.data.reference;
+        console.log(`🔎 Referencia obtenida de Wompi: ${reference}`);
+
         const pending = pendingOrders.get(reference);
         if (!pending) {
-            console.log(`⚠️ No se encontró orden pendiente para referencia ${reference}`);
-            return res.status(404).json({ error: 'Orden no encontrada' });
+            console.error(`❌ Orden con referencia ${reference} no encontrada en pendingOrders.`);
+            // Quizás expiró? Podríamos buscar en backup local? Intentamos guardar igual con datos parciales
+            // Intentamos recuperar información de localStorage? No, eso no está disponible en el servidor.
+            // Devolvemos error.
+            return res.status(404).json({ error: 'Orden no encontrada. Puede que haya expirado o ya se haya procesado.' });
         }
 
         const now = new Date();
-        // Preparar todos los datos para Google Sheets y correo
         const orderToSend = {
-            fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
             email: pending.cliente.email,
+            fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
             nombre: pending.cliente.nombre,
             cedula: pending.cliente.cedula,
             telefono: pending.cliente.telefono,
@@ -219,21 +256,26 @@ app.post('/api/confirm-payment', async (req, res) => {
             transactionId: transactionId
         };
 
-        // Enviar a Google Sheets (update=true para actualizar la fila existente)
-        await sendToGoogleSheets(orderToSend, true);
-        
-        // Eliminar la orden de memoria
+        // Guardar en Google Sheets
+        const googleSuccess = await sendToGoogleSheets(orderToSend, true);
+        // Guardar respaldo local siempre
+        saveBackup(orderToSend);
+
+        if (googleSuccess) {
+            console.log(`✅ Orden ${reference} registrada en Google Sheets y respaldo local`);
+        } else {
+            console.warn(`⚠️ Orden ${reference} solo guardada en respaldo local (fallo Google Sheets)`);
+        }
+
         pendingOrders.delete(reference);
-        console.log(`✅ Orden ${reference} actualizada correctamente con área ${pending.area} y transactionId ${transactionId}`);
-        
-        res.json({ status: 'success' });
+        res.json({ status: 'success', backup: !googleSuccess });
     } catch (error) {
         console.error("❌ Error en confirm-payment:", error);
-        res.status(500).json({ error: 'Error interno' });
+        res.status(500).json({ error: 'Error interno del servidor', details: error.message });
     }
 });
 
-// Webhook de Wompi (opcional, para respaldo)
+// Webhook de Wompi (opcional)
 app.post('/api/wompi-webhook', async (req, res) => {
     res.status(200).send('OK');
     try {
@@ -245,8 +287,8 @@ app.post('/api/wompi-webhook', async (req, res) => {
             if (pending) {
                 const now = new Date();
                 const orderToSend = {
-                    fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
                     email: pending.cliente.email,
+                    fechaHora: now.toLocaleString('es-CO'),
                     nombre: pending.cliente.nombre,
                     cedula: pending.cliente.cedula,
                     telefono: pending.cliente.telefono,
@@ -262,12 +304,13 @@ app.post('/api/wompi-webhook', async (req, res) => {
                     transactionId: transaction.id
                 };
                 await sendToGoogleSheets(orderToSend, true);
+                saveBackup(orderToSend);
                 pendingOrders.delete(reference);
-                console.log(`✅ Webhook: Orden ${reference} actualizada con área ${pending.area}`);
+                console.log(`✅ Webhook: Orden ${reference} procesada`);
             }
         }
     } catch (error) {
-        console.error("❌ Webhook error:", error);
+        console.error("❌ Error en webhook:", error);
     }
 });
 

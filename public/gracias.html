@@ -1,111 +1,98 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CO2Reforest — Confirmación de pago</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #C8972B;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CO2Reforest — Confirmación de pago</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #C8972B;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
 <section class="sec" style="min-height: 70vh; display: flex; align-items: center;">
-  <div class="wrap" style="text-align: center;">
-    <div id="mensaje" class="hero-badge" style="margin: 0 auto 20px; background: #2D5F8A;">Procesando tu pedido...</div>
-    <h1 class="sec-title" id="titulo">Verificando tu pago</h1>
-    <div id="loader" class="loader"></div>
-    <p class="sec-sub" id="descripcion" style="margin-bottom: 30px;">Por favor espera un momento, estamos confirmando tu transacción...</p>
-    <div id="info-adicional" class="res-banner" style="display: none; text-align: left;"></div>
-    <div style="margin-top: 40px;">
-      <a href="index.html" class="btn-p" id="boton-volver" style="display: none;">Volver al inicio</a>
+    <div class="wrap" style="text-align: center;">
+        <div id="mensaje" class="hero-badge" style="margin: 0 auto 20px; background: #2D5F8A;">Procesando tu pedido...</div>
+        <h1 class="sec-title" id="titulo">Verificando tu pago</h1>
+        <div id="loader" class="loader"></div>
+        <p class="sec-sub" id="descripcion" style="margin-bottom: 30px;">Por favor espera un momento, estamos confirmando tu transacción...</p>
+        <div id="info-adicional" class="res-banner" style="display: none; text-align: left;"></div>
+        <div style="margin-top: 40px;">
+            <a href="index.html" class="btn-p" id="boton-volver" style="display: none;">Volver al inicio</a>
+        </div>
     </div>
-  </div>
 </section>
 
 <script>
-  // Constantes iguales a las del frontend
-  const PRECIOS = { a: 180000, b: 186000, c: 198000 };
-  const PLACA_COST = 85000;
+    async function confirmarPedido() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const transactionId = urlParams.get('id');
+        if (!transactionId) {
+            mostrarError('No se recibió un ID de transacción válido. Por favor contacta a soporte.');
+            return;
+        }
 
-  function calcularTotalDesdeCarrito(cart) {
-    let subtotal = (cart.a || 0) * PRECIOS.a + (cart.b || 0) * PRECIOS.b + (cart.c || 0) * PRECIOS.c;
-    let grupos = (cart.a || 0) + (cart.b || 0) + (cart.c || 0);
-    let descuento = Math.min(Math.floor(grupos / 10), 20);
-    let descuentoMonto = Math.round(subtotal * descuento / 100);
-    let total = subtotal - descuentoMonto;
-    if (cart.placa) total += PLACA_COST;
-    return total;
-  }
-
-  async function confirmarPedido() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const transactionId = urlParams.get('id');
-    if (!transactionId) {
-      mostrarError('No se recibió un ID de transacción válido. Por favor contacta a soporte.');
-      return;
+        try {
+            const response = await fetch('/api/confirm-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transactionId })
+            });
+            const data = await response.json();
+            if (response.ok && data.status === 'success') {
+                localStorage.removeItem('co2reforest_cart');
+                mostrarExito(transactionId);
+            } else {
+                let errorMsg = data.error || 'No se pudo completar el registro.';
+                mostrarError(`Hubo un problema al registrar tu pedido. Tu pago fue aprobado (ID: ${transactionId}), pero no pudimos completar el registro. Detalle: ${errorMsg}. Por favor contacta a soporte con este ID.`);
+            }
+        } catch (error) {
+            console.error('Error al confirmar pedido:', error);
+            mostrarError(`Error de conexión. Tu pago fue aprobado (ID: ${transactionId}), pero no pudimos verificar el registro. Guarda este ID y contacta a soporte. Detalle: ${error.message}`);
+        }
     }
 
-    try {
-      const response = await fetch('/api/confirm-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transactionId })
-      });
-      const data = await response.json();
-      if (response.ok && data.status === 'success') {
-        // Éxito: limpiar localStorage y mostrar mensaje
-        localStorage.removeItem('co2reforest_cart');
-        mostrarExito(transactionId);
-      } else {
-        mostrarError(`Hubo un problema al registrar tu pedido. Tu pago fue aprobado (ID: ${transactionId}), pero no pudimos completar el registro. Por favor contacta a soporte con este ID.`);
-      }
-    } catch (error) {
-      console.error('Error al confirmar pedido:', error);
-      mostrarError(`Error de conexión. Tu pago fue aprobado (ID: ${transactionId}), pero no pudimos verificar el registro. Guarda este ID y contacta a soporte.`);
+    function mostrarExito(transactionId) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('mensaje').textContent = '✅ Pago confirmado';
+        document.getElementById('mensaje').style.background = '#2e7d32';
+        document.getElementById('titulo').innerHTML = '¡Gracias por tu compromiso con la Orinoquía!';
+        document.getElementById('descripcion').innerHTML = 'Tu pedido ha sido registrado exitosamente. En breve recibirás el certificado Ley 2173 y el reporte de registro REAA en tu correo electrónico.';
+        const infoDiv = document.getElementById('info-adicional');
+        infoDiv.style.display = 'inline-block';
+        infoDiv.innerHTML = `<strong>ID de transacción:</strong> ${transactionId}<br><strong>Estado:</strong> Pagado y registrado<br><strong>Comprobante enviado a:</strong> Tu correo electrónico (próximamente)`;
+        const btn = document.getElementById('boton-volver');
+        btn.style.display = 'inline-block';
+        btn.textContent = 'Volver al inicio';
     }
-  }
 
-  function mostrarExito(transactionId) {
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('mensaje').textContent = '✅ Pago confirmado';
-    document.getElementById('mensaje').style.background = '#2e7d32';
-    document.getElementById('titulo').innerHTML = '¡Gracias por tu compromiso con la Orinoquía!';
-    document.getElementById('descripcion').innerHTML = 'Tu pedido ha sido registrado exitosamente. En breve recibirás el certificado Ley 2173 y el reporte de registro REAA en tu correo electrónico.';
-    const infoDiv = document.getElementById('info-adicional');
-    infoDiv.style.display = 'inline-block';
-    infoDiv.innerHTML = `<strong>ID de transacción:</strong> ${transactionId}<br><strong>Estado:</strong> Pagado y registrado<br><strong>Comprobante enviado a:</strong> Tu correo electrónico (próximamente)`;
-    const btn = document.getElementById('boton-volver');
-    btn.style.display = 'inline-block';
-    btn.textContent = 'Volver al inicio';
-  }
+    function mostrarError(mensaje) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('mensaje').textContent = '⚠️ Error';
+        document.getElementById('mensaje').style.background = '#c62828';
+        document.getElementById('titulo').innerHTML = 'Hubo un problema';
+        document.getElementById('descripcion').innerHTML = mensaje;
+        const btn = document.getElementById('boton-volver');
+        btn.style.display = 'inline-block';
+        btn.textContent = 'Contactar soporte';
+        const txId = new URLSearchParams(window.location.search).get('id');
+        btn.href = `mailto:soporte@co2reforest.com?subject=Problema con pedido&body=ID de transacción: ${txId}`;
+    }
 
-  function mostrarError(mensaje) {
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('mensaje').textContent = '⚠️ Error';
-    document.getElementById('mensaje').style.background = '#c62828';
-    document.getElementById('titulo').innerHTML = 'Hubo un problema';
-    document.getElementById('descripcion').innerHTML = mensaje;
-    const btn = document.getElementById('boton-volver');
-    btn.style.display = 'inline-block';
-    btn.textContent = 'Contactar soporte';
-    btn.href = 'mailto:soporte@co2reforest.com?subject=Problema con pedido&body=ID de transacción: ' + new URLSearchParams(window.location.search).get('id');
-  }
-
-  confirmarPedido();
+    confirmarPedido();
 </script>
 </body>
 </html>
