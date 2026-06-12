@@ -35,9 +35,7 @@
     </div>
   </div>
 </section>
-
 <script>
-  // Recuperar el carrito guardado antes del pago
   const carritoRaw = localStorage.getItem('co2reforest_cart');
   if (!carritoRaw) {
     mostrarError('No se encontró información del pedido. Por favor contacta a soporte.');
@@ -50,16 +48,12 @@
       confirmarPedido(cartData, transactionId);
     }
   }
-
   async function confirmarPedido(cartData, transactionId) {
     try {
       const response = await fetch('/api/confirm-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          transactionId: transactionId,
-          cart: cartData
-        })
+        body: JSON.stringify({ transactionId, cart: cartData })
       });
       const data = await response.json();
       if (response.ok && data.status === 'success') {
@@ -73,7 +67,6 @@
       mostrarError(`Error de conexión. Tu pago fue aprobado (ID: ${transactionId}), pero no pudimos verificar el registro. Guarda este ID y contacta a soporte.`);
     }
   }
-
   function mostrarExito(transactionId) {
     document.getElementById('loader').style.display = 'none';
     document.getElementById('mensaje').textContent = '✅ Pago confirmado';
@@ -87,7 +80,6 @@
     btn.style.display = 'inline-block';
     btn.textContent = 'Volver al inicio';
   }
-
   function mostrarError(mensaje) {
     document.getElementById('loader').style.display = 'none';
     document.getElementById('mensaje').textContent = '⚠️ Error';

@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* tus estilos existentes, no los cambio */
     .form-section {
       background: white;
       border-radius: 24px;
@@ -55,6 +54,28 @@
     }
     .btn-form:hover {
       background: var(--gold);
+    }
+    /* Loader */
+    .loader-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .loader {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .hidden {
+      display: none;
     }
     .region-block {
       background: #fff;
@@ -109,9 +130,6 @@
       border-radius: 12px;
       margin: 20px 0;
     }
-    .hidden {
-      display: none;
-    }
     .cb { cursor: pointer; user-select: none; }
     .cnt-input { text-align: center; }
   </style>
@@ -159,7 +177,11 @@
           </div>
         </div>
         <div style="text-align: center; margin-top: 24px;">
-          <button type="submit" class="btn-form">Continuar →</button>
+          <button type="submit" class="btn-form" id="submitBtn">Continuar →</button>
+          <div id="loaderWrapper" class="loader-wrapper hidden">
+            <div class="loader"></div>
+            <p style="margin-left: 10px; color: var(--green);">Enviando datos, por favor espera...</p>
+          </div>
         </div>
       </form>
     </div>
@@ -404,7 +426,7 @@
     }
   }
 
-  // ==================== FORMULARIO Y REGIONES ====================
+  // ==================== FORMULARIO Y REGIONES CON LOADER ====================
   let clienteData = null;
   let areaSeleccionada = null;
   const clienteForm = document.getElementById('clienteForm');
@@ -413,6 +435,8 @@
   const confirmarAreaBtn = document.getElementById('confirmarAreaBtn');
   const areaWarning = document.getElementById('areaWarning');
   const areaOptions = document.querySelectorAll('.area-option');
+  const submitBtn = document.getElementById('submitBtn');
+  const loaderWrapper = document.getElementById('loaderWrapper');
 
   areaOptions.forEach(opt => {
     opt.addEventListener('click', (e) => {
@@ -439,7 +463,10 @@
       }
       clienteData = { nombre, cedula, email, telefono, ciudad };
       
-      // Enviar datos al backend para guardar en Google Sheets (estado "Solicitud")
+      // Mostrar loader y deshabilitar botón
+      submitBtn.style.display = 'none';
+      loaderWrapper.classList.remove('hidden');
+      
       try {
         const response = await fetch('/api/save-client', {
           method: 'POST',
@@ -456,6 +483,10 @@
       } catch (error) {
         console.error('Error de red al guardar cliente:', error);
         alert('No se pudo contactar el servidor. Tus datos se guardaron localmente. Continuamos...');
+      } finally {
+        // Ocultar loader y restaurar botón (aunque ya no se necesita porque la página cambiará)
+        loaderWrapper.classList.add('hidden');
+        submitBtn.style.display = 'inline-block';
       }
       
       localStorage.setItem('co2reforest_cliente', JSON.stringify(clienteData));
