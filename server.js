@@ -26,7 +26,7 @@ if (!WOMPI_PRIVATE_KEY) {
     console.warn("⚠️ WOMPI_PRIVATE_KEY no definida. La verificación de transacciones podría fallar.");
 }
 if (!GOOGLE_SCRIPT_URL) {
-    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida.");
+    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida. Los pedidos no se guardarán en Google Sheets.");
 }
 
 const CURRENCY = 'COP';
@@ -75,7 +75,10 @@ function calcularTotal(a, b, c, placa) {
 }
 
 async function sendToGoogleSheets(orderData, isUpdate = false) {
-    if (!GOOGLE_SCRIPT_URL) return;
+    if (!GOOGLE_SCRIPT_URL) {
+        console.warn("⚠️ GOOGLE_SCRIPT_URL no definida, no se envía a Sheets.");
+        return;
+    }
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -89,7 +92,7 @@ async function sendToGoogleSheets(orderData, isUpdate = false) {
     }
 }
 
-// Endpoint para guardar solo datos personales (interés)
+// Endpoint para guardar solo datos personales (interés, sin pago aún)
 app.post('/api/save-client', [
     body('nombre').notEmpty(),
     body('cedula').notEmpty(),
@@ -115,13 +118,14 @@ app.post('/api/save-client', [
         textoPlaca: '',
         total: 0,
         estado: 'Solicitud',
-        area: ''
+        area: '',
+        transactionId: ''
     };
     await sendToGoogleSheets(orderData, false);
     res.json({ status: 'success' });
 });
 
-// Endpoint para crear pago
+// Endpoint para crear pago (almacena temporalmente los datos del carrito y cliente)
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
@@ -154,10 +158,11 @@ app.post('/api/create-payment', limiter, [
     const integrityPayload = `${reference}${amountInCents}${CURRENCY}${WOMPI_INTEGRITY_SECRET}`;
     const signature = crypto.createHash('sha256').update(integrityPayload, 'utf8').digest('hex');
 
+    // Guardar en memoria los detalles completos del pedido (incluyendo cliente)
     pendingOrders.set(reference, { a, b, c, placa, textoPlaca, cliente, total, area });
     console.log(`📝 Orden pendiente guardada con referencia: ${reference}, área: ${area}`);
 
-    const baseUrl = process.env.BASE_URL || 'https://co2reforestprueba.onrender.com';
+    const baseUrl = process.env.BASE_URL || (process.env.NODE_ENV === 'production' ? 'https://co2reforestprueba.onrender.com' : 'http://localhost:3000');
     const redirectUrl = `${baseUrl}/gracias.html`;
 
     res.json({
@@ -170,29 +175,39 @@ app.post('/api/create-payment', limiter, [
     });
 });
 
-// Endpoint para confirmar pago y actualizar Google Sheets
+// Endpoint para confirmar pago (llamado desde gracias.html)
 app.post('/api/confirm-payment', async (req, res) => {
     const { transactionId } = req.body;
     if (!transactionId) return res.status(400).json({ error: 'Falta transactionId' });
 
     try {
+        // Verificar el estado de la transacción con Wompi usando la llave privada
         const authToken = WOMPI_PRIVATE_KEY || WOMPI_PUBLIC_KEY;
         const wompiResponse = await fetch(`https://api.wompi.co/v1/transactions/${transactionId}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const wompiData = await wompiResponse.json();
         if (!wompiData.data || wompiData.data.status !== 'APPROVED') {
+            console.log(`⚠️ Transacción ${transactionId} no aprobada o no encontrada.`);
             return res.status(400).json({ error: 'Pago no aprobado o no encontrado' });
         }
         const transaction = wompiData.data;
         const reference = transaction.reference;
         const pending = pendingOrders.get(reference);
-        if (!pending) return res.status(404).json({ error: 'Orden no encontrada' });
+        if (!pending) {
+            console.log(`⚠️ No se encontró orden pendiente para referencia ${reference}`);
+            return res.status(404).json({ error: 'Orden no encontrada' });
+        }
 
         const now = new Date();
+        // Preparar todos los datos para Google Sheets y correo
         const orderToSend = {
-            email: pending.cliente.email,
             fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+            email: pending.cliente.email,
+            nombre: pending.cliente.nombre,
+            cedula: pending.cliente.cedula,
+            telefono: pending.cliente.telefono,
+            ciudad: pending.cliente.ciudad,
             packA: pending.a,
             packB: pending.b,
             packC: pending.c,
@@ -200,19 +215,25 @@ app.post('/api/confirm-payment', async (req, res) => {
             textoPlaca: pending.textoPlaca || '',
             total: pending.total,
             estado: 'Pagado',
-            area: pending.area
+            area: pending.area,
+            transactionId: transactionId
         };
+
+        // Enviar a Google Sheets (update=true para actualizar la fila existente)
         await sendToGoogleSheets(orderToSend, true);
+        
+        // Eliminar la orden de memoria
         pendingOrders.delete(reference);
-        console.log(`✅ Orden ${reference} actualizada correctamente con área ${pending.area}`);
+        console.log(`✅ Orden ${reference} actualizada correctamente con área ${pending.area} y transactionId ${transactionId}`);
+        
         res.json({ status: 'success' });
     } catch (error) {
-        console.error(error);
+        console.error("❌ Error en confirm-payment:", error);
         res.status(500).json({ error: 'Error interno' });
     }
 });
 
-// Webhook (opcional)
+// Webhook de Wompi (opcional, para respaldo)
 app.post('/api/wompi-webhook', async (req, res) => {
     res.status(200).send('OK');
     try {
@@ -224,8 +245,12 @@ app.post('/api/wompi-webhook', async (req, res) => {
             if (pending) {
                 const now = new Date();
                 const orderToSend = {
+                    fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
                     email: pending.cliente.email,
-                    fechaHora: now.toLocaleString('es-CO'),
+                    nombre: pending.cliente.nombre,
+                    cedula: pending.cliente.cedula,
+                    telefono: pending.cliente.telefono,
+                    ciudad: pending.cliente.ciudad,
                     packA: pending.a,
                     packB: pending.b,
                     packC: pending.c,
@@ -233,7 +258,8 @@ app.post('/api/wompi-webhook', async (req, res) => {
                     textoPlaca: pending.textoPlaca || '',
                     total: pending.total,
                     estado: 'Pagado',
-                    area: pending.area
+                    area: pending.area,
+                    transactionId: transaction.id
                 };
                 await sendToGoogleSheets(orderToSend, true);
                 pendingOrders.delete(reference);
@@ -241,7 +267,7 @@ app.post('/api/wompi-webhook', async (req, res) => {
             }
         }
     } catch (error) {
-        console.error(error);
+        console.error("❌ Webhook error:", error);
     }
 });
 
