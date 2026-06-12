@@ -59,12 +59,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           transactionId: transactionId,
-          cart: cartData   // enviamos todo el carrito (incluye cliente, area, packs, placa)
+          cart: cartData   // enviamos todo el carrito (cliente, area, packs, placa)
         })
       });
       const data = await response.json();
       if (response.ok && data.status === 'success') {
-        localStorage.removeItem('co2reforest_cart'); // limpiar carrito
+        localStorage.removeItem('co2reforest_cart');
         mostrarExito(transactionId);
       } else {
         mostrarError(`Hubo un problema al registrar tu pedido. Tu pago fue aprobado (ID: ${transactionId}), pero no pudimos completar el registro. Detalle: ${data.error || 'Error desconocido'}. Por favor contacta a soporte con este ID.`);

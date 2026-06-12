@@ -11,8 +11,6 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const pendingOrders = new Map();
-
 const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY;
 const WOMPI_PRIVATE_KEY = process.env.WOMPI_PRIVATE_KEY;
 const WOMPI_INTEGRITY_SECRET = process.env.WOMPI_INTEGRITY_SECRET;
@@ -92,7 +90,7 @@ async function sendToGoogleSheets(orderData, isUpdate = false) {
     }
 }
 
-// Endpoint para guardar datos personales (crea fila con estado "Solicitud")
+// Endpoint para guardar datos personales (estado "Solicitud")
 app.post('/api/save-client', [
     body('nombre').notEmpty(),
     body('cedula').notEmpty(),
@@ -128,7 +126,7 @@ app.post('/api/save-client', [
     }
 });
 
-// Endpoint para crear pago
+// Endpoint para crear el pago
 app.post('/api/create-payment', limiter, [
     body('a').optional().isInt({ min: 0, max: 2813 }).toInt(),
     body('b').optional().isInt({ min: 0, max: 3058 }).toInt(),
@@ -161,8 +159,7 @@ app.post('/api/create-payment', limiter, [
     const integrityPayload = `${reference}${amountInCents}${CURRENCY}${WOMPI_INTEGRITY_SECRET}`;
     const signature = crypto.createHash('sha256').update(integrityPayload, 'utf8').digest('hex');
 
-    pendingOrders.set(reference, { a, b, c, placa, textoPlaca, cliente, total, area });
-    console.log(`📝 Orden pendiente guardada con referencia: ${reference}, área: ${area}, email: ${cliente.email}`);
+    console.log(`📝 Pago creado con referencia: ${reference}, email: ${cliente.email}`);
 
     const baseUrl = process.env.BASE_URL || 'https://co2reforestprueba.onrender.com';
     const redirectUrl = `${baseUrl}/gracias.html`;
@@ -177,73 +174,64 @@ app.post('/api/create-payment', limiter, [
     });
 });
 
-// Endpoint para confirmar pago y actualizar Google Sheets
+// Endpoint para confirmar pago (recibe transactionId y el carrito completo)
 app.post('/api/confirm-payment', async (req, res) => {
-    const { transactionId } = req.body;
-    if (!transactionId) return res.status(400).json({ error: 'Falta transactionId' });
+    const { transactionId, cart } = req.body;
+    if (!transactionId || !cart) {
+        return res.status(400).json({ error: 'Faltan datos: transactionId y cart son requeridos' });
+    }
 
     try {
         // Verificar transacción en Wompi (opcional pero recomendado)
-        let transaction = null;
         if (WOMPI_PRIVATE_KEY) {
-            const authToken = WOMPI_PRIVATE_KEY;
             const wompiResponse = await fetch(`https://api.wompi.co/v1/transactions/${transactionId}`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
+                headers: { 'Authorization': `Bearer ${WOMPI_PRIVATE_KEY}` }
             });
             const wompiData = await wompiResponse.json();
-            if (wompiData.data && wompiData.data.status === 'APPROVED') {
-                transaction = wompiData.data;
-                console.log(`✅ Transacción ${transactionId} verificada en Wompi: APROBADA`);
+            if (!wompiData.data || wompiData.data.status !== 'APPROVED') {
+                console.warn(`⚠️ Transacción ${transactionId} no aprobada o no encontrada, pero igual se registrará.`);
             } else {
-                console.warn(`⚠️ Transacción ${transactionId} no aprobada o no encontrada en Wompi`);
+                console.log(`✅ Transacción ${transactionId} verificada en Wompi: APROBADA`);
             }
-        } else {
-            console.warn("⚠️ No se pudo verificar la transacción: falta WOMPI_PRIVATE_KEY");
         }
 
-        // Buscar la orden pendiente por referencia (asumiendo que la referencia está en el objeto transacción)
-        // En este flujo, la referencia se guardó al crear el pago. La redirigimos con transactionId,
-        // pero la relación no está automática. Podemos usar pendingOrders con la referencia que viene en la transacción.
-        // Como alternativa, podemos obtener la referencia del objeto transaction (si está disponible)
-        let pending = null;
-        let reference = null;
-        if (transaction && transaction.reference) {
-            reference = transaction.reference;
-            pending = pendingOrders.get(reference);
-        }
-        if (!pending) {
-            // Si no se encuentra, puede ser que la transacción no tenga referencia o la orden expiró.
-            // Devolvemos error, pero el usuario ya pagó. Sugerimos contacto manual.
-            console.error(`❌ No se encontró orden pendiente para transacción ${transactionId}`);
-            return res.status(404).json({ error: 'Orden no encontrada. Contacta a soporte con el ID de transacción.' });
-        }
+        // Extraer datos del carrito enviado desde gracias.html
+        const { a, b, c, placa, area, cliente } = cart;
+        const subtotal = (a||0)*180000 + (b||0)*186000 + (c||0)*198000;
+        const grupos = (a||0)+(b||0)+(c||0);
+        let porcentaje = 0;
+        if (grupos >= 200) porcentaje = 20;
+        else if (grupos >= 100) porcentaje = 10;
+        else porcentaje = Math.min(Math.floor(grupos / 10), 20);
+        const descuento = Math.round(subtotal * porcentaje / 100);
+        let total = subtotal - descuento;
+        if (placa) total += 85000;
 
         const now = new Date();
         const orderToSend = {
-            email: pending.cliente.email,
+            email: cliente.email,
             fechaHora: now.toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
-            nombre: pending.cliente.nombre,
-            cedula: pending.cliente.cedula,
-            telefono: pending.cliente.telefono,
-            ciudad: pending.cliente.ciudad,
-            packA: pending.a,
-            packB: pending.b,
-            packC: pending.c,
-            placa: pending.placa,
-            textoPlaca: pending.textoPlaca || '',
-            total: pending.total,
+            nombre: cliente.nombre,
+            cedula: cliente.cedula,
+            telefono: cliente.telefono,
+            ciudad: cliente.ciudad,
+            packA: a || 0,
+            packB: b || 0,
+            packC: c || 0,
+            placa: placa || false,
+            textoPlaca: '',
+            total: total,
             estado: 'Pagado',
-            area: pending.area,
+            area: area || '',
             transactionId: transactionId
         };
-        
+
         const success = await sendToGoogleSheets(orderToSend, true);
         if (success) {
-            pendingOrders.delete(reference);
-            console.log(`✅ Orden ${reference} actualizada correctamente con área ${pending.area}`);
+            console.log(`✅ Pedido para ${cliente.email} actualizado correctamente con transacción ${transactionId}`);
             res.json({ status: 'success' });
         } else {
-            console.error(`❌ Falló la actualización en Google Sheets para la orden ${reference}`);
+            console.error(`❌ Falló la actualización en Google Sheets para el email ${cliente.email}`);
             res.status(500).json({ error: 'Error al actualizar el pedido en Google Sheets' });
         }
     } catch (error) {
@@ -252,38 +240,13 @@ app.post('/api/confirm-payment', async (req, res) => {
     }
 });
 
-// Webhook opcional (puede ser llamado por Wompi)
+// Webhook opcional
 app.post('/api/wompi-webhook', async (req, res) => {
     res.status(200).send('OK');
     try {
         const event = req.body;
         if (event.event === 'transaction.updated' && event.data.transaction.status === 'APPROVED') {
-            const transaction = event.data.transaction;
-            const reference = transaction.reference;
-            const pending = pendingOrders.get(reference);
-            if (pending) {
-                const now = new Date();
-                const orderToSend = {
-                    email: pending.cliente.email,
-                    fechaHora: now.toLocaleString('es-CO'),
-                    nombre: pending.cliente.nombre,
-                    cedula: pending.cliente.cedula,
-                    telefono: pending.cliente.telefono,
-                    ciudad: pending.cliente.ciudad,
-                    packA: pending.a,
-                    packB: pending.b,
-                    packC: pending.c,
-                    placa: pending.placa,
-                    textoPlaca: pending.textoPlaca || '',
-                    total: pending.total,
-                    estado: 'Pagado',
-                    area: pending.area,
-                    transactionId: transaction.id
-                };
-                await sendToGoogleSheets(orderToSend, true);
-                pendingOrders.delete(reference);
-                console.log(`✅ Webhook: Orden ${reference} actualizada con área ${pending.area}`);
-            }
+            console.log(`📢 Webhook: transacción ${event.data.transaction.id} aprobada.`);
         }
     } catch (error) {
         console.error("Error en webhook:", error);
