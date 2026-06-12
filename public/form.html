@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
+    /* ... (todos los estilos anteriores se mantienen) ... */
     .form-section {
       background: white;
       border-radius: 24px;
@@ -62,7 +63,6 @@
       margin-bottom: 40px;
       overflow: visible;
     }
-    /* ✅ NUEVO: imagen completa, ancho completo, altura automática, sin recortes */
     .region-img {
       width: 100%;
       height: auto;
@@ -226,7 +226,7 @@
       </div>
     </div>
 
-    <!-- Calculadora (se mostrará después) -->
+    <!-- Calculadora (se mostrará después de confirmar área) -->
     <div id="calculadoraSection" class="hidden">
       <p class="sec-tag">Paso 3</p>
       <h2 class="sec-title">Selecciona tus grupos de árboles</h2>
@@ -404,7 +404,7 @@
     }
   }
 
-  // ==================== FORMULARIO Y REGIONES ====================
+  // ==================== FORMULARIO Y REGIONES (con envío a /api/save-client) ====================
   let clienteData = null;
   let areaSeleccionada = null;
   const clienteForm = document.getElementById('clienteForm');
@@ -426,7 +426,7 @@
   });
 
   if (clienteForm) {
-    clienteForm.addEventListener('submit', (e) => {
+    clienteForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const nombre = document.getElementById('nombre').value.trim();
       const cedula = document.getElementById('cedula').value.trim();
@@ -438,6 +438,26 @@
         return;
       }
       clienteData = { nombre, cedula, email, telefono, ciudad };
+      
+      // ✅ ENVIAR DATOS AL BACKEND PARA GUARDAR EN GOOGLE SHEETS (estado "Solicitud")
+      try {
+        const response = await fetch('/api/save-client', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(clienteData)
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          console.error('Error al guardar cliente:', data);
+          alert('Tus datos se guardaron localmente, pero hubo un problema al registrarlos. Puedes continuar.');
+        } else {
+          console.log('Cliente guardado en Google Sheets');
+        }
+      } catch (error) {
+        console.error('Error de red al guardar cliente:', error);
+        alert('No se pudo contactar el servidor. Tus datos se guardaron localmente. Continuamos...');
+      }
+      
       localStorage.setItem('co2reforest_cliente', JSON.stringify(clienteData));
       document.querySelector('.form-section').style.display = 'none';
       regionesSection.classList.remove('hidden');

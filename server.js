@@ -7,7 +7,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const path = require('path');
-const fs = require('fs'); // para guardar respaldo local
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,11 +22,8 @@ if (!WOMPI_PUBLIC_KEY || !WOMPI_INTEGRITY_SECRET) {
     console.error("❌ ERROR: Variables de Wompi no definidas.");
     process.exit(1);
 }
-if (!WOMPI_PRIVATE_KEY) {
-    console.warn("⚠️ WOMPI_PRIVATE_KEY no definida. La verificación de transacciones podría fallar.");
-}
 if (!GOOGLE_SCRIPT_URL) {
-    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida. Los pedidos no se guardarán en Google Sheets.");
+    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida. No se guardarán datos en Google Sheets.");
 }
 
 const CURRENCY = 'COP';
@@ -44,7 +40,7 @@ app.use(helmet({
             styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://api.wompi.co", "https://api-sandbox.wompi.co", "https://script.google.com"],
+            connectSrc: ["'self'", "https://api.wompi.co", "https://script.google.com"],
             formAction: ["'self'", "https://checkout.wompi.co"],
         },
     },
@@ -54,8 +50,7 @@ const allowedOrigins = [
     'http://localhost:5500',
     'http://127.0.0.1:5500',
     'https://co2reforest.com',
-    'https://co2reforestprueba.onrender.com',
-    'https://*.onrender.com'
+    'https://co2reforestprueba.onrender.com'
 ];
 app.use(cors({ origin: allowedOrigins, optionsSuccessStatus: 200 }));
 app.use(express.json());
@@ -78,41 +73,60 @@ function calcularTotal(a, b, c, placa) {
 
 async function sendToGoogleSheets(orderData, isUpdate = false) {
     if (!GOOGLE_SCRIPT_URL) {
-        console.log("📤 No se enviará a Google Sheets: URL no configurada.");
+        console.error("❌ No se enviará a Google Sheets: URL no configurada.");
         return false;
     }
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors', // a veces ayuda con CORS, pero no recibirás respuesta
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orden: orderData, update: isUpdate })
         });
-        // No podemos obtener respuesta JSON en modo no-cors, asumimos éxito
-        console.log(`📤 Envío a Google Sheets realizado (modo no-cors) para ${orderData.email}`);
-        return true;
+        const result = await response.json();
+        console.log(`📤 Envío a Google Sheets: ${result.status}`);
+        if (result.status === 'success') return true;
+        else throw new Error(result.message || 'Error desconocido');
     } catch (error) {
         console.error("❌ Error enviando a Google Sheets:", error);
         return false;
     }
 }
 
-// Función para guardar copia de seguridad local
-function saveBackup(orderData) {
-    try {
-        const backupFile = './pedidos_backup.json';
-        let backups = [];
-        if (fs.existsSync(backupFile)) {
-            const data = fs.readFileSync(backupFile, 'utf8');
-            backups = JSON.parse(data);
-        }
-        backups.push(orderData);
-        fs.writeFileSync(backupFile, JSON.stringify(backups, null, 2));
-        console.log(`💾 Pedido guardado en respaldo local: ${orderData.transactionId}`);
-    } catch (err) {
-        console.error("❌ Error guardando respaldo local:", err);
+// Endpoint para guardar datos personales (crea fila con estado "Solicitud")
+app.post('/api/save-client', [
+    body('nombre').notEmpty(),
+    body('cedula').notEmpty(),
+    body('email').isEmail(),
+    body('telefono').notEmpty(),
+    body('ciudad').notEmpty(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const { nombre, cedula, email, telefono, ciudad } = req.body;
+    const orderData = {
+        fechaHora: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+        nombre,
+        cedula,
+        email,
+        telefono,
+        ciudad,
+        packA: 0,
+        packB: 0,
+        packC: 0,
+        placa: false,
+        textoPlaca: '',
+        total: 0,
+        estado: 'Solicitud',
+        area: ''
+    };
+    const success = await sendToGoogleSheets(orderData, false);
+    if (success) {
+        res.json({ status: 'success' });
+    } else {
+        res.status(500).json({ error: 'No se pudo guardar en Google Sheets' });
     }
-}
+});
 
 // Endpoint para crear pago
 app.post('/api/create-payment', limiter, [
@@ -129,10 +143,7 @@ app.post('/api/create-payment', limiter, [
     body('cliente.ciudad').notEmpty(),
 ], (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        console.error("❌ Errores de validación en create-payment:", errors.array());
-        return res.status(400).json({ errors: errors.array() });
-    }
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const a = req.body.a || 0;
     const b = req.body.b || 0;
@@ -169,72 +180,42 @@ app.post('/api/create-payment', limiter, [
 // Endpoint para confirmar pago y actualizar Google Sheets
 app.post('/api/confirm-payment', async (req, res) => {
     const { transactionId } = req.body;
-    console.log(`🔔 Recibida solicitud de confirmación para transactionId: ${transactionId}`);
-    if (!transactionId) {
-        console.log("❌ Faltó transactionId");
-        return res.status(400).json({ error: 'Falta transactionId' });
-    }
+    if (!transactionId) return res.status(400).json({ error: 'Falta transactionId' });
 
     try {
-        // Verificar con Wompi (opcional pero recomendado)
-        let wompiStatus = 'APPROVED'; // por defecto asumimos aprobado si llegó a gracias.html
+        // Verificar transacción en Wompi (opcional pero recomendado)
+        let transaction = null;
         if (WOMPI_PRIVATE_KEY) {
-            const apiUrl = `https://api.wompi.co/v1/transactions/${transactionId}`;
-            console.log(`🔍 Consultando Wompi: ${apiUrl}`);
-            const wompiResponse = await fetch(apiUrl, {
-                headers: { 'Authorization': `Bearer ${WOMPI_PRIVATE_KEY}` }
+            const authToken = WOMPI_PRIVATE_KEY;
+            const wompiResponse = await fetch(`https://api.wompi.co/v1/transactions/${transactionId}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
             });
             const wompiData = await wompiResponse.json();
-            if (!wompiResponse.ok || !wompiData.data || wompiData.data.status !== 'APPROVED') {
-                console.warn(`⚠️ Wompi no reporta transacción APROBADA: ${wompiData.data?.status || 'desconocido'}`);
-                wompiStatus = wompiData.data?.status || 'UNKNOWN';
+            if (wompiData.data && wompiData.data.status === 'APPROVED') {
+                transaction = wompiData.data;
+                console.log(`✅ Transacción ${transactionId} verificada en Wompi: APROBADA`);
             } else {
-                console.log(`✅ Wompi confirma transacción APROBADA`);
+                console.warn(`⚠️ Transacción ${transactionId} no aprobada o no encontrada en Wompi`);
             }
         } else {
-            console.warn("⚠️ No hay WOMPI_PRIVATE_KEY, se omite verificación con Wompi");
+            console.warn("⚠️ No se pudo verificar la transacción: falta WOMPI_PRIVATE_KEY");
         }
 
-        // Buscar la orden pendiente por la referencia (viene en la transacción)
-        // Necesitamos obtener la referencia a partir del transactionId? En nuestro flujo, la referencia está guardada en pendingOrders con la referencia que generamos.
-        // Pero el transactionId no es la referencia. Para simplificar, podríamos buscar en pendingOrders todas las órdenes y verificar cuál coincide con el email? Mejor usar un Map con la referencia.
-        // En create-payment guardamos con reference = CO2R-...
-        // Wompi devuelve el campo reference en la transacción. Por tanto, debemos extraer la referencia de la consulta a Wompi.
-        // Si no pudimos consultar Wompi, tendremos que buscar de otra forma. En nuestro caso, si no se consulta, fallará.
-        // Para solucionarlo, podemos cambiar el flujo: enviar la referencia desde gracias.html (almacenarla en localStorage)
-        // o buscar la orden por email y total? No es robusto.
-
-        // Por ahora, asumiremos que la referencia está en el campo 'reference' de la transacción de Wompi.
-        // Si no pudimos consultar Wompi, no podremos encontrar la orden. Por eso es mejor pedir la referencia desde el frontend.
-
-        // Cambio: Agregar en gracias.html que envíe también la referencia (almacenada en localStorage durante create-payment).
-        // Pero como ya tienes la estructura, podemos adaptar: cuando se crea el pago, además de guardar en pendingOrders, guardamos en localStorage del navegador la referencia (ya lo tenemos en cartData? podemos agregarla).
-        // Para no complicar, por ahora asumiremos que podemos consultar Wompi y extraer la referencia.
-
-        if (!WOMPI_PRIVATE_KEY) {
-            // Si no hay llave privada, no podemos obtener la referencia. Fallamos.
-            return res.status(500).json({ error: 'No se puede verificar la transacción sin WOMPI_PRIVATE_KEY' });
+        // Buscar la orden pendiente por referencia (asumiendo que la referencia está en el objeto transacción)
+        // En este flujo, la referencia se guardó al crear el pago. La redirigimos con transactionId,
+        // pero la relación no está automática. Podemos usar pendingOrders con la referencia que viene en la transacción.
+        // Como alternativa, podemos obtener la referencia del objeto transaction (si está disponible)
+        let pending = null;
+        let reference = null;
+        if (transaction && transaction.reference) {
+            reference = transaction.reference;
+            pending = pendingOrders.get(reference);
         }
-
-        // Obtener la referencia desde la respuesta de Wompi
-        const apiUrl = `https://api.wompi.co/v1/transactions/${transactionId}`;
-        const wompiResponse = await fetch(apiUrl, {
-            headers: { 'Authorization': `Bearer ${WOMPI_PRIVATE_KEY}` }
-        });
-        const wompiData = await wompiResponse.json();
-        if (!wompiData.data || wompiData.data.status !== 'APPROVED') {
-            return res.status(400).json({ error: 'Pago no aprobado o no encontrado' });
-        }
-        const reference = wompiData.data.reference;
-        console.log(`🔎 Referencia obtenida de Wompi: ${reference}`);
-
-        const pending = pendingOrders.get(reference);
         if (!pending) {
-            console.error(`❌ Orden con referencia ${reference} no encontrada en pendingOrders.`);
-            // Quizás expiró? Podríamos buscar en backup local? Intentamos guardar igual con datos parciales
-            // Intentamos recuperar información de localStorage? No, eso no está disponible en el servidor.
-            // Devolvemos error.
-            return res.status(404).json({ error: 'Orden no encontrada. Puede que haya expirado o ya se haya procesado.' });
+            // Si no se encuentra, puede ser que la transacción no tenga referencia o la orden expiró.
+            // Devolvemos error, pero el usuario ya pagó. Sugerimos contacto manual.
+            console.error(`❌ No se encontró orden pendiente para transacción ${transactionId}`);
+            return res.status(404).json({ error: 'Orden no encontrada. Contacta a soporte con el ID de transacción.' });
         }
 
         const now = new Date();
@@ -255,27 +236,23 @@ app.post('/api/confirm-payment', async (req, res) => {
             area: pending.area,
             transactionId: transactionId
         };
-
-        // Guardar en Google Sheets
-        const googleSuccess = await sendToGoogleSheets(orderToSend, true);
-        // Guardar respaldo local siempre
-        saveBackup(orderToSend);
-
-        if (googleSuccess) {
-            console.log(`✅ Orden ${reference} registrada en Google Sheets y respaldo local`);
+        
+        const success = await sendToGoogleSheets(orderToSend, true);
+        if (success) {
+            pendingOrders.delete(reference);
+            console.log(`✅ Orden ${reference} actualizada correctamente con área ${pending.area}`);
+            res.json({ status: 'success' });
         } else {
-            console.warn(`⚠️ Orden ${reference} solo guardada en respaldo local (fallo Google Sheets)`);
+            console.error(`❌ Falló la actualización en Google Sheets para la orden ${reference}`);
+            res.status(500).json({ error: 'Error al actualizar el pedido en Google Sheets' });
         }
-
-        pendingOrders.delete(reference);
-        res.json({ status: 'success', backup: !googleSuccess });
     } catch (error) {
-        console.error("❌ Error en confirm-payment:", error);
-        res.status(500).json({ error: 'Error interno del servidor', details: error.message });
+        console.error("Error en /api/confirm-payment:", error);
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
 
-// Webhook de Wompi (opcional)
+// Webhook opcional (puede ser llamado por Wompi)
 app.post('/api/wompi-webhook', async (req, res) => {
     res.status(200).send('OK');
     try {
@@ -304,13 +281,12 @@ app.post('/api/wompi-webhook', async (req, res) => {
                     transactionId: transaction.id
                 };
                 await sendToGoogleSheets(orderToSend, true);
-                saveBackup(orderToSend);
                 pendingOrders.delete(reference);
-                console.log(`✅ Webhook: Orden ${reference} procesada`);
+                console.log(`✅ Webhook: Orden ${reference} actualizada con área ${pending.area}`);
             }
         }
     } catch (error) {
-        console.error("❌ Error en webhook:", error);
+        console.error("Error en webhook:", error);
     }
 });
 
