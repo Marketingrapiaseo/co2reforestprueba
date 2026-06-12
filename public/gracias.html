@@ -47,7 +47,6 @@
     if (!transactionId) {
       mostrarError('No se recibió un ID de transacción válido.');
     } else {
-      // Enviar al servidor todos los datos del pedido + transactionId
       confirmarPedido(cartData, transactionId);
     }
   }
@@ -59,7 +58,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           transactionId: transactionId,
-          cart: cartData   // enviamos todo el carrito (cliente, area, packs, placa)
+          cart: cartData
         })
       });
       const data = await response.json();

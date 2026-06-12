@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* ... (todos los estilos anteriores se mantienen) ... */
+    /* tus estilos existentes, no los cambio */
     .form-section {
       background: white;
       border-radius: 24px;
@@ -172,7 +172,7 @@
       
       <!-- Región 1 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region1.jpg?t=1750000000" alt="El capricho, Dafne, La cascada" loading="eager">
+        <img class="region-img" src="/imagenes/region1.jpg" alt="El capricho, Dafne, La cascada" loading="eager">
         <h3 class="region-title">🌿 El capricho, Dafne y La cascada</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="El capricho">🌳 El capricho</div>
@@ -183,7 +183,7 @@
 
       <!-- Región 2 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region2.jpg?t=1750000000" alt="Azulejos y El caribe" loading="eager">
+        <img class="region-img" src="/imagenes/region2.jpg" alt="Azulejos y El caribe" loading="eager">
         <h3 class="region-title">🏝️ Azulejos y El caribe</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Azulejos">🏺 Azulejos</div>
@@ -193,7 +193,7 @@
 
       <!-- Región 3 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region3.jpg?t=1750000000" alt="Guayandayes" loading="eager">
+        <img class="region-img" src="/imagenes/region3.jpg" alt="Guayandayes" loading="eager">
         <h3 class="region-title">🏞️ Guayandayes</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Guayandayes">🌾 Guayandayes</div>
@@ -202,7 +202,7 @@
 
       <!-- Región 4 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region4.jpg?t=1750000000" alt="Brillante y comarca" loading="eager">
+        <img class="region-img" src="/imagenes/region4.jpg" alt="Brillante y comarca" loading="eager">
         <h3 class="region-title">✨ Brillante y comarca</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Brillante">⭐ Brillante</div>
@@ -212,7 +212,7 @@
 
       <!-- Región 5 -->
       <div class="region-block">
-        <img class="region-img" src="/imagenes/region5.jpg?t=1750000000" alt="Borinquen y tolemaida" loading="eager">
+        <img class="region-img" src="/imagenes/region5.jpg" alt="Borinquen y tolemaida" loading="eager">
         <h3 class="region-title">🌳 Borinquen y tolemaida</h3>
         <div class="areas-grid">
           <div class="area-option" data-area="Borinquen">🍃 Borinquen</div>
@@ -404,7 +404,7 @@
     }
   }
 
-  // ==================== FORMULARIO Y REGIONES (con envío a /api/save-client) ====================
+  // ==================== FORMULARIO Y REGIONES ====================
   let clienteData = null;
   let areaSeleccionada = null;
   const clienteForm = document.getElementById('clienteForm');
@@ -439,7 +439,7 @@
       }
       clienteData = { nombre, cedula, email, telefono, ciudad };
       
-      // ✅ ENVIAR DATOS AL BACKEND PARA GUARDAR EN GOOGLE SHEETS (estado "Solicitud")
+      // Enviar datos al backend para guardar en Google Sheets (estado "Solicitud")
       try {
         const response = await fetch('/api/save-client', {
           method: 'POST',

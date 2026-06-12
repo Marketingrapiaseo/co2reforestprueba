@@ -27,6 +27,7 @@ if (!GOOGLE_SCRIPT_URL) {
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
+// Middlewares
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
