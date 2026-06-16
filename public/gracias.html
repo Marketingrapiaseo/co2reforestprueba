@@ -35,19 +35,39 @@
     </div>
   </div>
 </section>
+
 <script>
-  const carritoRaw = localStorage.getItem('co2reforest_cart');
-  if (!carritoRaw) {
-    mostrarError('No se encontró información del pedido. Por favor contacta a soporte.');
-  } else {
-    const cartData = JSON.parse(carritoRaw);
-    const transactionId = new URLSearchParams(window.location.search).get('id');
-    if (!transactionId) {
-      mostrarError('No se recibió un ID de transacción válido.');
-    } else {
-      confirmarPedido(cartData, transactionId);
+  // 🔍 Recuperar carrito de localStorage o de la URL
+  function getCart() {
+    // Primero intentar desde localStorage
+    const raw = localStorage.getItem('co2reforest_cart');
+    if (raw) {
+      try { return JSON.parse(raw); } catch(e) {}
     }
+    // Si no está en localStorage, intentar desde la URL (parámetro cart)
+    const urlParams = new URLSearchParams(window.location.search);
+    const cartParam = urlParams.get('cart');
+    if (cartParam) {
+      try {
+        return JSON.parse(decodeURIComponent(cartParam));
+      } catch(e) {
+        console.error('Error al decodificar carrito de URL:', e);
+      }
+    }
+    return null;
   }
+
+  const cartData = getCart();
+  const transactionId = new URLSearchParams(window.location.search).get('id');
+
+  if (!cartData) {
+    mostrarError('No se encontró información del pedido. Por favor contacta a soporte.');
+  } else if (!transactionId) {
+    mostrarError('No se recibió un ID de transacción válido.');
+  } else {
+    confirmarPedido(cartData, transactionId);
+  }
+
   async function confirmarPedido(cartData, transactionId) {
     try {
       const response = await fetch('/api/confirm-payment', {
@@ -67,6 +87,7 @@
       mostrarError(`Error de conexión. Tu pago fue aprobado (ID: ${transactionId}), pero no pudimos verificar el registro. Guarda este ID y contacta a soporte.`);
     }
   }
+
   function mostrarExito(transactionId) {
     document.getElementById('loader').style.display = 'none';
     document.getElementById('mensaje').textContent = '✅ Pago confirmado';
@@ -80,6 +101,7 @@
     btn.style.display = 'inline-block';
     btn.textContent = 'Volver al inicio';
   }
+
   function mostrarError(mensaje) {
     document.getElementById('loader').style.display = 'none';
     document.getElementById('mensaje').textContent = '⚠️ Error';

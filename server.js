@@ -7,9 +7,13 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// 🔧 Solución para el error X-Forwarded-For en Render
+app.set('trust proxy', 1);
 
 const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY;
 const WOMPI_PRIVATE_KEY = process.env.WOMPI_PRIVATE_KEY;
@@ -20,13 +24,11 @@ if (!WOMPI_PUBLIC_KEY || !WOMPI_INTEGRITY_SECRET) {
     console.error("❌ ERROR: Variables de Wompi no definidas.");
     process.exit(1);
 }
-if (!GOOGLE_SCRIPT_URL) {
-    console.warn("⚠️ GOOGLE_SCRIPT_URL no definida. No se guardarán datos en Google Sheets.");
-}
 
 const CURRENCY = 'COP';
 const PLACA_COST = 85000;
 
+// Middlewares
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -68,31 +70,52 @@ function calcularTotal(a, b, c, placa) {
     return total;
 }
 
+// Guardar pedido en archivo JSON local (siempre funciona)
+function saveToLocalJSON(orderData) {
+    const filePath = path.join(__dirname, 'pedidos.json');
+    let pedidos = [];
+    if (fs.existsSync(filePath)) {
+        try {
+            const data = fs.readFileSync(filePath, 'utf8');
+            pedidos = JSON.parse(data);
+        } catch(e) {
+            pedidos = [];
+        }
+    }
+    pedidos.push(orderData);
+    fs.writeFileSync(filePath, JSON.stringify(pedidos, null, 2));
+    console.log(`💾 Pedido guardado en pedidos.json para ${orderData.email}`);
+    return true;
+}
+
+// Envío a Google Sheets (opcional, no crítico)
 async function sendToGoogleSheets(orderData, isUpdate = false) {
     if (!GOOGLE_SCRIPT_URL) {
-        console.error("❌ No se enviará a Google Sheets: URL no configurada.");
+        console.warn("⚠️ GOOGLE_SCRIPT_URL no definida, no se enviará a Sheets.");
         return false;
     }
     try {
-        console.log(`📤 Enviando a ${GOOGLE_SCRIPT_URL} (update=${isUpdate})...`);
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ orden: orderData, update: isUpdate })
         });
-        const text = await response.text(); // primero como texto para ver si es JSON válido
-        console.log(`📤 Respuesta RAW: ${text}`);
+        const text = await response.text();
         let result;
         try {
             result = JSON.parse(text);
         } catch(e) {
-            console.error("❌ La respuesta no es JSON válido:", text);
-            throw new Error("Respuesta no JSON del script");
+            console.error("❌ Respuesta no JSON:", text);
+            return false;
         }
-        if (result.status === 'success') return true;
-        else throw new Error(result.message || 'Error desconocido');
+        if (result.status === 'success') {
+            console.log(`📤 Envío a Google Sheets exitoso`);
+            return true;
+        } else {
+            throw new Error(result.message || 'Error desconocido');
+        }
     } catch (error) {
-        console.error("❌ Error detallado al enviar a Google Sheets:", error.message);
+        console.error("❌ Error al enviar a Google Sheets (no crítico):", error.message);
         return false;
     }
 }
@@ -124,12 +147,9 @@ app.post('/api/save-client', [
         estado: 'Solicitud',
         area: ''
     };
-    const success = await sendToGoogleSheets(orderData, false);
-    if (success) {
-        res.json({ status: 'success' });
-    } else {
-        res.status(500).json({ error: 'No se pudo guardar en Google Sheets' });
-    }
+    saveToLocalJSON(orderData);
+    await sendToGoogleSheets(orderData, false);
+    res.json({ status: 'success' });
 });
 
 app.post('/api/create-payment', limiter, [
@@ -167,7 +187,11 @@ app.post('/api/create-payment', limiter, [
     console.log(`📝 Pago creado con referencia: ${reference}, email: ${cliente.email}`);
 
     const baseUrl = process.env.BASE_URL || 'https://co2reforestprueba.onrender.com';
-    const redirectUrl = `${baseUrl}/gracias.html`;
+    // Pasamos el carrito en la URL para que gracias.html lo recupere si localStorage falla
+    const cartEncoded = encodeURIComponent(JSON.stringify({
+        a, b, c, placa, area, cliente
+    }));
+    const redirectUrl = `${baseUrl}/gracias.html?id=${reference}&cart=${cartEncoded}`;
 
     res.json({
         publicKey: WOMPI_PUBLIC_KEY,
@@ -186,23 +210,6 @@ app.post('/api/confirm-payment', async (req, res) => {
     }
 
     try {
-        // Verificación opcional con Wompi (pero no es crítica)
-        if (WOMPI_PRIVATE_KEY) {
-            try {
-                const wompiResponse = await fetch(`https://api.wompi.co/v1/transactions/${transactionId}`, {
-                    headers: { 'Authorization': `Bearer ${WOMPI_PRIVATE_KEY}` }
-                });
-                const wompiData = await wompiResponse.json();
-                if (wompiData.data && wompiData.data.status === 'APPROVED') {
-                    console.log(`✅ Transacción ${transactionId} verificada en Wompi: APROBADA`);
-                } else {
-                    console.warn(`⚠️ Transacción ${transactionId} no aprobada o no encontrada.`);
-                }
-            } catch (err) {
-                console.warn(`⚠️ No se pudo verificar transacción en Wompi: ${err.message}`);
-            }
-        }
-
         const { a, b, c, placa, area, cliente } = cart;
         const total = calcularTotal(a||0, b||0, c||0, placa||false);
         
@@ -225,17 +232,15 @@ app.post('/api/confirm-payment', async (req, res) => {
             transactionId: transactionId
         };
 
-        const success = await sendToGoogleSheets(orderToSend, true);
-        if (success) {
-            console.log(`✅ Pedido para ${cliente.email} actualizado correctamente`);
-            res.json({ status: 'success' });
-        } else {
-            console.error(`❌ Falló la actualización en Google Sheets para ${cliente.email}`);
-            res.status(500).json({ error: 'Error al actualizar el pedido en Google Sheets' });
-        }
+        saveToLocalJSON(orderToSend);
+        await sendToGoogleSheets(orderToSend, true);
+        
+        console.log(`✅ Pedido para ${cliente.email} registrado correctamente (local).`);
+        res.json({ status: 'success' });
+        
     } catch (error) {
         console.error("Error en /api/confirm-payment:", error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ error: 'Error interno, pero el pedido puede haberse guardado localmente.' });
     }
 });
 
