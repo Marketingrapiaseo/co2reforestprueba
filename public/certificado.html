@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* ========== EXACTAMENTE EL MISMO CSS QUE EL DE BIENVENIDA ========== */
   :root{
     --forest-900:#0E2B1A;
     --forest-800:#143726;
@@ -379,7 +378,7 @@
     C:{ name:'Silvopastoril',   ico:'🐄', desc:'Pack C · el más biodiverso',  species:{Moriche:1,Saladillo:1,Yopo:1,'Cañofistol':1,Aceite:1} }
   };
 
-  // ---- Leer parámetros de la URL (o usar demo) ----
+  // ---- Leer parámetros de la URL ----
   const q = new URLSearchParams(location.search);
   const num = (k)=>{ const v = parseInt(q.get(k),10); return isNaN(v)||v<0 ? 0 : v; };
   const hasParams = q.has('packA')||q.has('packB')||q.has('packC');
@@ -471,7 +470,6 @@
   countUp(document.getElementById('tGroups'), totalGroups);
   countUp(document.getElementById('tSpecies'), speciesCount);
   countUp(document.getElementById('tTotal'), order.total, { suffix:'' });
-  // Añadir formato moneda al total
   setTimeout(()=>{
     const el = document.getElementById('tTotal');
     if(el && !el.textContent.includes('$')) el.textContent = fmtCurrency(order.total);
