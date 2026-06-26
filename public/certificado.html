@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu certificado · CO2Reforest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ========== EXACTAMENTE EL MISMO CSS QUE EL DE BIENVENIDA ========== */
+  :root{
+    --forest-900:#0E2B1A;
+    --forest-800:#143726;
+    --forest-700:#1A4A2E;
+    --forest-500:#2D7A4F;
+    --leaf-400:#4CAF7D;
+    --leaf-200:#9FD8B7;
+    --gold:#C8972B;
+    --gold-soft:#E3B85A;
+    --paper:#F6F3EA;
+    --paper-2:#FBF9F2;
+    --line:#E4DECB;
+    --ink:#1B2A20;
+    --ink-soft:#586a5d;
+    --shadow:0 18px 50px -24px rgba(14,43,26,.45);
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;
+    --sans:'Montserrat',system-ui,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:0 22px}
+
+  .hero{
+    position:relative;overflow:hidden;color:#eafff1;text-align:center;
+    background:
+      radial-gradient(1200px 520px at 50% -8%, rgba(76,175,125,.30), transparent 60%),
+      radial-gradient(900px 600px at 90% 120%, rgba(200,151,43,.16), transparent 55%),
+      linear-gradient(180deg, var(--forest-900), var(--forest-800) 70%, var(--forest-700));
+    padding:64px 22px 92px;
+  }
+  .hero::after{
+    content:"";position:absolute;left:0;right:0;bottom:-1px;height:70px;
+    background:radial-gradient(60% 100% at 50% 100%, var(--paper) 50%, transparent 51%);
+    background-size:34px 70px;background-repeat:repeat-x;background-position:bottom;
+    opacity:1;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--leaf-200);padding:7px 15px;border:1px solid rgba(159,216,183,.35);
+    border-radius:100px;background:rgba(14,43,26,.35);
+  }
+  .eyebrow b{color:#fff}
+  .seal{width:172px;height:172px;margin:26px auto 14px;display:block}
+  .seal .ring-text{fill:var(--gold-soft);font-family:var(--sans);font-weight:700;font-size:8.6px;letter-spacing:2.1px}
+  .seal .ring{animation:spin 48s linear infinite}
+  .seal .count{fill:#fff;font-family:var(--serif);font-weight:600}
+  .seal .count-label{fill:var(--leaf-200);font-family:var(--sans);font-weight:700;font-size:8px;letter-spacing:2px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  h1.welcome{
+    font-family:var(--serif);font-weight:600;line-height:1.06;
+    font-size:clamp(30px,6.2vw,52px);margin:14px 0 6px;letter-spacing:-.01em;
+  }
+  h1.welcome .em{color:var(--gold-soft);font-style:italic}
+  .company{
+    font-family:var(--serif);font-weight:600;font-style:italic;
+    color:#fff;font-size:clamp(20px,4.4vw,30px);margin:2px 0 0;
+  }
+  .doc-line{margin:9px 0 0;font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--gold-soft);text-transform:uppercase}
+  .hero-sub{max-width:560px;margin:16px auto 0;color:#cfe9da;font-size:clamp(15px,2.4vw,17px)}
+  .hero-meta{margin-top:14px;font-size:12.5px;color:rgba(207,233,218,.75);letter-spacing:.04em}
+
+  section{padding:54px 0}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+  .sec-num{font-family:var(--serif);font-size:15px;color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums}
+  .sec-title{font-family:var(--serif);font-weight:600;font-size:clamp(22px,3.6vw,28px);margin:0;letter-spacing:-.01em}
+  .sec-rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+  .summary{margin-top:-44px;position:relative;z-index:2}
+  .card{
+    background:var(--paper-2);border:1px solid var(--line);border-radius:20px;
+    box-shadow:var(--shadow);padding:30px;
+  }
+  .pack-list{display:grid;gap:12px;margin:0}
+  .pack-row{
+    display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;
+    padding:15px 18px;background:#fff;border:1px solid var(--line);border-radius:14px;
+  }
+  .pack-ico{font-size:26px;line-height:1}
+  .pack-name{font-weight:700;font-size:15.5px}
+  .pack-desc{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+  .pack-qty{
+    font-family:var(--serif);font-weight:600;font-size:22px;color:var(--forest-500);
+    white-space:nowrap;text-align:right;
+  }
+  .pack-qty span{display:block;font-family:var(--sans);font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.05em}
+
+  .totals{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px;
+  }
+  .total-box{
+    text-align:center;padding:18px 10px;border-radius:14px;
+    background:linear-gradient(180deg,#fff,#f4f7f3);border:1px solid var(--line);
+  }
+  .total-box .n{font-family:var(--serif);font-weight:700;font-size:clamp(26px,5vw,34px);color:var(--forest-700);line-height:1;font-variant-numeric:tabular-nums}
+  .total-box .l{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px}
+  .total-box.gold{background:linear-gradient(180deg,#FEF9EE,#FFF2D0);border-color:var(--gold);}
+  .total-box.gold .n{color:#8B6000}
+  .total-box.gold .l{color:#8B6000}
+  .area-tag{
+    display:flex;align-items:center;gap:10px;margin-top:18px;padding:13px 16px;
+    background:rgba(76,175,125,.10);border:1px dashed var(--leaf-400);border-radius:12px;
+    font-size:13.5px;color:var(--forest-700);
+  }
+  .area-tag b{color:var(--forest-700)}
+
+  .impact-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+  .impact-hero{
+    background:linear-gradient(160deg,var(--forest-700),var(--forest-900));
+    color:#eafff1;border-radius:20px;padding:30px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .impact-hero .big{font-family:var(--serif);font-weight:700;font-size:clamp(40px,9vw,64px);line-height:.95;color:#fff;font-variant-numeric:tabular-nums}
+  .impact-hero .big small{font-size:.4em;color:var(--leaf-200);font-weight:600}
+  .impact-hero .cap{margin-top:6px;color:#cfe9da;font-size:14px;max-width:320px}
+  .impact-hero .yr{margin-top:18px;display:inline-flex;align-items:center;gap:10px;font-size:13px;color:var(--leaf-200);border-top:1px solid rgba(159,216,183,.25);padding-top:14px}
+  .impact-hero .yr b{font-family:var(--serif);color:#fff;font-size:19px;font-weight:600}
+  .impact-side{display:grid;gap:14px}
+  .equiv{
+    background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:20px;
+  }
+  .equiv .label{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+  .equiv .v{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,30px);color:var(--ink);margin-top:4px;font-variant-numeric:tabular-nums}
+  .equiv .d{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+  .note{font-size:11.5px;color:var(--ink-soft);margin-top:14px;line-height:1.45}
+
+  .species-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:12px}
+  .sp{
+    background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .sp:hover{transform:translateY(-3px);box-shadow:0 14px 30px -20px rgba(14,43,26,.5)}
+  .sp .top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .sp .name{font-weight:700;font-size:15px}
+  .sp .qty{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--forest-500)}
+  .sp .sci{font-style:italic;font-size:12px;color:var(--ink-soft);margin-top:1px}
+  .sp .meta{display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
+  .sp .co2{font-size:12px;font-weight:700;color:var(--forest-700)}
+  .sp .tag{font-size:10.5px;color:var(--ink-soft);text-align:right}
+
+  .journey{background:var(--forest-900);color:#eafff1;border-radius:24px;padding:40px clamp(22px,4vw,44px);box-shadow:var(--shadow)}
+  .journey .sec-title{color:#fff}
+  .journey .sec-num{color:var(--gold-soft)}
+  .journey .sec-rule{background:linear-gradient(90deg,rgba(159,216,183,.4),transparent)}
+  .steps{display:grid;gap:0;margin-top:8px}
+  .step{display:grid;grid-template-columns:auto 1fr;gap:20px;padding:18px 0;position:relative}
+  .step:not(:last-child)::before{content:"";position:absolute;left:21px;top:46px;bottom:-4px;width:2px;background:linear-gradient(180deg,var(--leaf-400),rgba(76,175,125,.2))}
+  .step .dot{
+    width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+    font-family:var(--serif);font-weight:700;font-size:18px;z-index:1;
+    background:var(--forest-700);border:2px solid var(--leaf-400);color:#fff;
+  }
+  .step.done .dot{background:var(--leaf-400);border-color:var(--leaf-400);color:var(--forest-900)}
+  .step h3{margin:6px 0 4px;font-size:16.5px;font-weight:700;color:#fff}
+  .step.done h3 .chk{color:var(--leaf-200);font-weight:700}
+  .step p{margin:0;color:#bfe0cd;font-size:13.8px;max-width:560px}
+
+  .closing{text-align:center;padding:56px 22px 30px}
+  .closing h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4.4vw,34px);margin:0 0 10px;letter-spacing:-.01em}
+  .closing p{color:var(--ink-soft);max-width:520px;margin:0 auto 22px;font-size:15px}
+  .ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:14px;
+    padding:13px 22px;border-radius:100px;transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn-gold{background:var(--gold);color:#22160a;box-shadow:0 12px 26px -14px rgba(200,151,43,.8)}
+  .btn-ghost{background:transparent;color:var(--forest-700);border:1.5px solid var(--forest-500)}
+
+  footer{background:var(--forest-900);color:#bfe0cd;text-align:center;padding:26px 22px;font-size:12.5px}
+  footer .legal{opacity:.7;margin-top:6px;font-size:11.5px}
+
+  @media (max-width:720px){
+    .totals{grid-template-columns:1fr 1fr}
+    .impact-grid{grid-template-columns:1fr}
+    .pack-row{grid-template-columns:auto 1fr;gap:12px}
+    .pack-qty{grid-column:1/-1;text-align:left;border-top:1px dashed var(--line);padding-top:10px;display:flex;gap:8px;align-items:baseline}
+    .pack-qty span{display:inline}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <div class="wrap">
+      <span class="eyebrow">🌿 <b>Compra confirmada</b> · Ley 2173</span>
+
+      <svg class="seal" viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <path id="sealCircle" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"/>
+        </defs>
+        <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(200,151,43,.45)" stroke-width="1.5"/>
+        <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(159,216,183,.30)" stroke-width="1"/>
+        <g class="ring" style="transform-origin:100px 100px">
+          <text class="ring-text"><textPath href="#sealCircle" startOffset="0%">· RECONOCIMIENTO AMBIENTAL · ÁREA DE VIDA · ORINOQUÍA · LEY 2173 / RES. 1491 </textPath></text>
+        </g>
+        <g transform="translate(100,128)">
+          <rect x="-2.5" y="-30" width="5" height="34" rx="2.5" fill="#1A4A2E"/>
+          <g transform="translate(0,-30)">
+            <ellipse cx="0" cy="0" rx="3" ry="22" fill="#2D7A4F" transform="rotate(-46)"/>
+            <ellipse cx="0" cy="0" rx="3" ry="22" fill="#4CAF7D" transform="rotate(-22)"/>
+            <ellipse cx="0" cy="0" rx="3" ry="22" fill="#2D7A4F" transform="rotate(0)"/>
+            <ellipse cx="0" cy="0" rx="3" ry="22" fill="#4CAF7D" transform="rotate(22)"/>
+            <ellipse cx="0" cy="0" rx="3" ry="22" fill="#2D7A4F" transform="rotate(46)"/>
+          </g>
+        </g>
+        <text class="count" id="sealCount" x="100" y="86" text-anchor="middle" font-size="34">0</text>
+        <text class="count-label" x="100" y="100" text-anchor="middle">ÁRBOLES NATIVOS</text>
+      </svg>
+
+      <h1 class="welcome">Gracias por <span class="em">dar vida</span> a la Orinoquía</h1>
+      <p class="company" id="companyName">Tu Empresa S.A.S.</p>
+      <p class="doc-line" id="docLine">C.C. —</p>
+      <p class="hero-sub">Tu compra ya quedó registrada. A partir de hoy, cada árbol que adquiriste empieza un camino real: del vivero a la sabana.</p>
+      <p class="hero-meta" id="orderMeta">Pedido confirmado</p>
+    </div>
+  </header>
+
+  <!-- ============ SUMMARY ============ -->
+  <section class="summary">
+    <div class="wrap">
+      <div class="card">
+        <div class="sec-head" style="margin-top:-4px">
+          <span class="sec-num">01</span>
+          <h2 class="sec-title">Esto fue lo que sembraste</h2>
+          <span class="sec-rule"></span>
+        </div>
+        <div class="pack-list" id="packList"></div>
+
+        <div class="totals" id="totalsContainer">
+          <div class="total-box"><div class="n" id="tTrees">0</div><div class="l">Árboles nativos</div></div>
+          <div class="total-box"><div class="n" id="tGroups">0</div><div class="l">Grupos de 5</div></div>
+          <div class="total-box"><div class="n" id="tSpecies">0</div><div class="l">Especies distintas</div></div>
+          <div class="total-box gold"><div class="n" id="tTotal">$0</div><div class="l">Total pagado</div></div>
+        </div>
+
+        <div class="area-tag">📍 <span>Área de Vida escogida: <b id="areaName">Área de Vida · Orinoquía</b></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ IMPACT ============ -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">02</span>
+        <h2 class="sec-title">Tu beneficio ambiental</h2>
+        <span class="sec-rule"></span>
+      </div>
+      <div class="impact-grid">
+        <div class="impact-hero">
+          <div class="big" id="co2Year">0 <small>kg</small></div>
+          <div class="cap">de CO₂ capturado cada año por tus árboles, una vez establecidos.</div>
+          <div class="yr">🌍 A 10 años: <b id="co2Decade">0 t</b> de CO₂ retiradas de la atmósfera</div>
+        </div>
+        <div class="impact-side">
+          <div class="equiv">
+            <div class="label">Equivalente aproximado</div>
+            <div class="v" id="carKm">0 km</div>
+            <div class="d">de un carro a gasolina que dejan de emitirse (a 10 años).</div>
+          </div>
+          <div class="equiv">
+            <div class="label">Además, tu compra aporta</div>
+            <div class="v" style="font-size:19px;line-height:1.3">Empleo digno a la comunidad Sikuani y hábitat para la biodiversidad de la sabana.</div>
+          </div>
+        </div>
+      </div>
+      <p class="note">Las cifras de CO₂ corresponden a estimaciones por especie del catálogo de CO2Reforest y dependen de las condiciones de crecimiento. La equivalencia en kilómetros usa un factor aproximado de 0,18 kg de CO₂ por km y se ofrece solo como referencia.</p>
+    </div>
+  </section>
+
+  <!-- ============ SPECIES ============ -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">03</span>
+        <h2 class="sec-title">Las especies que ahora son tuyas</h2>
+        <span class="sec-rule"></span>
+      </div>
+      <div class="species-grid" id="speciesGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============ JOURNEY ============ -->
+  <section>
+    <div class="wrap">
+      <div class="journey">
+        <div class="sec-head">
+          <span class="sec-num">04</span>
+          <h2 class="sec-title">El camino de tus árboles</h2>
+          <span class="sec-rule"></span>
+        </div>
+        <div class="steps">
+          <div class="step done">
+            <div class="dot">✓</div>
+            <div>
+              <h3>Pedido confirmado <span class="chk">— hecho</span></h3>
+              <p>Recibimos tu compra de <b id="jTrees">tus</b> árboles nativos. Aquí empieza todo.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="dot">2</div>
+            <div>
+              <h3>Propagación en el vivero certificado</h3>
+              <p>Tus árboles nacen de semilla con registro ICA en nuestro vivero propio en la Orinoquía, donde crecen y se fortalecen hasta estar listos para campo.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="dot">3</div>
+            <div>
+              <h3>Siembra en tu Área de Vida</h3>
+              <p>Cada árbol se trasplanta al Área de Vida que escogiste y se georreferencia uno por uno, conforme a la Ley 2173 y la Resolución 1491/2025.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="dot">4</div>
+            <div>
+              <h3>Monitoreo y certificación</h3>
+              <p>Recibes tu certificado oficial y reportes fotográficos geolocalizados cada semestre durante 2 años. Tu impacto, siempre verificable.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CLOSING ============ -->
+  <section class="closing">
+    <div class="wrap">
+      <h2>Tu certificado está en camino</h2>
+      <p>En las próximas horas recibirás por correo el detalle de tu pedido y los siguientes pasos. ¿Tienes una pregunta? Estamos aquí.</p>
+      <div class="ctas">
+        <a class="btn btn-gold" href="https://wa.me/573155928625">💬 Escríbenos por WhatsApp</a>
+        <a class="btn btn-ghost" href="mailto:ventas@co2reforest.com">✉️ ventas@co2reforest.com</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    🌳 CO2Reforest · Orinoquía Colombiana
+    <div class="legal">Ley 2173 de 2021 · Resolución 1491 de 2025 · Semilla ICA · Comunidad Sikuani</div>
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+
+  const SPECIES = {
+    Moriche:    { sci:'Mauritia flexuosa',      co2:22, tag:'Palma sagrada Sikuani' },
+    Orejero:    { sci:'Enterolobium cyclocarpum',co2:85, tag:'Mayor captura de CO₂' },
+    Yopo:       { sci:'Anadenanthera peregrina', co2:55, tag:'Fija nitrógeno (N₂)' },
+    Saladillo:  { sci:'Caraipa llanorum',        co2:37, tag:'Madera densa' },
+    Aceite:     { sci:'Copaifera officinalis',   co2:37, tag:'Resina medicinal' },
+    'Cañofistol':{ sci:'Cassia grandis',         co2:77, tag:'Flor y sombra' }
+  };
+  const PACKAGES = {
+    A:{ name:'Bosque Llanero',  ico:'🌳', desc:'Pack A · el ancla',           species:{Moriche:2,Saladillo:1,Yopo:1,'Cañofistol':1} },
+    B:{ name:'Galería Riparia', ico:'🌊', desc:'Pack B · mayor captura CO₂',  species:{Moriche:2,Saladillo:1,'Cañofistol':1,Orejero:1} },
+    C:{ name:'Silvopastoril',   ico:'🐄', desc:'Pack C · el más biodiverso',  species:{Moriche:1,Saladillo:1,Yopo:1,'Cañofistol':1,Aceite:1} }
+  };
+
+  // ---- Leer parámetros de la URL (o usar demo) ----
+  const q = new URLSearchParams(location.search);
+  const num = (k)=>{ const v = parseInt(q.get(k),10); return isNaN(v)||v<0 ? 0 : v; };
+  const hasParams = q.has('packA')||q.has('packB')||q.has('packC');
+
+  const order = {
+    empresa: q.get('empresa') || 'Maribel Herrera González',
+    doc:     q.get('doc')     || 'C.C. 1.107.053.675',
+    area:    q.get('area')    || 'Caño Verde · Orinoquía',
+    total:   num('total')     || 180000,
+    transaccion: q.get('transaccion') || '—',
+    packs:   hasParams ? { A:num('packA'), B:num('packB'), C:num('packC') }
+                       : { A:1, B:0, C:0 }
+  };
+
+  // ---- Cálculos ----
+  const speciesTotals = {};
+  let totalTrees = 0, totalGroups = 0, co2Year = 0;
+  const purchased = [];
+
+  Object.keys(PACKAGES).forEach(code=>{
+    const qty = order.packs[code] || 0;
+    if(qty<=0) return;
+    const p = PACKAGES[code];
+    let packTrees = 0, packCo2 = 0;
+    Object.keys(p.species).forEach(sp=>{
+      const n = p.species[sp]*qty;
+      speciesTotals[sp] = (speciesTotals[sp]||0) + n;
+      packTrees += p.species[sp];
+      packCo2   += p.species[sp]*SPECIES[sp].co2;
+    });
+    totalGroups += qty;
+    totalTrees  += packTrees*qty;
+    co2Year     += packCo2*qty;
+    purchased.push({ code, qty, name:p.name, ico:p.ico, desc:p.desc });
+  });
+
+  const co2Decade   = co2Year*10;
+  const co2DecadeT  = co2Decade/1000;
+  const carKm       = Math.round(co2Decade/0.18);
+  const speciesCount= Object.keys(speciesTotals).length;
+
+  const fmt = (n)=> n.toLocaleString('es-CO');
+  const fmtCurrency = (n)=> '$' + fmt(n);
+  const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  function countUp(el, target, opts={}){
+    const dur = 1200, dec = opts.decimals||0, suf = opts.suffix||'';
+    const render = (val)=>{ el.textContent = (dec? val.toFixed(dec) : Math.round(val)).toLocaleString('es-CO') + suf; };
+    if(reduce || target===0){ render(target); return; }
+    const t0 = performance.now();
+    (function tick(now){
+      const k = Math.min(1,(now-t0)/dur);
+      const e = 1-Math.pow(1-k,3);
+      render(target*e);
+      if(k<1) requestAnimationFrame(tick); else render(target);
+    })(t0);
+  }
+
+  // ---- Insertar datos ----
+  document.getElementById('companyName').textContent = order.empresa;
+  document.getElementById('docLine').textContent = order.doc;
+  document.getElementById('areaName').textContent = order.area;
+  document.getElementById('orderMeta').textContent =
+    'Pedido confirmado · ' + new Date().toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'}) +
+    ' · ID ' + order.transaccion;
+
+  document.getElementById('packList').innerHTML = purchased.map(p=>`
+    <div class="pack-row">
+      <div class="pack-ico">${p.ico}</div>
+      <div><div class="pack-name">${p.name}</div><div class="pack-desc">${p.desc} · 5 árboles c/u</div></div>
+      <div class="pack-qty">×${p.qty}<span>grupos</span></div>
+    </div>`).join('') || '<div class="pack-desc">Sin paquetes.</div>';
+
+  const spSorted = Object.keys(speciesTotals).sort((a,b)=>
+    (speciesTotals[b]*SPECIES[b].co2) - (speciesTotals[a]*SPECIES[a].co2));
+  document.getElementById('speciesGrid').innerHTML = spSorted.map(sp=>{
+    const s = SPECIES[sp], n = speciesTotals[sp];
+    return `<div class="sp">
+      <div class="top"><div><div class="name">${sp}</div><div class="sci">${s.sci}</div></div><div class="qty">${n}</div></div>
+      <div class="meta"><div class="co2">${s.co2} kg CO₂/año</div><div class="tag">${s.tag}</div></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('jTrees').textContent = fmt(totalTrees);
+
+  // Animaciones
+  countUp(document.getElementById('sealCount'), totalTrees);
+  countUp(document.getElementById('tTrees'), totalTrees);
+  countUp(document.getElementById('tGroups'), totalGroups);
+  countUp(document.getElementById('tSpecies'), speciesCount);
+  countUp(document.getElementById('tTotal'), order.total, { suffix:'' });
+  // Añadir formato moneda al total
+  setTimeout(()=>{
+    const el = document.getElementById('tTotal');
+    if(el && !el.textContent.includes('$')) el.textContent = fmtCurrency(order.total);
+  }, reduce?0:1250);
+
+  const cy = document.getElementById('co2Year');
+  countUp(cy, co2Year, {suffix:''});
+  setTimeout(()=>{ if(!cy.querySelector('small')){ cy.insertAdjacentHTML('beforeend',' <small>kg</small>'); } }, reduce?0:1250);
+  countUp(document.getElementById('co2Decade'), co2DecadeT, {decimals: co2DecadeT<10?2:1, suffix:' t'});
+  countUp(document.getElementById('carKm'), carKm, {suffix:' km'});
+})();
+</script>
+</body>
+</html>
