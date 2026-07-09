@@ -55,7 +55,61 @@
     .btn-form:hover {
       background: var(--gold);
     }
-    /* Loader */
+    .btn-form:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .areas-grid-simple {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .area-card-simple {
+      background: #fff;
+      border-radius: 16px;
+      padding: 30px 20px;
+      text-align: center;
+      border: 2px solid var(--line);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .area-card-simple:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+    .area-card-simple.selected {
+      border-color: var(--gold);
+      background: #FFFDF5;
+      box-shadow: 0 4px 16px rgba(200,151,43,0.15);
+    }
+    .area-card-simple .name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .area-card-simple .sub {
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      margin-top: 6px;
+    }
+    .area-card-simple .emoji {
+      font-size: 2.4rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .warning {
+      background: #FFF3E0;
+      border-left: 4px solid var(--gold);
+      padding: 12px 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+    .hidden {
+      display: none;
+    }
     .loader-wrapper {
       display: flex;
       justify-content: center;
@@ -74,67 +128,25 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    .hidden {
-      display: none;
-    }
-    .region-block {
-      background: #fff;
-      border-radius: 28px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-      margin-bottom: 40px;
-      overflow: visible;
-    }
-    .region-img {
-      width: 100%;
-      height: auto;
-      display: block;
-      background-color: #e2f0e6;
-      border-radius: 28px 28px 0 0;
-    }
-    .region-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      color: var(--green);
-      padding: 20px 20px 0 20px;
-    }
-    .areas-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      padding: 20px;
-    }
-    .area-option {
-      background: #f5f5f0;
-      border-radius: 60px;
-      padding: 10px 20px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 2px solid transparent;
-      color: #2a4a2a;
-    }
-    .area-option.selected {
-      background: var(--gold);
-      color: white;
-      border-color: #a05e15;
-      box-shadow: 0 2px 8px rgba(200,151,43,0.4);
-    }
-    .area-option:hover {
-      background: #e0e0d5;
-      transform: translateY(-2px);
-    }
-    .warning {
-      background: #FFF3E0;
-      border-left: 4px solid var(--gold);
-      padding: 12px 20px;
-      border-radius: 12px;
-      margin: 20px 0;
-    }
     .cb { cursor: pointer; user-select: none; }
     .cnt-input { text-align: center; }
+    @media (max-width: 720px) {
+      .areas-grid-simple { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
+
+<nav>
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMjAgNTYiPgogIDxyZWN0IHg9IjgiIHk9IjI4IiB3aWR0aD0iNSIgaGVpZ2h0PSIxOCIgcng9IjIuNSIgZmlsbD0iIzFBNEEyRSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiMyRDdBNEYiIHRyYW5zZm9ybT0icm90YXRlKC00MiAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiM0Q0FGN0QiIHRyYW5zZm9ybT0icm90YXRlKC0xOCAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiMyRDdBNEYiIHRyYW5zZm9ybT0icm90YXRlKDYgMTAuNSAyNCkiLz4KICA8ZWxsaXBzZSBjeD0iMTAuNSIgY3k9IjI0IiByeD0iMiIgcnk9IjE1IiBmaWxsPSIjNENBRjdEIiB0cmFuc2Zvcm09InJvdGF0ZSgzMCAxMC41IDI0KSIvPgogIDxlbGxpcHNlIGN4PSIxMC41IiBjeT0iMjQiIHJ4PSIyIiByeT0iMTUiIGZpbGw9IiMyRDdBNEYiIHRyYW5zZm9ybT0icm90YXRlKDU0IDEwLjUgMjQpIi8+CiAgPHBhdGggZD0iTTIgNDYgUTEwLjUgNDIgMTkgNDYiIHN0cm9rZT0iIzFBNEEyRSIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDx0ZXh0IHg9IjI4IiB5PSIyOSIgZm9udC1mYW1pbHk9Ik1vbnRzZXJyYXQsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iIzFBNEEyRSI+Q088L3RleHQ+CiAgPHRleHQgeD0iNjMiIHk9IjM0IiBmb250LWZhbWlseT0iTW9udHNlcnJhdCxBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjMUE0QTJFIj4yPC90ZXh0PgogIDx0ZXh0IHg9IjI4IiB5PSI0NiIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM0Q0FGN0QiPlJlZm9yZXN0PC90ZXh0PgogIDx0ZXh0IHg9IjI4IiB5PSI1NCIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjQzg5NzJCIiBsZXR0ZXItc3BhY2luZ0AxLjIiPk9SSU5PUVXDjUEgwrcgTEVZQSAyMTczPC90ZXh0Pgo8L3N2Zz4=" alt="CO2Reforest" class="nav-logo">
+  <ul class="nav-links">
+    <li><a href="#calculadora">Calculadora CO₂</a></li>
+    <li><a href="#especies">Especies</a></li>
+    <li><a href="#ley2173">Ley 2173</a></li>
+    <li><a href="#form" class="nav-cta">Iniciar pedido</a></li>
+  </ul>
+</nav>
+
 <section class="sec" id="form">
   <div class="wrap">
     <p class="sec-tag">Paso 1</p>
@@ -175,73 +187,45 @@
       </form>
     </div>
 
-    <!-- Sección de regiones (oculta inicialmente) -->
-    <div id="regionesSection" class="hidden">
+    <!-- ========== PASO 2: ÁREAS DE VIDA (SOLO LAS 3 SOLICITADAS, SIN IMÁGENES) ========== -->
+    <div id="areasSection" class="hidden">
       <p class="sec-tag">Paso 2</p>
       <h2 class="sec-title">Elige tu área de vida</h2>
-      <p class="sec-sub">Selecciona una de las áreas disponibles. Puedes cambiar tu selección en cualquier momento.</p>
-      
-      <!-- Región 1 -->
-      <div class="region-block">
-        <img class="region-img" src="/imagenes/region1.jpg" alt="El capricho, Dafne, La cascada" loading="eager">
-        <h3 class="region-title">🌿 El capricho, Dafne y La cascada</h3>
-        <div class="areas-grid">
-          <div class="area-option" data-area="El capricho">🌳 El capricho</div>
-          <div class="area-option" data-area="Dafne">💧 Dafne</div>
-          <div class="area-option" data-area="La cascada">🏞️ La cascada</div>
-        </div>
-      </div>
+      <p class="sec-sub">Selecciona el área donde deseas sembrar tus árboles nativos.</p>
 
-      <!-- Región 2 -->
-      <div class="region-block">
-        <img class="region-img" src="/imagenes/region2.jpg" alt="Azulejos y El caribe" loading="eager">
-        <h3 class="region-title">🏝️ Azulejos y El caribe</h3>
-        <div class="areas-grid">
-          <div class="area-option" data-area="Azulejos">🏺 Azulejos</div>
-          <div class="area-option" data-area="El caribe">🌊 El caribe</div>
+      <div class="areas-grid-simple" id="areasContainer">
+        <!-- Dafne -->
+        <div class="area-card-simple" data-area="Dafne">
+          <span class="emoji">💧</span>
+          <div class="name">Dafne</div>
+          <div class="sub">Zona de humedales y morichales</div>
         </div>
-      </div>
-
-      <!-- Región 3 -->
-      <div class="region-block">
-        <img class="region-img" src="/imagenes/region3.jpg" alt="Guayandayes" loading="eager">
-        <h3 class="region-title">🏞️ Guayandayes</h3>
-        <div class="areas-grid">
-          <div class="area-option" data-area="Guayandayes">🌾 Guayandayes</div>
+        <!-- El Capricho -->
+        <div class="area-card-simple" data-area="El Capricho">
+          <span class="emoji">🌳</span>
+          <div class="name">El Capricho</div>
+          <div class="sub">Bosque de galería con alta biodiversidad</div>
         </div>
-      </div>
-
-      <!-- Región 4 -->
-      <div class="region-block">
-        <img class="region-img" src="/imagenes/region4.jpg" alt="Brillante y comarca" loading="eager">
-        <h3 class="region-title">✨ Brillante y comarca</h3>
-        <div class="areas-grid">
-          <div class="area-option" data-area="Brillante">⭐ Brillante</div>
-          <div class="area-option" data-area="comarca">🗺️ comarca</div>
-        </div>
-      </div>
-
-      <!-- Región 5 -->
-      <div class="region-block">
-        <img class="region-img" src="/imagenes/region5.jpg" alt="Borinquen y tolemaida" loading="eager">
-        <h3 class="region-title">🌳 Borinquen y tolemaida</h3>
-        <div class="areas-grid">
-          <div class="area-option" data-area="Borinquen">🍃 Borinquen</div>
-          <div class="area-option" data-area="tolemaida">🍂 tolemaida</div>
+        <!-- Borinque -->
+        <div class="area-card-simple" data-area="Borinque">
+          <span class="emoji">🌿</span>
+          <div class="name">Borinque</div>
+          <div class="sub">Zona de restauración activa con comunidad Sikuani</div>
         </div>
       </div>
 
       <div class="warning" id="areaWarning" style="display: none;">⚠️ Por favor selecciona un área de vida antes de continuar.</div>
-      <div style="text-align: center; margin: 30px 0 40px;">
-        <button id="confirmarAreaBtn" class="btn-form" disabled>Confirmar área seleccionada y continuar →</button>
+      <div style="text-align: center; margin: 20px 0 40px;">
+        <button id="confirmarAreaBtn" class="btn-form" disabled>Confirmar área y ver calculadora →</button>
       </div>
     </div>
 
-    <!-- Calculadora (se mostrará después de confirmar área) -->
+    <!-- ========== PASO 3: CALCULADORA ========== -->
     <div id="calculadoraSection" class="hidden">
       <p class="sec-tag">Paso 3</p>
       <h2 class="sec-title">Selecciona tus grupos de árboles</h2>
       <p class="sec-sub">Cada grupo son 5 árboles. Cuantos más grupos, mayor descuento (hasta 20%).</p>
+
       <div class="calc-box">
         <div class="calc-grid">
           <div>
@@ -415,29 +399,30 @@
     }
   }
 
-  // ==================== FORMULARIO Y REGIONES CON LOADER ====================
+  // ==================== FORMULARIO Y ÁREAS (SOLO 3) ====================
   let clienteData = null;
   let areaSeleccionada = null;
   const clienteForm = document.getElementById('clienteForm');
-  const regionesSection = document.getElementById('regionesSection');
+  const areasSection = document.getElementById('areasSection');
   const calculadoraSection = document.getElementById('calculadoraSection');
   const confirmarAreaBtn = document.getElementById('confirmarAreaBtn');
   const areaWarning = document.getElementById('areaWarning');
-  const areaOptions = document.querySelectorAll('.area-option');
+  const areaCards = document.querySelectorAll('.area-card-simple');
   const submitBtn = document.getElementById('submitBtn');
   const loaderWrapper = document.getElementById('loaderWrapper');
 
-  areaOptions.forEach(opt => {
-    opt.addEventListener('click', (e) => {
-      e.stopPropagation();
-      areaOptions.forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected');
-      areaSeleccionada = opt.getAttribute('data-area');
+  // Selección de área (solo 3)
+  areaCards.forEach(card => {
+    card.addEventListener('click', () => {
+      areaCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      areaSeleccionada = card.getAttribute('data-area');
       confirmarAreaBtn.disabled = false;
       if (areaWarning) areaWarning.style.display = 'none';
     });
   });
 
+  // Paso 1: enviar formulario
   if (clienteForm) {
     clienteForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -451,11 +436,10 @@
         return;
       }
       clienteData = { nombre, cedula, email, telefono, ciudad };
-      
-      // Mostrar loader y deshabilitar botón
+
       submitBtn.style.display = 'none';
       loaderWrapper.classList.remove('hidden');
-      
+
       try {
         const response = await fetch('/api/save-client', {
           method: 'POST',
@@ -473,18 +457,18 @@
         console.error('Error de red al guardar cliente:', error);
         alert('No se pudo contactar el servidor. Tus datos se guardaron localmente. Continuamos...');
       } finally {
-        // Ocultar loader y restaurar botón (aunque ya no se necesita porque la página cambiará)
         loaderWrapper.classList.add('hidden');
         submitBtn.style.display = 'inline-block';
       }
-      
+
       localStorage.setItem('co2reforest_cliente', JSON.stringify(clienteData));
       document.querySelector('.form-section').style.display = 'none';
-      regionesSection.classList.remove('hidden');
-      regionesSection.scrollIntoView({ behavior: 'smooth' });
+      areasSection.classList.remove('hidden');
+      areasSection.scrollIntoView({ behavior: 'smooth' });
     });
   }
 
+  // Paso 2: confirmar área
   if (confirmarAreaBtn) {
     confirmarAreaBtn.addEventListener('click', () => {
       if (!areaSeleccionada) {
@@ -492,13 +476,14 @@
         return;
       }
       localStorage.setItem('co2reforest_area', areaSeleccionada);
-      regionesSection.classList.add('hidden');
+      areasSection.classList.add('hidden');
       calculadoraSection.classList.remove('hidden');
       upd();
       calculadoraSection.scrollIntoView({ behavior: 'smooth' });
     });
   }
 
+  // Paso 3: proceder al pago
   document.addEventListener('DOMContentLoaded', () => {
     const btnPagarFinal = document.getElementById('btn-pagar-final');
     if (btnPagarFinal) {
@@ -524,6 +509,7 @@
       });
     }
   });
+
   upd();
 </script>
 </body>
