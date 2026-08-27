@@ -13,6 +13,15 @@
 </head>
 <body>
 
+<!-- ========== INTRO VIDEO ========== -->
+<div id="intro-overlay">
+  <video id="intro-video" src="Videos/Intro.mp4" autoplay muted playsinline></video>
+  <div class="intro-controls">
+    <button id="skip-intro">Saltar intro</button>
+  </div>
+</div>
+
+<!-- ========== CONTENIDO PRINCIPAL ========== -->
 <!-- ========== NAVEGACIÓN ========== -->
 <nav>
   <img src="logo.png" alt="CO2 Reforest" class="nav-logo">
@@ -580,5 +589,49 @@
 </div>
 
 <script src="script.js"></script>
+
+<!-- ========== SCRIPT PARA LA INTRO ========== -->
+<script>
+  (function() {
+    'use strict';
+
+    const overlay = document.getElementById('intro-overlay');
+    const video = document.getElementById('intro-video');
+    const skipBtn = document.getElementById('skip-intro');
+
+    // Si ya se vio en esta sesión, ocultar overlay
+    if (sessionStorage.getItem('introViewed')) {
+      overlay.classList.add('hidden');
+      setTimeout(function() {
+        overlay.style.display = 'none';
+      }, 600);
+      return;
+    }
+
+    function cerrarIntro() {
+      overlay.classList.add('hidden');
+      setTimeout(function() {
+        overlay.style.display = 'none';
+        sessionStorage.setItem('introViewed', 'true');
+        video.pause();
+      }, 600);
+    }
+
+    // Al terminar el video
+    video.addEventListener('ended', cerrarIntro);
+
+    // Al hacer clic en saltar
+    skipBtn.addEventListener('click', cerrarIntro);
+
+    // En móviles, autoplay puede fallar; al primer clic en cualquier parte se reproduce
+    document.addEventListener('click', function() {
+      if (video.paused) {
+        video.play().catch(function() {});
+      }
+    }, { once: true });
+
+  })();
+</script>
+
 </body>
 </html>
