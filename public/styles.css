@@ -180,12 +180,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
 .reaa-box h5{font-weight:700;color:var(--green);font-size:.88rem;margin-bottom:4px;}
 .reaa-box p{font-size:.8rem;color:#5A7A6A;line-height:1.5;}
 
-/* CARRUSEL ÁREA DE VIDA - RESPONSIVE */
+/* CARRUSEL ÁREA DE VIDA - RESPONSIVE Y SIN OVERFLOW */
 .area-carousel {
   width: 100%;
   overflow: hidden;
   border-radius: 16px;
   margin-bottom: 16px;
+  position: relative;
 }
 .area-track {
   display: flex;
