@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (k.indexOf('CO2') !== -1 || k.indexOf('CO₂') !== -1) co2 = v;
         if (k.indexOf('Precio') !== -1) precio = v;
       });
-      // Buscar dato curioso desde el elemento específico
       var curiosoEl = el.querySelector('.sp-curioso');
       if (curiosoEl) {
         dato = curiosoEl.textContent.replace('✦ Dato curioso:', '').trim();
@@ -46,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   /* Contadores hero */
   function animateCounters() {
-    document.querySelectorAll('.kpi-n[data-target]').forEach(function(el) {
+    document.querySelectorAll('.kpi-n[data-target], .r-num[data-target]').forEach(function(el) {
       if (el.dataset.animated === 'true') return;
       var target = parseFloat(el.dataset.target);
       var suffix = el.dataset.suffix || '';
@@ -64,28 +63,23 @@ document.addEventListener('DOMContentLoaded', function() {
   var hk = document.querySelector('.hero-kpis');
   if (hk && 'IntersectionObserver' in window) { var o = new IntersectionObserver(function(e) { e.forEach(function(x) { if (x.isIntersecting) { animateCounters(); o.unobserve(x.target); } }); }, {threshold:.3}); o.observe(hk); } else { animateCounters(); }
 
-  /* FAQ toggle - CORREGIDO */
+  /* FAQ toggle */
   document.querySelectorAll('.faq-q').forEach(function(q) {
     q.addEventListener('click', function() {
       var item = q.closest('.faq-item');
       var wasOpen = item.classList.contains('open');
-      // Cerrar todos los demás
-      document.querySelectorAll('.faq-item.open').forEach(function(i) {
-        if (i !== item) i.classList.remove('open');
-      });
-      // Alternar el actual
-      if (wasOpen) {
-        item.classList.remove('open');
-      } else {
-        item.classList.add('open');
-      }
+      document.querySelectorAll('.faq-item.open').forEach(function(i) { if (i !== item) i.classList.remove('open'); });
+      if (wasOpen) { item.classList.remove('open'); } else { item.classList.add('open'); }
     });
   });
 
-  /* Empleado options */
+  /* Empleado options - index */
   document.querySelectorAll('.emp-opt').forEach(function(opt) {
     opt.addEventListener('click', function() {
-      document.querySelectorAll('.emp-opt').forEach(function(o) { o.classList.remove('active'); });
+      var container = opt.closest('.emp-options');
+      if (container) {
+        container.querySelectorAll('.emp-opt').forEach(function(o) { o.classList.remove('active'); });
+      }
       opt.classList.add('active');
       var n = parseInt(opt.dataset.emp || '0');
       var inp = document.getElementById('calc-empleados');
@@ -93,11 +87,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  /* Input de empleados */
   var empInput = document.getElementById('calc-empleados');
   if (empInput) {
     empInput.addEventListener('input', function() {
-      document.querySelectorAll('.emp-opt').forEach(function(o) { o.classList.remove('active'); });
+      var container = empInput.closest('.calc-grid');
+      if (container) {
+        container.querySelectorAll('.emp-opt').forEach(function(o) { o.classList.remove('active'); });
+      }
       updateCalc();
     });
   }
@@ -112,9 +108,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
   /* Inicializar calculadora */
   updateCalc();
+
+  /* Resultados contadores */
+  var rSection = document.querySelector('.resultados-grid');
+  if (rSection && 'IntersectionObserver' in window) {
+    var rObs = new IntersectionObserver(function(e) {
+      e.forEach(function(x) {
+        if (x.isIntersecting) { animateCounters(); rObs.unobserve(x.target); }
+      });
+    }, {threshold:.3});
+    rObs.observe(rSection);
+  } else { animateCounters(); }
 });
 
-/* ===== CALCULADORA - CORREGIDA ===== */
+/* ===== CALCULADORA ===== */
 function changeCnt(btn, delta) {
   var input = btn.parentElement.querySelector('.cnt-input');
   var v = Math.max(0, parseInt(input.value || '0') + delta);
