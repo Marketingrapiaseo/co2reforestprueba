@@ -318,3 +318,45 @@ footer{background:#0c1e0c;padding:36px 44px;display:flex;justify-content:space-b
   .steps-grid{grid-template-columns:1fr;}
   .emp-options{grid-template-columns:1fr;}
 }
+/* ========== VIVERO ========== */
+.vivero-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 10px;
+}
+.vivero-item {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  aspect-ratio: 4/3;
+  background: #e8f0e8;
+}
+.vivero-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.10);
+}
+.vivero-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.vivero-item:hover img {
+  transform: scale(1.04);
+}
+
+@media (max-width: 900px) {
+  .vivero-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+@media (max-width: 600px) {
+  .vivero-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
