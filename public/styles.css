@@ -15,7 +15,7 @@ body{font-family:'Inter',sans-serif;color:#26332C;background:#fff;overflow-x:hid
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:10px 40px;background:rgba(255,255,255,0.97);backdrop-filter:blur(14px);border-bottom:1px solid rgba(63,125,88,0.08);box-shadow:0 2px 20px rgba(0,0,0,0.05);}
-.nav-logo{height:90px;width:auto;} /* ← LOGO MÁS GRANDE (antes 64px) */
+.nav-logo{height:90px;width:auto;}
 .nav-links{display:flex;gap:22px;list-style:none;align-items:center;}
 .nav-links a{text-decoration:none;color:#2D4A3C;font-size:.84rem;font-weight:500;transition:color .2s;}
 .nav-links a:hover{color:var(--light);}
@@ -436,14 +436,14 @@ footer{background:#0c1e0c;padding:36px 44px;display:flex;justify-content:space-b
 .modal-stats strong{color:var(--green);}
 @media(max-width:900px){.modal-contenido{flex-direction:column;max-width:95%;}.modal-imagen img{max-height:250px;}.modal-info{padding:20px;}.modal-info h3{font-size:1.5rem;}}
 
-/* ========== INTRO VIDEO OVERLAY ========== */
+/* ========== INTRO VIDEO OVERLAY (FONDO BLANCO) ========== */
 #intro-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: #0a1a0f;
+  background: #ffffff; /* ← Fondo blanco */
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -458,7 +458,7 @@ footer{background:#0c1e0c;padding:36px 44px;display:flex;justify-content:space-b
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #0a1a0f;
+  background: #ffffff; /* ← Fondo blanco para el video */
 }
 .intro-controls {
   position: absolute;
@@ -467,9 +467,9 @@ footer{background:#0c1e0c;padding:36px 44px;display:flex;justify-content:space-b
   z-index: 10;
 }
 #skip-intro {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.06); /* ← Fondo claro para contraste sobre blanco */
+  color: #1a2a1f;
+  border: 1px solid rgba(0,0,0,0.10);
   padding: 12px 28px;
   border-radius: 60px;
   font-weight: 600;
@@ -480,7 +480,7 @@ footer{background:#0c1e0c;padding:36px 44px;display:flex;justify-content:space-b
   font-family: 'Inter', sans-serif;
 }
 #skip-intro:hover {
-  background: rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.12);
 }
 @media (max-width: 600px) {
   .intro-controls {
@@ -490,8 +490,5 @@ footer{background:#0c1e0c;padding:36px 44px;display:flex;justify-content:space-b
   #skip-intro {
     padding: 10px 20px;
     font-size: 0.8rem;
-  }
-  #intro-video {
-    object-fit: contain;
   }
 }
