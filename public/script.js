@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  /* Empleado options - index */
+  /* Empleado options */
   document.querySelectorAll('.emp-opt').forEach(function(opt) {
     opt.addEventListener('click', function() {
       var container = opt.closest('.emp-options');
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
   } else { animateCounters(); }
 });
 
-/* ===== CALCULADORA ===== */
+/* ===== CALCULADORA (NUEVA LÓGICA CON EMPLEADOS) ===== */
 function changeCnt(btn, delta) {
   var input = btn.parentElement.querySelector('.cnt-input');
   var v = Math.max(0, parseInt(input.value || '0') + delta);
@@ -130,20 +130,35 @@ function changeCnt(btn, delta) {
 }
 
 function updateCalc() {
-  var trees = 0, co2 = 0, total = 0;
+  // 1. Leer empleados
+  var empInput = document.getElementById('calc-empleados');
+  var empleados = parseInt(empInput ? empInput.value : 0) || 0;
+
+  // 2. Calcular árboles base (Ley 2173: 2 árboles por empleado)
+  var arbolesBase = empleados * 2;
+
+  // 3. Leer contadores de paquetes (opcional)
+  var treesPack = 0, co2Pack = 0, totalPack = 0;
   document.querySelectorAll('.cnt-input').forEach(function(inp) {
     var n = parseInt(inp.value || '0');
     var p = parseInt(inp.dataset.price || '0');
     var c = parseInt(inp.dataset.co2 || '0');
-    trees += n;
-    total += n * p;
-    co2 += n * c;
+    treesPack += n;
+    totalPack += n * p;
+    co2Pack += n * c;
     var row = inp.closest('.cr');
     if (row) {
       var co2El = row.querySelector('.cr-co2');
       if (co2El) co2El.textContent = (n * c) + ' kg CO₂/año';
     }
   });
+
+  // 4. Decidir qué usar: si hay empleados, usar árboles base; si no, usar paquetes
+  var trees = empleados > 0 ? arbolesBase : treesPack;
+  var total = empleados > 0 ? arbolesBase * 50000 : totalPack; // precio promedio
+  var co2 = empleados > 0 ? arbolesBase * 22 : co2Pack; // 22 kg promedio por árbol
+
+  // 5. Mostrar resultados
   var te = document.getElementById('r-trees');
   if (te) te.textContent = trees;
   var ce = document.getElementById('r-co2');
