@@ -7,11 +7,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
+    /* ========== VARIABLES ========== */
+    :root {
+      --green: #3F7D58;
+      --mid: #285943;
+      --light: #6FA47C;
+      --gold: #C8972B;
+      --gold-soft: #E3B85A;
+      --tierra: #8A6A4A;
+      --cream: #F4F1E8;
+      --gray: #F7F8F5;
+      --line: #E4DECB;
+      --ink-soft: #5A7A6A;
+      --shadow: 0 8px 24px rgba(0,0,0,0.05);
+      --radio: 16px;
+      --transicion: 0.2s ease;
+    }
+
+    /* ========== SECCIÓN FORMULARIO ========== */
     .form-section {
       background: white;
       border-radius: 24px;
       padding: 32px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+      box-shadow: var(--shadow);
       margin-bottom: 40px;
     }
     .form-grid {
@@ -34,7 +52,8 @@
       border: 1px solid #ddd;
       border-radius: 12px;
       font-size: 1rem;
-      transition: 0.2s;
+      transition: var(--transicion);
+      background: #fff;
     }
     .form-group input:focus {
       outline: none;
@@ -49,8 +68,9 @@
       border-radius: 40px;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.2s;
+      transition: var(--transicion);
       margin-top: 10px;
+      font-size: 0.95rem;
     }
     .btn-form:hover {
       background: var(--gold);
@@ -58,57 +78,6 @@
     .btn-form:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-    }
-    .areas-grid-simple {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin: 30px 0;
-    }
-    .area-card-simple {
-      background: #fff;
-      border-radius: 16px;
-      padding: 30px 20px;
-      text-align: center;
-      border: 2px solid var(--line);
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .area-card-simple:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-    }
-    .area-card-simple.selected {
-      border-color: var(--gold);
-      background: #FFFDF5;
-      box-shadow: 0 4px 16px rgba(200,151,43,0.15);
-    }
-    .area-card-simple .name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--green);
-    }
-    .area-card-simple .sub {
-      font-size: 0.8rem;
-      color: var(--ink-soft);
-      margin-top: 6px;
-    }
-    .area-card-simple .emoji {
-      font-size: 2.4rem;
-      display: block;
-      margin-bottom: 8px;
-    }
-    .warning {
-      background: #FFF3E0;
-      border-left: 4px solid var(--gold);
-      padding: 12px 20px;
-      border-radius: 12px;
-      margin: 20px 0;
-    }
-    .hidden {
-      display: none;
     }
     .loader-wrapper {
       display: flex;
@@ -128,10 +97,405 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    .cb { cursor: pointer; user-select: none; }
-    .cnt-input { text-align: center; }
+    .hidden {
+      display: none !important;
+    }
+
+    /* ========== ÁREAS DE VIDA ========== */
+    .areas-grid-simple {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .area-card-simple {
+      background: #fff;
+      border-radius: var(--radio);
+      padding: 30px 20px;
+      text-align: center;
+      border: 2px solid var(--line);
+      cursor: pointer;
+      transition: all var(--transicion);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .area-card-simple:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+    .area-card-simple.selected {
+      border-color: var(--gold);
+      background: #FFFDF5;
+      box-shadow: 0 4px 16px rgba(200,151,43,0.15);
+    }
+    .area-card-simple .emoji {
+      font-size: 2.4rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .area-card-simple .name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .area-card-simple .sub {
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      margin-top: 6px;
+    }
+    .warning {
+      background: #FFF3E0;
+      border-left: 4px solid var(--gold);
+      padding: 12px 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      color: #8B6000;
+    }
+
+    /* ========== CALCULADORA (estilos completos) ========== */
+    .calc-box {
+      background: linear-gradient(135deg, var(--green), var(--mid));
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: 0 16px 48px rgba(63,125,88,0.28);
+    }
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 44px;
+      align-items: start;
+    }
+    .calc-box h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .calc-box p.sub {
+      color: rgba(255,255,255,0.73);
+      line-height: 1.65;
+      margin-bottom: 26px;
+      font-size: 0.92rem;
+    }
+    .disc-scale {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+    .ds-title {
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 10px;
+    }
+    .ds-bar {
+      height: 7px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.15);
+      margin-bottom: 7px;
+      overflow: hidden;
+    }
+    .ds-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4CAF7D, #C8972B);
+      border-radius: 4px;
+      transition: width 0.4s;
+      width: 0%;
+    }
+    .ds-lbls {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.69rem;
+      color: rgba(255,255,255,0.55);
+    }
+    .counters {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .cr {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .cr-label {
+      flex: 1;
+      min-width: 120px;
+    }
+    .cr-name {
+      font-weight: 600;
+      font-size: 0.86rem;
+      color: #fff;
+    }
+    .cr-price {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 2px;
+    }
+    .counter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s;
+      user-select: none;
+    }
+    .cb:hover {
+      background: rgba(255,255,255,0.32);
+    }
+    .cnt-input {
+      width: 70px;
+      text-align: center;
+      background: rgba(255,255,255,0.18);
+      border: 1.5px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 8px;
+      padding: 4px 6px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .cnt-input:focus {
+      border-color: #fff;
+      background: rgba(255,255,255,0.25);
+    }
+    .cr-co2 {
+      font-size: 0.74rem;
+      color: rgba(255,255,255,0.5);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .placa-box {
+      background: rgba(200,151,43,0.15);
+      border: 1.5px solid rgba(200,151,43,0.4);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+    .placa-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .placa-toggle {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .placa-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .placa-slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.2);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .placa-slider::before {
+      content: '';
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    .placa-toggle input:checked + .placa-slider {
+      background: var(--gold);
+    }
+    .placa-toggle input:checked + .placa-slider::before {
+      transform: translateX(18px);
+      background: #fff;
+    }
+    .placa-lbl {
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.88rem;
+    }
+    .placa-sub {
+      font-size: 0.76rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.5;
+    }
+    .placa-precio {
+      font-size: 0.8rem;
+      color: var(--gold);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .max-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .results {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .r-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+    .rrow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .rrow:last-child {
+      border-bottom: none;
+    }
+    .rl {
+      font-size: 0.83rem;
+      color: #5A7A6A;
+    }
+    .rv {
+      font-weight: 600;
+      color: var(--green);
+      font-size: 0.92rem;
+    }
+    .rv.big {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+    }
+    .rv.gold {
+      color: var(--gold);
+    }
+    .rv.disc {
+      color: #c0392b;
+    }
+
+    .dbadge {
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      margin: 16px 0;
+      background: linear-gradient(135deg, #2D5F8A, #3a7ab8);
+      transition: background 0.3s;
+    }
+    .db-pct {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .db-lbl {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.82);
+      margin-top: 3px;
+    }
+
+    .total-box {
+      background: var(--green);
+      color: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      margin-top: 14px;
+    }
+    .tb-lbl {
+      font-size: 0.74rem;
+      opacity: 0.78;
+    }
+    .tb-total {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+    }
+    .tb-note {
+      font-size: 0.7rem;
+      opacity: 0.6;
+      margin-top: 3px;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 14px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      background: #f0f7f0;
+      color: var(--green);
+      border: 1px solid rgba(26,74,46,0.1);
+    }
+    .pill.opt {
+      background: #FFF8E0;
+      color: #8B6000;
+      border-color: rgba(200,151,43,0.25);
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 900px) {
+      .calc-grid {
+        grid-template-columns: 1fr;
+      }
+      .calc-box {
+        padding: 28px 20px;
+      }
+    }
     @media (max-width: 720px) {
-      .areas-grid-simple { grid-template-columns: 1fr; }
+      .areas-grid-simple {
+        grid-template-columns: 1fr;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .cr {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .cr-co2 {
+        margin-left: 0;
+        text-align: right;
+      }
+      .counter {
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -187,7 +551,7 @@
       </form>
     </div>
 
-    <!-- ========== PASO 2: ÁREAS DE VIDA (SOLO LAS 3 SOLICITADAS, SIN IMÁGENES) ========== -->
+    <!-- ========== PASO 2: ÁREAS DE VIDA ========== -->
     <div id="areasSection" class="hidden">
       <p class="sec-tag">Paso 2</p>
       <h2 class="sec-title">Elige tu área de vida</h2>
@@ -399,7 +763,7 @@
     }
   }
 
-  // ==================== FORMULARIO Y ÁREAS (SOLO 3) ====================
+  // ==================== FORMULARIO Y ÁREAS ====================
   let clienteData = null;
   let areaSeleccionada = null;
   const clienteForm = document.getElementById('clienteForm');
@@ -411,7 +775,7 @@
   const submitBtn = document.getElementById('submitBtn');
   const loaderWrapper = document.getElementById('loaderWrapper');
 
-  // Selección de área (solo 3)
+  // Selección de área
   areaCards.forEach(card => {
     card.addEventListener('click', () => {
       areaCards.forEach(c => c.classList.remove('selected'));
