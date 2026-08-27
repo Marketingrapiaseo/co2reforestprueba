@@ -176,18 +176,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
   border-radius: 16px;
   margin-bottom: 16px;
 }
-
 .area-track {
   display: flex;
   gap: 20px;
   width: max-content;
   animation: scrollArea 30s linear infinite;
 }
-
 .area-carousel:hover .area-track {
   animation-play-state: paused;
 }
-
 .area-item {
   flex: 0 0 400px;
   height: 280px;
@@ -197,7 +194,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   background: #e8f0e8;
 }
-
 .area-item img {
   width: 100%;
   height: 100%;
@@ -205,7 +201,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
   display: block;
   transition: transform 0.4s ease;
 }
-
 .area-item:hover {
   transform: scale(1.02);
   box-shadow: 0 8px 30px rgba(0,0,0,0.15);
@@ -214,26 +209,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:ce
 .area-item:hover img {
   transform: scale(1.05);
 }
-
 @keyframes scrollArea {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-
 @media (max-width: 900px) {
-  .area-item {
-    flex: 0 0 280px;
-    height: 200px;
-  }
+  .area-item { flex: 0 0 280px; height: 200px; }
 }
 @media (max-width: 600px) {
-  .area-item {
-    flex: 0 0 220px;
-    height: 160px;
-  }
-  .area-track {
-    gap: 12px;
-  }
+  .area-item { flex: 0 0 220px; height: 160px; }
+  .area-track { gap: 12px; }
 }
 
 /* PAQUETES / PROGRAMAS */
