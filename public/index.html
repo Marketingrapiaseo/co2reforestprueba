@@ -3,35 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CO2 Reforest — Programas de restauración para empresas · Ley 2173</title>
+  <title>CO2 Reforest · Restauración ecológica · Ley 2173 de 2021</title>
+  <meta name="description" content="CO2 Reforest: Solución empresarial para el cumplimiento de la Ley 2173 de 2021. Restauración ecológica, trazabilidad, monitoreo y reportes ESG en la Orinoquía.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="imagenes/favicon.png" type="image/png">
 </head>
 <body>
 
+<!-- ========== NAVEGACIÓN ========== -->
 <nav>
   <img src="logo.png" alt="CO2 Reforest" class="nav-logo">
   <ul class="nav-links">
     <li><a href="#como-funciona">Cómo funciona</a></li>
     <li><a href="#area-vida">Área de Vida</a></li>
-    <li><a href="#programas">Programas</a></li>
+    <li><a href="#programas">Alternativas</a></li>
     <li><a href="#especies">Especies</a></li>
-    <li><a href="#normativa">Ley 2173</a></li>
-    <li><a href="#trazabilidad">Trazabilidad</a></li>
+    <li><a href="#vivero">Vivero</a></li>
+    <li><a href="#ley2173">Ley 2173</a></li>
     <li><a href="#faq">FAQ</a></li>
-    <li><a href="#contacto" class="nav-cta">Solicitar propuesta</a></li>
+    <li><a href="form.html" class="nav-cta">Solicitar propuesta</a></li>
   </ul>
 </nav>
 
-<!-- HERO -->
+<!-- ========== HERO ========== -->
 <section class="hero">
   <div class="hero-photo"></div>
   <div class="hero-inner">
-    <div class="hero-badge">🌿 Cumplimiento legal + Restauración ecológica</div>
-    <h1>Calcula tu obligación, <em>restaura ecosistemas</em> y obtén trazabilidad verificable</h1>
-    <p class="hero-sub">Programas de restauración en un Área de Vida en la Orinoquía para que tu empresa cumpla la normativa de compensación. Georreferenciación, monitoreo anual y documentación completa incluidos.</p>
+    <div class="hero-badge">🌿 Restauración ecológica · Ley 2173 de 2021</div>
+    <h1>Restaura y conserva ecosistemas plantando árboles,<br><em>mide tu impacto</em> y cumple la legislación</h1>
+    <p class="hero-sub">CO2 Reforest ofrece a tu empresa una solución integral de restauración ecológica en la Orinoquía, con trazabilidad, monitoreo anual y reportes ESG para cumplir la normativa ambiental.</p>
     <p class="hero-law">⚖️ Ley 2173 de 2021 · Resolución 1491/2025 · Resolución 0358/2026</p>
     <div class="hero-kpis">
       <div class="kpi"><div class="kpi-n" data-target="34580">0</div><div class="kpi-l">Árboles establecidos</div></div>
@@ -42,42 +45,97 @@
     </div>
     <div class="hero-btns">
       <a href="#calculadora" class="btn-p">Calcula tu obligación</a>
-      <a href="#area-vida" class="btn-s">Conoce el Área de Vida</a>
+      <a href="#programas" class="btn-s">Ver alternativas</a>
     </div>
   </div>
 </section>
 
-<!-- CÓMO FUNCIONA -->
+<!-- ========== INTRODUCCIÓN ========== -->
+<section class="sec intro">
+  <div class="wrap">
+    <div class="sec-tag">Solución empresarial</div>
+    <h2 class="sec-title">Restauración ecológica al servicio de tu empresa</h2>
+    <p class="sec-sub">Te acompañamos en el cumplimiento de la Ley 2173 de 2021 mediante programas de restauración en un Área de Vida registrada, con georreferenciación, monitoreo anual y documentación completa para la autoridad ambiental.</p>
+    <div class="intro-btns">
+      <a href="#calculadora" class="btn-p">Calcula tu obligación</a>
+      <a href="#beneficios" class="btn-outline">Conoce los beneficios</a>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CALCULADORA LEY 2173 ========== -->
+<section id="calculadora" class="sec">
+  <div class="wrap">
+    <div class="calc-box">
+      <div class="calc-grid">
+        <div>
+          <h2>Calcula la obligación de tu empresa</h2>
+          <p class="sub">Ingresa el número de empleados de planta y conoce cuántos árboles necesitas sembrar según la Ley 2173.</p>
+          <div class="calc-note">ℹ️ La Ley 2173 establece la obligación de sembrar 2 árboles nativos por cada empleado de planta. Esta calculadora es una estimación referencial.</div>
+          <div style="margin-bottom:18px;">
+            <label style="display:block;font-size:.78rem;color:rgba(255,255,255,.6);margin-bottom:8px;font-weight:600;">N.º de empleados de planta</label>
+            <input id="calc-empleados" type="number" min="1" style="width:100%;padding:12px;border-radius:8px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:1rem;font-family:'Playfair Display',serif;font-weight:700;outline:none;" placeholder="Ej: 250">
+          </div>
+          <div style="font-size:.76rem;color:rgba(255,255,255,.55);margin-bottom:10px;">O selecciona un rango común:</div>
+          <div class="emp-options">
+            <div class="emp-opt" data-emp="100"><div class="emp-n">100</div><div class="emp-l">empleados</div></div>
+            <div class="emp-opt" data-emp="500"><div class="emp-n">500</div><div class="emp-l">empleados</div></div>
+            <div class="emp-opt" data-emp="1000"><div class="emp-n">1.000</div><div class="emp-l">empleados</div></div>
+            <div class="emp-opt" data-emp="5000"><div class="emp-n">5.000+</div><div class="emp-l">empleados</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="results">
+            <div class="r-title">Resumen estimado</div>
+            <div class="rrow"><span class="rl">Árboles requeridos</span><span class="rv big" id="r-trees">0</span></div>
+            <div class="rrow"><span class="rl">Grupos / programa</span><span class="rv" id="r-groups">0</span></div>
+            <div class="rrow"><span class="rl">CO₂ estimado/año</span><span class="rv big" id="r-co2">0 kg</span></div>
+            <div class="rrow"><span class="rl">Inversión estimada</span><span class="rv gold big" id="r-total">$0</span></div>
+            <div class="total-box"><div class="tb-lbl">Costo promedio por árbol</div><div class="tb-total" id="r-avg">$0</div></div>
+            <a href="form.html" class="btn-ley" style="margin-top:18px;display:block;text-align:center;">Solicitar propuesta →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CÓMO FUNCIONA ========== -->
 <section id="como-funciona" class="sec sec-gray">
   <div class="wrap">
     <div class="sec-tag">Proceso</div>
     <div class="sec-title">Cómo funciona</div>
     <div class="sec-sub">Te acompañamos en cada etapa del cumplimiento de la obligación de compensación ambiental.</div>
     <div class="steps-grid">
-      <div class="step-card"><div class="step-num">1</div><h4>Diagnóstico</h4><p>Analizamos la obligación de tu empresa según la normativa aplicable y determinamos los árboles requeridos.</p></div>
-      <div class="step-card"><div class="step-num">2</div><h4>Programa de restauración</h4><p>Seleccionas la alternativa de restauración alineada con objetivos ecológicos del Área de Vida.</p></div>
-      <div class="step-card"><div class="step-num">3</div><h4>Jornada de siembra</h4><p>Realizamos la plantación con acompañamiento técnico, georreferenciación y registro fotográfico.</p></div>
-      <div class="step-card"><div class="step-num">4</div><h4>Monitoreo y documentación</h4><p>Seguimiento anual, reportes de establecimiento, medición de carbono y documentación para la autoridad.</p></div>
+      <div class="step-card"><div class="step-num">01</div><h4>Calcula</h4><p>Determina la obligación de tu empresa según la Ley 2173.</p></div>
+      <div class="step-card"><div class="step-num">02</div><h4>Selecciona</h4><p>Elige la alternativa de restauración adecuada.</p></div>
+      <div class="step-card"><div class="step-num">03</div><h4>Planificamos</h4><p>Diseñamos y programamos la jornada de siembra.</p></div>
+      <div class="step-card"><div class="step-num">04</div><h4>Sembramos</h4><p>Establecemos los árboles en el Área de Vida.</p></div>
+      <div class="step-card"><div class="step-num">05</div><h4>Georreferenciamos</h4><p>Registramos la ubicación exacta de cada árbol.</p></div>
+      <div class="step-card"><div class="step-num">06</div><h4>Monitoreamos</h4><p>Realizamos seguimiento y mantenimiento anual.</p></div>
+      <div class="step-card"><div class="step-num">07</div><h4>Medimos</h4><p>Evaluamos los indicadores de impacto disponibles.</p></div>
+      <div class="step-card"><div class="step-num">08</div><h4>Reportamos</h4><p>Entregamos las evidencias correspondientes.</p></div>
+      <div class="step-card"><div class="step-num">09</div><h4>Certificamos</h4><p>Entregamos la documentación que corresponda.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ÁREA DE VIDA -->
+<!-- ========== ÁREA DE VIDA ========== -->
 <section id="area-vida" class="sec">
   <div class="wrap">
-    <div class="sec-tag">Área de Vida</div>
-    <div class="sec-title">Hato Dafne — Primavera, Vichada, Orinoquía</div>
-    <div class="sec-sub">200 hectáreas de sabana inundable y bosque de galería. Corredor biológico entre los ríos Tomo y Vichada con presencia de Danta, Ocarros, Venado y Oso Melero.</div>
+    <div class="sec-tag">Nuestro territorio</div>
+    <div class="sec-title">Nuestra Área de Vida · Hato Dafne</div>
+    <div class="sec-sub">200 hectáreas de sabana inundable y bosque de galería en Primavera, Vichada, Orinoquía. Corredor biológico entre los ríos Tomo y Vichada.</div>
     <div class="area-vida-grid">
       <div>
         <div class="area-vida-imgs">
-          <img src="/imagenes/area-vida1.jpg" alt="Bosque de galería">
-          <img src="/imagenes/area-vida2.jpg" alt="Sabana inundable">
-          <img src="/imagenes/area-vida3.jpg" alt="Río Tomo">
+          <img src="imagenes/area-vida1.jpg" alt="Bosque de galería en el Área de Vida" loading="lazy">
+          <img src="imagenes/area-vida2.jpg" alt="Sabana inundable" loading="lazy">
+          <img src="imagenes/area-vida3.jpg" alt="Río Tomo" loading="lazy">
         </div>
         <div class="area-vida-video">
-          <video controls preload="none" poster="/imagenes/area-vida1.jpg">
-            <source src="/imagenes/video-area-vida.mp4" type="video/mp4">
+          <video controls preload="none" poster="imagenes/area-vida1.jpg">
+            <source src="imagenes/video-area-vida.mp4" type="video/mp4">
           </video>
         </div>
       </div>
@@ -88,52 +146,60 @@
           <div class="av-feat"><h5>📍 Ubicación</h5><p>Primavera, Vichada, Orinoquía colombiana. Acceso vía terrestre y fluvial.</p></div>
           <div class="av-feat"><h5>🦎 Fauna emblemática</h5><p>Danta (Tapirus terrestris), Ocarros, Venado, Oso melero, Moriche y más de 180 especies registradas.</p></div>
         </div>
-        <div class="area-vida-map">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d50000!2d-69.28!3d4.85!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNMKwNTEnMDAuMCJOIDY5wrAxNic0OC4wIlc!5e0!3m2!1ses!2sco!4v1" allowfullscreen loading="lazy"></iframe>
+        <!-- Placeholder para mapa -->
+        <div class="area-vida-map-placeholder">
+          <div style="background:#E8F0E8;border-radius:12px;padding:40px 20px;text-align:center;color:#5A7A6A;border:2px dashed #B8CDB5;">
+            <div style="font-size:2.5rem;margin-bottom:10px;">🗺️</div>
+            <p style="font-weight:600;margin-bottom:4px;">Mapa de las Áreas de Vida</p>
+            <p style="font-size:.8rem;">Aquí irá el mapa detallado de las áreas de vida de CO2 Reforest.</p>
+          </div>
         </div>
         <div class="reaa-box">
           <h5>📋 Estado de registro</h5>
-          <p>El Área de Vida se encuentra en proceso de registro ante el REAA (Registro de Áreas de Vida) conforme a la normativa vigente. [Estado: pendiente de actualización con cifra oficial]</p>
+          <p>El Área de Vida se encuentra en proceso de registro ante el REAA (Registro de Áreas de Vida) conforme a la normativa vigente. <span style="color:#8A6A4A;font-weight:600;">[TODO: Actualizar con estado oficial]</span></p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- PROGRAMAS DE RESTAURACIÓN -->
+<!-- ========== ALTERNATIVAS DE RESTAURACIÓN ========== -->
 <section id="programas" class="sec sec-cream">
   <div class="wrap">
-    <div class="sec-tag">Programas de restauración</div>
-    <div class="sec-title">Alternativas de restauración para tu empresa</div>
-    <div class="sec-sub">Cada programa se articula con el Plan de Restauración ecológica del Área de Vida y atiende un objetivo de conservación específico.</div>
+    <div class="sec-tag">Alternativas de restauración</div>
+    <div class="sec-title">Elige el programa que se alinea con tus objetivos</div>
+    <div class="sec-sub">Cada alternativa está diseñada para generar un impacto ecológico medible y duradero en el Área de Vida.</div>
     <div class="packs">
+      <!-- Bosque ripario -->
       <div class="pk">
-        <div class="pk-img"><img src="/imagenes/ripario.jpg" alt="Bosque Ripario"><div class="pk-over"><span class="pk-badge a">Ripario</span><div class="pk-title">Bosque Ripario</div></div></div>
+        <div class="pk-img"><img src="imagenes/ripario.jpg" alt="Bosque Ripario" loading="lazy"><div class="pk-over"><span class="pk-badge a">Ripario</span><div class="pk-title">Bosque Ripario</div></div></div>
         <div class="pk-body">
           <p class="pk-obj">🎯 Objetivo: Conservación del Río Tomo y sus riberas</p>
-          <p class="pk-desc">Restauración de la franja ribereña para proteger fuentes hídricas, estabilizar riberas y recuperar conectividad acuático-terrestre. Prioriza Salix humboldtiana, Inga spp. y Pachira aquatica.</p>
+          <p class="pk-desc">Restauración de la franja ribereña para proteger fuentes hídricas, estabilizar riberas y recuperar conectividad acuático-terrestre.</p>
           <div class="chips"><span class="chip">Río Tomo</span><span class="chip">Fuentes hídricas</span><span class="chip">Conectividad</span></div>
           <div class="co2box a"><div class="co2n a">22 kg</div><div class="co2l">CO₂ estimado por árbol/año*</div></div>
           <div class="pk-price"><span class="price-n a">$45.000</span><span class="price-s">por árbol (programa)</span></div>
           <a href="form.html?programa=ripario" class="pk-btn a">Solicitar propuesta</a>
         </div>
       </div>
+      <!-- Hábitat Danta -->
       <div class="pk">
-        <div class="pk-img"><img src="/imagenes/danta.jpg" alt="Hábitat Danta"><div class="pk-over"><span class="pk-badge b">Hábitat</span><div class="pk-title">Hábitat para la Danta</div></div></div>
+        <div class="pk-img"><img src="imagenes/danta.jpg" alt="Hábitat Danta" loading="lazy"><div class="pk-over"><span class="pk-badge b">Hábitat</span><div class="pk-title">Hábitat para la Danta</div></div></div>
         <div class="pk-body">
           <p class="pk-obj">🎯 Objetivo: Oferta de hábitat para Tapirus terrestris</p>
-          <p class="pk-desc">Corredores de hábitat para la Danta, especie bandera y paraguas del Área de Vida. Incluye Genipa americana, Gustavia spp. y Eschweilera spp. que proveen alimento y refugio.</p>
+          <p class="pk-desc">Corredores de hábitat para la Danta, especie bandera y paraguas del Área de Vida. Incluye especies que proveen alimento y refugio.</p>
           <div class="chips"><span class="chip">Danta</span><span class="chip">Corredores</span><span class="chip">Hábitat crítico</span></div>
           <div class="co2box b"><div class="co2n b">25 kg</div><div class="co2l">CO₂ estimado por árbol/año*</div></div>
           <div class="pk-price"><span class="price-n b">$52.000</span><span class="price-s">por árbol (programa)</span></div>
           <a href="form.html?programa=danta" class="pk-btn b">Solicitar propuesta</a>
         </div>
       </div>
+      <!-- Bosques Sostenibles -->
       <div class="pk">
-        <div class="pk-img"><img src="/imagenes/promisorias.jpg" alt="Especies promisorias"><div class="pk-over"><span class="pk-badge c">Promisorias</span><div class="pk-title">Bosques Sostenibles</div></div></div>
+        <div class="pk-img"><img src="imagenes/promisorias.jpg" alt="Bosques Sostenibles" loading="lazy"><div class="pk-over"><span class="pk-badge c">Promisorias</span><div class="pk-title">Bosques Sostenibles</div></div></div>
         <div class="pk-body">
           <p class="pk-obj">🎯 Objetivo: Uso sostenible con beneficio comunitario</p>
-          <p class="pk-desc">Especies con potencial económico sostenible: Carapa guianensis, Swietenia macrophylla, Orbignya phalerata y Brosimum alicastrum. Beneficios compartidos con familias Sikuani.</p>
+          <p class="pk-desc">Especies con potencial económico sostenible. Beneficios compartidos con familias Sikuani del área de influencia.</p>
           <div class="chips"><span class="chip">Maderable</span><span class="chip">No maderable</span><span class="chip">Comunitario</span></div>
           <div class="co2box c"><div class="co2n c">28 kg</div><div class="co2l">CO₂ estimado por árbol/año*</div></div>
           <div class="pk-price"><span class="price-n c">$58.000</span><span class="price-s">por árbol (programa)</span></div>
@@ -144,16 +210,16 @@
   </div>
 </section>
 
-<!-- ESPECIES (CORREGIDAS - TODAS CON EL MISMO FORMATO) -->
+<!-- ========== ESPECIES NATIVAS ========== -->
 <section id="especies" class="sec sec-gray">
   <div class="wrap">
-    <div class="sec-tag">Especies nativas</div>
-    <div class="sec-title">Especies del Área de Vida</div>
-    <div class="sec-sub">Cada especie incluye dato curioso, función ecológica e importancia para el ecosistema.</div>
+    <div class="sec-tag">Biodiversidad</div>
+    <div class="sec-title">Especies nativas del Área de Vida</div>
+    <div class="sec-sub">Cada especie incluye su nombre científico, función ecológica y un dato curioso para conocer mejor la biodiversidad que restauras.</div>
     <div class="species">
-      <!-- 1. Moriche -->
+      <!-- Moriche -->
       <div class="sp">
-        <div class="sp-img"><img src="/imagenes/moriche.jpg" alt="Moriche"></div>
+        <div class="sp-img"><img src="imagenes/moriche.jpg" alt="Moriche" loading="lazy"></div>
         <div class="sp-body">
           <div class="sp-name">Moriche</div>
           <div class="sp-sci">Mauritia flexuosa</div>
@@ -167,9 +233,9 @@
           </div>
         </div>
       </div>
-      <!-- 2. Andiroba -->
+      <!-- Andiroba -->
       <div class="sp">
-        <div class="sp-img"><img src="/imagenes/andiroba.jpg" alt="Andiroba"></div>
+        <div class="sp-img"><img src="imagenes/andiroba.jpg" alt="Andiroba" loading="lazy"></div>
         <div class="sp-body">
           <div class="sp-name">Andiroba</div>
           <div class="sp-sci">Carapa guianensis</div>
@@ -183,9 +249,9 @@
           </div>
         </div>
       </div>
-      <!-- 3. Jagua -->
+      <!-- Jagua -->
       <div class="sp">
-        <div class="sp-img"><img src="/imagenes/jagua.jpg" alt="Jagua"></div>
+        <div class="sp-img"><img src="imagenes/jagua.jpg" alt="Jagua" loading="lazy"></div>
         <div class="sp-body">
           <div class="sp-name">Jagua</div>
           <div class="sp-sci">Genipa americana</div>
@@ -199,9 +265,9 @@
           </div>
         </div>
       </div>
-      <!-- 4. Cacao de Monte -->
+      <!-- Cacao de Monte -->
       <div class="sp">
-        <div class="sp-img"><img src="/imagenes/cacao-monte.jpg" alt="Cacao de monte"></div>
+        <div class="sp-img"><img src="imagenes/cacao-monte.jpg" alt="Cacao de monte" loading="lazy"></div>
         <div class="sp-body">
           <div class="sp-name">Cacao de Monte</div>
           <div class="sp-sci">Pachira aquatica</div>
@@ -215,9 +281,9 @@
           </div>
         </div>
       </div>
-      <!-- 5. Guamo -->
+      <!-- Guamo -->
       <div class="sp">
-        <div class="sp-img"><img src="/imagenes/guamo.jpg" alt="Guamo"></div>
+        <div class="sp-img"><img src="imagenes/guamo.jpg" alt="Guamo" loading="lazy"></div>
         <div class="sp-body">
           <div class="sp-name">Guamo</div>
           <div class="sp-sci">Inga spp.</div>
@@ -231,9 +297,9 @@
           </div>
         </div>
       </div>
-      <!-- 6. Guáimaro -->
+      <!-- Guáimaro -->
       <div class="sp">
-        <div class="sp-img"><img src="/imagenes/guaimaro.jpg" alt="Guáimaro"></div>
+        <div class="sp-img"><img src="imagenes/guaimaro.jpg" alt="Guáimaro" loading="lazy"></div>
         <div class="sp-body">
           <div class="sp-name">Guáimaro</div>
           <div class="sp-sci">Brosimum alicastrum</div>
@@ -251,95 +317,74 @@
     <p style="font-size:.78rem;color:#7A9A8A;margin-top:18px;text-align:center;">* Cifras de CO₂ son estimaciones basadas en modelos alométricos. Ver sección <a href="#carbono" style="color:var(--green);font-weight:600;">Cómo medimos el carbono</a>.</p>
   </div>
 </section>
+
 <!-- ========== VIVERO CERTIFICADO ========== -->
 <section id="vivero" class="sec sec-cream">
   <div class="wrap">
     <div class="sec-tag">Vivero certificado</div>
     <div class="sec-title">Semilla ICA · Producción propia</div>
     <div class="sec-sub">Tus árboles nacen en nuestro vivero certificado por el ICA, donde crecen y se fortalecen antes de ser trasplantados al Área de Vida.</div>
-    <div class="vivero-grid">
-      <div class="vivero-item"><img src="imagenes/Fotos vivero/1.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
-      <div class="vivero-item"><img src="imagenes/Fotos vivero/2.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
-      <div class="vivero-item"><img src="imagenes/Fotos vivero/3.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
-      <div class="vivero-item"><img src="imagenes/Fotos vivero/4.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
-      <div class="vivero-item"><img src="imagenes/Fotos vivero/5.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+    
+    <div class="vivero-carousel">
+      <div class="vivero-track">
+        <!-- Imagen 1 -->
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/1.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+        <!-- Imagen 2 -->
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/2.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+        <!-- Imagen 3 -->
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/3.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+        <!-- Imagen 4 -->
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/4.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+        <!-- Imagen 5 -->
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/5.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+
+        <!-- DUPLICADO (para loop infinito) -->
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/1.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/2.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/3.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/4.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+        <div class="vivero-item"><img src="imagenes/Fotos vivero/5.jpeg" alt="Vivero CO2 Reforest" loading="lazy"></div>
+      </div>
     </div>
+    
   </div>
 </section>
-<!-- LEY 2173 -->
-<section id="normativa" class="sec sec-cream">
+
+<!-- ========== LEY 2173 ========== -->
+<section id="ley2173" class="sec">
   <div class="wrap">
     <div class="ley-grid">
       <div>
-        <div class="ley-tag">Normativa aplicable</div>
-        <div class="ley-title">¿Qué obliga la Ley 2173 de 2021?</div>
+        <div class="sec-tag" style="margin-bottom:8px;">Marco legal</div>
+        <h2 class="sec-title" style="font-size:clamp(1.8rem,3.5vw,2.5rem);margin-bottom:16px;">Ley 2173 de 2021</h2>
         <div class="ley-txt">La <strong>Ley 2173 de 2021</strong> obliga a compensar la pérdida de biodiversidad mediante siembra y mantenimiento de árboles nativos en áreas equivalentes. La <strong>Resolución 1491 de 2025</strong> y la <strong>Resolución 0358 de 2026</strong> reglamentan los criterios, tasas de supervivencia y procedimientos de verificación.</div>
         <div class="ley-alert"><div class="la-t">Importante</div><div class="la-b">La compra de árboles por sí sola no equivale al cumplimiento legal. El cumplimiento requiere un proceso integral que incluye siembra, establecimiento, monitoreo y documentación verificable conforme a la normativa.</div></div>
         <div class="res-card">
           <div class="res-card-tag">Proceso integral de cumplimiento</div>
-          <div class="res-card-title">CO2Reforest acompaña cada etapa</div>
+          <div class="res-card-title">CO2 Reforest acompaña cada etapa</div>
           <div class="res-items">
-            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">1. Diagnóstico de obligación según normativa (empresa)</div></div>
-            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">2. Selección de programa de restauración (empresa + CO2Reforest)</div></div>
-            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">3. Jornada de siembra con seguimiento técnico (CO2Reforest)</div></div>
-            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">4. Monitoreo y mantenimiento hasta establecimiento (CO2Reforest)</div></div>
-            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">5. Documentación y reportes para la autoridad (CO2Reforest)</div></div>
+            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">1. Diagnóstico de obligación según normativa</div></div>
+            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">2. Selección de programa de restauración</div></div>
+            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">3. Jornada de siembra con seguimiento técnico</div></div>
+            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">4. Monitoreo y mantenimiento hasta establecimiento</div></div>
+            <div class="ri"><div class="ri-dot"></div><div class="ri-txt">5. Documentación y reportes para la autoridad</div></div>
           </div>
         </div>
         <a href="form.html" class="btn-ley">Solicitar propuesta →</a>
       </div>
       <div>
         <div class="ley-bens">
-          <div class="lb"><div class="lb-ico">⚠️</div><div><div class="lb-t">Certificado Siembra Vida</div><div class="lb-b">Es documentación emitida por CO2Reforest que da fe del proceso realizado. No es un certificado expedido por la autoridad ambiental.</div></div></div>
-          <div class="lb"><div class="lb-ico">📋</div><div><div class="lb-t">¿Qué recibe tu empresa?</div><div class="lb-b">Reporte de siembra, georreferenciación, registro fotográfico, reportes de monitoreo anual, estimación de captura de carbono, documentación para la autoridad.</div></div></div>
-          <div class="lb"><div class="lb-ico">📍</div><div><div class="lb-t">Georreferenciación</div><div class="lb-b">Cada árbol registrado con coordenadas, especie, fecha y estado. Monitoreo anual verificable.</div></div></div>
-          <div class="lb"><div class="lb-ico">🌱</div><div><div class="lb-t">Vivero certificado ICA</div><div class="lb-b">Propio para propagación de especies nativas endémicas y amenazadas.</div></div></div>
+          <div class="lb"><div class="lb-ico">📋</div><div><div class="lb-t">¿Qué establece la Ley 2173?</div><div class="lb-b">Obliga a sembrar 2 árboles nativos por cada empleado de planta en áreas de vida registradas.</div></div></div>
+          <div class="lb"><div class="lb-ico">🏢</div><div><div class="lb-t">¿A quién aplica?</div><div class="lb-b">A todas las empresas que realicen proyectos, obras o actividades que requieran licencia ambiental.</div></div></div>
+          <div class="lb"><div class="lb-ico">🌳</div><div><div class="lb-t">¿Qué obligación genera?</div><div class="lb-b">Sembrar 2 árboles nativos por cada empleado de planta, en áreas de vida registradas ante el MADS.</div></div></div>
+          <div class="lb"><div class="lb-ico">🤝</div><div><div class="lb-t">¿Cómo te ayudamos?</div><div class="lb-b">Ofrecemos un programa integral: registro, siembra, georreferenciación, monitoreo y reportes para la autoridad.</div></div></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CALCULADORA -->
-<section id="calculadora" class="sec">
-  <div class="wrap">
-    <div class="calc-box">
-      <div class="calc-grid">
-        <div>
-          <h2>Calcula tu obligación</h2>
-          <p class="sub">Estima los árboles requeridos e inversión según empleados y programa de restauración.</p>
-          <div class="calc-note">ℹ️ El número de árboles depende de la base de cálculo que establezca la autoridad ambiental para tu empresa. Esta calculadora es una estimación referencial.</div>
-          <div style="margin-bottom:18px;"><label style="display:block;font-size:.78rem;color:rgba(255,255,255,.6);margin-bottom:8px;font-weight:600;">N.º de empleados</label><input id="calc-empleados" type="number" min="1" style="width:100%;padding:12px;border-radius:8px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:1rem;font-family:'Playfair Display',serif;font-weight:700;outline:none;" placeholder="Ej: 250"></div>
-          <div style="font-size:.76rem;color:rgba(255,255,255,.55);margin-bottom:10px;">O selecciona un rango:</div>
-          <div class="emp-options">
-            <div class="emp-opt" data-emp="100"><div class="emp-n">100</div><div class="emp-l">empleados</div></div>
-            <div class="emp-opt" data-emp="500"><div class="emp-n">500</div><div class="emp-l">empleados</div></div>
-            <div class="emp-opt" data-emp="1000"><div class="emp-n">1.000</div><div class="emp-l">empleados</div></div>
-            <div class="emp-opt" data-emp="5000"><div class="emp-n">5.000+</div><div class="emp-l">empleados</div></div>
-          </div>
-          <div class="counters">
-            <div class="cr"><div class="cr-label"><div class="cr-name">Ripario</div><div class="cr-price">$45.000/árbol</div></div><div class="counter"><button class="cb" onclick="changeCnt(this,-1)">−</button><input class="cnt-input" type="number" value="0" min="0" data-price="45000" data-co2="22"><button class="cb" onclick="changeCnt(this,1)">+</button></div><div class="cr-co2">0 kg CO₂/año</div></div>
-            <div class="cr"><div class="cr-label"><div class="cr-name">Danta</div><div class="cr-price">$52.000/árbol</div></div><div class="counter"><button class="cb" onclick="changeCnt(this,-1)">−</button><input class="cnt-input" type="number" value="0" min="0" data-price="52000" data-co2="25"><button class="cb" onclick="changeCnt(this,1)">+</button></div><div class="cr-co2">0 kg CO₂/año</div></div>
-            <div class="cr"><div class="cr-label"><div class="cr-name">Sostenibles</div><div class="cr-price">$58.000/árbol</div></div><div class="counter"><button class="cb" onclick="changeCnt(this,-1)">−</button><input class="cnt-input" type="number" value="0" min="0" data-price="58000" data-co2="28"><button class="cb" onclick="changeCnt(this,1)">+</button></div><div class="cr-co2">0 kg CO₂/año</div></div>
-          </div>
-        </div>
-        <div>
-          <div class="results">
-            <div class="r-title">Resumen estimado</div>
-            <div class="rrow"><span class="rl">Árboles requeridos</span><span class="rv big" id="r-trees">0</span></div>
-            <div class="rrow"><span class="rl">Grupos/programa</span><span class="rv" id="r-groups">0</span></div>
-            <div class="rrow"><span class="rl">CO₂ estimado/año</span><span class="rv big" id="r-co2">0 kg</span></div>
-            <div class="rrow"><span class="rl">Inversión estimada</span><span class="rv gold big" id="r-total">$0</span></div>
-            <div class="total-box"><div class="tb-lbl">Costo promedio/árbol</div><div class="tb-total" id="r-avg">$0</div></div>
-            <a href="form.html" class="btn-ley" style="margin-top:18px;display:block;text-align:center;">Solicitar propuesta →</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-</section>
-<!-- TRAZABILIDAD -->
+<!-- ========== TRAZABILIDAD ========== -->
 <section id="trazabilidad" class="sec sec-cream">
   <div class="wrap">
     <div class="sec-tag">Trazabilidad</div>
@@ -353,14 +398,14 @@
         <div class="traz-step"><div class="traz-step-num">4</div><div class="traz-step-text"><h4>Documentación para la autoridad</h4><p>Reportes de establecimiento, plan de siembra, cronograma, certificación del proceso.</p></div></div>
       </div>
       <div>
-        <div class="traz-img"><img src="/imagenes/trazabilidad.jpg" alt="Georreferenciación en campo"></div>
+        <div class="traz-img"><img src="imagenes/trazabilidad.jpg" alt="Georreferenciación en campo" loading="lazy"></div>
         <p style="margin-top:14px;font-size:.83rem;color:#5A7A6A;line-height:1.5;">Ejemplo de reporte: cada árbol incluye ID, coordenadas, especie, fecha de siembra, estado actual, altura, DAP y fotografía de seguimiento.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CARBONO / METODOLOGÍA -->
+<!-- ========== CARBONO / METODOLOGÍA ========== -->
 <section id="carbono" class="sec sec-gray">
   <div class="wrap">
     <div class="sec-tag">Metodología</div>
@@ -384,74 +429,37 @@
   </div>
 </section>
 
-<!-- IMPACTO SOCIAL -->
-<section id="impacto" class="sec">
-  <div class="wrap">
-    <div class="sec-tag">Impacto social</div>
-    <div class="sec-title">Comunidades Sikuani del área de influencia</div>
-    <div class="sec-sub">Las comunidades participan activamente y reciben beneficios concretos del proceso de restauración.</div>
-    <div class="impact-grid">
-      <div>
-        <div class="impact-card"><h4>👥 Participación</h4><p>Familias Sikuani participan en jornadas de siembra, mantenimiento y monitoreo. Generación de empleo local calificado.</p></div>
-        <div class="impact-card"><h4>🏠 Beneficios recibidos</h4><p>Ingresos por jornales, capacitación técnica, uso sostenible de especies promisorias (frutos, artesanías, medicina).</p></div>
-        <div class="impact-card"><h4>📊 Impacto cuantificable</h4><p>[Datos verificables pendientes: número de familias beneficiadas, jornales generados, ingresos transferidos — actualizar con cifras de campo]</p></div>
-      </div>
-      <div>
-        <div class="impact-imgs">
-          <img src="/imagenes/sikuani1.jpg" alt="Comunidad Sikuani">
-          <img src="/imagenes/sikuani2.jpg" alt="Jornada de siembra comunitaria">
-        </div>
-        <p style="font-size:.78rem;color:#7A9A8A;margin-top:10px;">Fotografías con autorización de las comunidades.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ESG -->
-<section class="sec sec-green">
-  <div class="wrap" style="text-align:center;">
-    <div class="sec-tag" style="color:var(--tierra)">Reportes</div>
-    <div class="sec-title wh">Reportes ESG</div>
-    <div class="sec-sub wh">Entregamos reportes Environmental, Social and Governance con indicadores específicos y verificables de tu aporte en restauración.</div>
-    <div class="esg">
-      <div class="ec"><div class="ec-ico">🌍</div><div class="ec-t">Ambiental</div><div class="ec-b">Captura de carbono estimada, biomasa medida, especies plantadas, supervivencia, hectáreas restauradas, conectividad ecológica recuperada.</div></div>
-      <div class="ec"><div class="ec-ico">👥</div><div class="ec-t">Social</div><div class="ec-b">Familias beneficiadas, empleos generados, capacitaciones, uso sostenible de especies por comunidades.</div></div>
-      <div class="ec"><div class="ec-ico">🏛️</div><div class="ec-t">Gobernanza</div><div class="ec-b">Documentación del proceso, trazabilidad por árbol, cronograma, cumplimiento normativo reportado.</div></div>
-    </div>
-    <p style="font-size:.76rem;color:rgba(255,255,255,.5);margin-top:22px;">Los reportes contienen indicadores específicos. No afirmamos compatibilidad con estándares GRI o B Corp como certificación.</p>
-  </div>
-</section>
-
-<!-- BENEFICIOS CATEGORIZADOS -->
-<section id="beneficios" class="sec sec-cream">
+<!-- ========== BENEFICIOS EMPRESARIALES ========== -->
+<section id="beneficios" class="sec">
   <div class="wrap">
     <div class="sec-tag">Beneficios</div>
     <div class="sec-title">¿Qué obtiene tu empresa?</div>
+    <div class="sec-sub">Un programa de restauración completo, con beneficios tangibles para tu empresa y el planeta.</div>
     <div class="ben-cat">
-      <div class="ben-cat-title">⚖️ Beneficios legales</div>
+      <div class="ben-cat-title">⚖️ Cumplimiento</div>
       <div class="ben-cat-grid">
         <div class="ben-item">Proceso documentado para <strong>acercar el cumplimiento</strong> de la obligación de compensación.</div>
         <div class="ben-item">Acompañamiento en la documentación requerida por la <strong>autoridad ambiental</strong>.</div>
       </div>
     </div>
     <div class="ben-cat">
-      <div class="ben-cat-title">🌿 Beneficios ambientales</div>
+      <div class="ben-cat-title">🌿 Ambiental</div>
       <div class="ben-cat-grid">
         <div class="ben-item">Restauración en un <strong>Área de Vida de 200 ha</strong> con Plan de Restauración propio.</div>
-        <div class="ben-item">Vivero <strong>certificado ICA</strong> con especies nativas endémicas y amenazadas.</div>
+        <div class="ben-item">Vivero <strong>certificado ICA</strong> con especies nativas.</div>
         <div class="ben-item"><strong>Medición directa de biomasa</strong> para estimar captura de carbono anualmente.</div>
         <div class="ben-item">Georreferenciación y <strong>monitoreo anual</strong> de cada árbol.</div>
       </div>
     </div>
     <div class="ben-cat">
-      <div class="ben-cat-title">🤝 Beneficios sociales</div>
+      <div class="ben-cat-title">🤝 Social</div>
       <div class="ben-cat-grid">
         <div class="ben-item">Beneficio a <strong>familias Sikuani</strong> del área de influencia.</div>
         <div class="ben-item">Empleo local y <strong>capacitación técnica</strong> en restauración.</div>
       </div>
     </div>
     <div class="ben-cat">
-      <div class="ben-cat-title">📊 Información para ESG</div>
+      <div class="ben-cat-title">📊 ESG</div>
       <div class="ben-cat-grid">
         <div class="ben-item">Reportes <strong>ESG</strong> con indicadores ambientales, sociales y de gobernanza.</div>
         <div class="ben-item"><strong>Trazabilidad verificable</strong> por árbol con cronograma de seguimiento.</div>
@@ -460,45 +468,107 @@
   </div>
 </section>
 
-<!-- FAQ (CORREGIDO) -->
-<section id="faq" class="sec sec-gray">
+<!-- ========== IMPACTO SOCIAL ========== -->
+<section id="impacto" class="sec sec-cream">
   <div class="wrap">
-    <div class="sec-tag">Preguntas frecuentes</div>
-    <div class="sec-title">FAQ</div>
-    <div class="faq-list">
-      <div class="faq-item"><div class="faq-q">¿Qué empresas están obligadas?<span class="faq-arrow">▾</span></div><div class="faq-a">Las empresas que realicen proyectos, obras o actividades que requieran licencia ambiental, conforme a la Ley 2173 de 2021 y sus decretos reglamentarios.</div></div>
-      <div class="faq-item"><div class="faq-q">¿Cuántos árboles debo sembrar?<span class="faq-arrow">▾</span></div><div class="faq-a">Depende de la base de cálculo que establezca la autoridad ambiental para tu proyecto. No existe un número fijo por empleado; lo determina el tipo de impacto y el área a compensar.</div></div>
-      <div class="faq-item"><div class="faq-q">¿Cómo se calcula la obligación?<span class="faq-arrow">▾</span></div><div class="faq-a">La autoridad ambiental establece el área a compensar y las tasas de siembra según el ecosistema impactado. La Resolución 1491/2025 define los criterios de cálculo.</div></div>
-      <div class="faq-item"><div class="faq-q">¿Dónde se siembran los árboles?<span class="faq-arrow">▾</span></div><div class="faq-a">En el Área de Vida Hato Dafne, Primavera, Vichada, en la Orinoquía colombiana.</div></div>
-      <div class="faq-item"><div class="faq-q">¿Qué es un Área de Vida?<span class="faq-arrow">▾</span></div><div class="faq-a">Es un área registrada ante la autoridad ambiental destinada a la conservación y restauración ecológica donde se pueden ejecutar obligaciones de compensación.</div></div>
-      <div class="faq-item"><div class="faq-q">¿Qué es el REAA?<span class="faq-arrow">▾</span></div><div class="faq-a">El Registro de Ecosistemas y Áreas de Vida (REAA) es el registro oficial donde se inscriben las áreas destinadas a compensación. El estado del registro del Área de Vida está en proceso de actualización.</div></div>
-      <div class="faq-item"><div class="faq-q">¿Quién expide el certificado?<span class="faq-arrow">▾</span></div><div class="faq-a">CO2Reforest emite documentación que da fe del proceso realizado. El certificado de cumplimiento ante la autoridad ambiental lo expide la propia autoridad.</div></div>
-      <div class="faq-item"><div class="faq-q">¿Cómo se georreferencian los árboles?<span class="faq-arrow">▾</span></div><div class="faq-a">Cada árbol se registra con coordenadas GPS al momento de siembra, con especie, fecha y fotografía. Se monitorean anualmente.</div></div>
-      <div class="faq-item"><div class="faq-q">¿Cómo se calcula el CO₂?<span class="faq-arrow">▾</span></div><div class="faq-a">Mediante modelos alométricos con datos de campo (DAP, altura) convertidos a biomasa y luego a CO₂ equivalente. Son estimaciones, no captura certificada. Ver sección "Cómo medimos el carbono".</div></div>
-      <div class="faq-item"><div class="faq-q">¿Qué recibe la empresa?<span class="faq-arrow">▾</span></div><div class="faq-a">Reporte de siembra, georreferenciación, registro fotográfico, reportes de monitoreo anual, estimación de captura de carbono y documentación para la autoridad ambiental.</div></div>
-      <div class="faq-item"><div class="faq-q">¿Qué ocurre después de la siembra?<span class="faq-arrow">▾</span></div><div class="faq-a">Monitoreo trimestral el primer año, luego anual hasta establecimiento (tasa de supervivencia verificada). Se generan reportes y se realiza mantenimiento según cronograma.</div></div>
+    <div class="sec-tag">Impacto social</div>
+    <div class="sec-title">Restauramos ecosistemas y fortalecemos comunidades</div>
+    <div class="sec-sub">Las comunidades Sikuani del área de influencia participan activamente y reciben beneficios concretos del proceso de restauración.</div>
+    <div class="impact-grid">
+      <div>
+        <div class="impact-card"><h4>👥 Participación</h4><p>Familias Sikuani participan en jornadas de siembra, mantenimiento y monitoreo. Generación de empleo local calificado.</p></div>
+        <div class="impact-card"><h4>🏠 Beneficios recibidos</h4><p>Ingresos por jornales, capacitación técnica, uso sostenible de especies promisorias (frutos, artesanías, medicina).</p></div>
+        <div class="impact-card"><h4>📊 Impacto cuantificable</h4><p><span style="color:#8A6A4A;font-weight:600;">[TODO: Actualizar con cifras de campo — número de familias beneficiadas, jornales generados, ingresos transferidos]</span></p></div>
+      </div>
+      <div>
+        <div class="impact-imgs">
+          <img src="imagenes/sikuani1.jpg" alt="Comunidad Sikuani" loading="lazy">
+          <img src="imagenes/sikuani2.jpg" alt="Jornada de siembra comunitaria" loading="lazy">
+        </div>
+        <p style="font-size:.78rem;color:#7A9A8A;margin-top:10px;">Fotografías con autorización de las comunidades.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
+<!-- ========== RESULTADOS ========== -->
+<section id="resultados" class="sec sec-green">
+  <div class="wrap" style="text-align:center;">
+    <div class="sec-tag" style="color:var(--tierra);">Resultados</div>
+    <div class="sec-title wh">Nuestros resultados</div>
+    <div class="sec-sub wh">Cifras que reflejan el impacto de nuestros programas de restauración en la Orinoquía.</div>
+    <div class="resultados-grid">
+      <div class="resultado-item"><div class="r-num" data-target="34580">0</div><div class="r-label">Árboles establecidos <small>acumulados</small></div></div>
+      <div class="resultado-item"><div class="r-num" data-target="200" data-suffix=" ha">0</div><div class="r-label">Hectáreas <small>en restauración</small></div></div>
+      <div class="resultado-item"><div class="r-num" data-target="1711" data-suffix=" t">0</div><div class="r-label">CO₂ estimado capturado/año*</div></div>
+      <div class="resultado-item"><div class="r-num" data-target="6">0</div><div class="r-label">Especies nativas <small>en programa</small></div></div>
+      <div class="resultado-item"><div class="r-num" data-target="15">0</div><div class="r-label">Familias Sikuani <small>beneficiadas</small></div></div>
+      <div class="resultado-item"><div class="r-num" data-target="12">0</div><div class="r-label">Jornadas de siembra <small>realizadas</small></div></div>
+    </div>
+    <p style="font-size:.76rem;color:rgba(255,255,255,.5);margin-top:22px;">* Cifras de CO₂ son estimaciones basadas en modelos alométricos. <span style="color:#8A6A4A;font-weight:600;">[TODO: Verificar cifras con información oficial de campo]</span></p>
+  </div>
+</section>
+
+<!-- ========== CERTIFICACIÓN / REPORTES ========== -->
+<section id="certificacion" class="sec sec-gray">
+  <div class="wrap">
+    <div class="sec-tag">Certificación y reportes</div>
+    <div class="sec-title">Recibe evidencia de tu impacto</div>
+    <div class="sec-sub">Documentación completa para tu empresa y la autoridad ambiental.</div>
+    <div class="cert-grid">
+      <div class="cert-item"><span class="cert-icon">📄</span><h4>Certificación Siembra Vida Empresarial</h4><p>Documento que acredita tu participación en el programa de restauración.</p></div>
+      <div class="cert-item"><span class="cert-icon">📊</span><h4>Reporte de establecimiento</h4><p>Detalle de árboles sembrados, especies y ubicación.</p></div>
+      <div class="cert-item"><span class="cert-icon">📈</span><h4>Reporte de monitoreo anual</h4><p>Evolución de los árboles, supervivencia y crecimiento.</p></div>
+      <div class="cert-item"><span class="cert-icon">🌍</span><h4>Reporte ESG</h4><p>Indicadores ambientales, sociales y de gobernanza.</p></div>
+      <div class="cert-item"><span class="cert-icon">📍</span><h4>Georreferenciación</h4><p>Mapa con la ubicación exacta de cada árbol.</p></div>
+      <div class="cert-item"><span class="cert-icon">📋</span><h4>Documentación para autoridad</h4><p>Reportes y evidencias para presentar ante la autoridad ambiental.</p></div>
+    </div>
+    <p style="font-size:.78rem;color:#7A9A8A;text-align:center;margin-top:18px;">Los reportes contienen indicadores específicos. <span style="color:#8A6A4A;font-weight:600;">[TODO: Incluir ejemplos reales de reportes cuando estén disponibles]</span></p>
+  </div>
+</section>
+
+<!-- ========== FAQ ========== -->
+<section id="faq" class="sec">
+  <div class="wrap">
+    <div class="sec-tag">Preguntas frecuentes</div>
+    <div class="sec-title">FAQ</div>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q">¿Qué es la Ley 2173 de 2021?<span class="faq-arrow">▾</span></div><div class="faq-a">Es la norma que obliga a las empresas a compensar la pérdida de biodiversidad mediante siembra y mantenimiento de árboles nativos en áreas equivalentes.</div></div>
+      <div class="faq-item"><div class="faq-q">¿A qué empresas aplica?<span class="faq-arrow">▾</span></div><div class="faq-a">A todas las empresas que realicen proyectos, obras o actividades que requieran licencia ambiental, conforme a la Ley 2173 y sus decretos reglamentarios.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Cómo calculo mi obligación?<span class="faq-arrow">▾</span></div><div class="faq-a">Usa nuestra calculadora: ingresa el número de empleados de planta y te mostraremos los árboles requeridos según la Ley 2173.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Dónde se siembran los árboles?<span class="faq-arrow">▾</span></div><div class="faq-a">En el Área de Vida Hato Dafne, Primavera, Vichada, en la Orinoquía colombiana.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Qué especies utilizan?<span class="faq-arrow">▾</span></div><div class="faq-a">Especies nativas de la Orinoquía: Moriche, Andiroba, Jagua, Cacao de Monte, Guamo, Guáimaro, entre otras.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Cómo se georreferencian los árboles?<span class="faq-arrow">▾</span></div><div class="faq-a">Cada árbol se registra con coordenadas GPS al momento de siembra, con especie, fecha y fotografía. Se monitorean anualmente.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Cómo se realiza el monitoreo?<span class="faq-arrow">▾</span></div><div class="faq-a">Monitoreo trimestral el primer año, luego anual hasta establecimiento (tasa de supervivencia verificada). Se generan reportes y mantenimiento según cronograma.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Cómo se mide el carbono?<span class="faq-arrow">▾</span></div><div class="faq-a">Mediante modelos alométricos con datos de campo (DAP, altura) convertidos a biomasa y luego a CO₂ equivalente. Son estimaciones, no captura certificada.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Qué recibe mi empresa?<span class="faq-arrow">▾</span></div><div class="faq-a">Reporte de siembra, georreferenciación, registro fotográfico, reportes de monitoreo anual, estimación de captura de carbono y documentación para la autoridad ambiental.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Cómo solicito una cotización?<span class="faq-arrow">▾</span></div><div class="faq-a">Puedes solicitar una propuesta a través del formulario en la sección "Solicitar propuesta" o contactándonos directamente por correo o WhatsApp.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Puedo sembrar árboles adicionales?<span class="faq-arrow">▾</span></div><div class="faq-a">Sí, es posible sembrar árboles adicionales a los requeridos por la Ley. Contáctanos para diseñar un programa a la medida.</div></div>
+      <div class="faq-item"><div class="faq-q">¿Puedo visitar el Área de Vida?<span class="faq-arrow">▾</span></div><div class="faq-a">Sí, coordinamos visitas al Área de Vida para que conozcas el proyecto en terreno y veas el impacto de tu inversión.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA FINAL ========== -->
 <section id="contacto" class="cta-final">
   <div class="cta-inner">
     <div class="cta-title">Calcula tu obligación y solicita una propuesta</div>
     <div class="cta-sub">Te acompañamos desde el diagnóstico hasta la documentación para la autoridad ambiental.</div>
     <div class="cta-btns">
-      <a href="form.html" class="btn-wh">Solicitar propuesta</a>
-      <a href="#calculadora" class="btn-ow">Calculadora</a>
+      <a href="#calculadora" class="btn-wh">Calcula tu obligación</a>
+      <a href="form.html" class="btn-ow">Solicitar propuesta</a>
     </div>
   </div>
 </section>
 
+<!-- ========== FOOTER ========== -->
 <footer>
   <img src="logo.png" alt="CO2 Reforest" class="f-logo">
-  <div class="f-contact">info@co2reforest.com · Primavera, Vichada, Colombia</div>
+  <div class="f-contact">info@co2reforest.com · +57 315 592 8625 · Primavera, Vichada, Colombia</div>
   <div class="f-info">Ley 2173 de 2021 · Res. 1491/2025 · Res. 0358/2026</div>
 </footer>
 
+<!-- Modal especies -->
 <div id="modal-especie" class="modal">
   <div class="modal-contenido">
     <span class="modal-cerrar">&times;</span>
@@ -523,6 +593,5 @@
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
