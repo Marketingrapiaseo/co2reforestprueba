@@ -7,12 +7,181 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
-    .cart-summary { background: #fff; border-radius: 20px; padding: 30px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); margin-bottom: 30px; }
-    .pack-line { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eaeaea; flex-wrap: wrap; }
-    .pack-name { font-weight: 600; color: var(--green); }
-    .total-grande { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--gold); }
-    .btn-pago { background: var(--gold); color: #fff; border: none; cursor: pointer; }
-    .btn-pago:hover { background: #b57c1a; }
+    /* ========== VARIABLES ========== */
+    :root {
+      --green: #3F7D58;
+      --mid: #285943;
+      --light: #6FA47C;
+      --gold: #C8972B;
+      --gold-soft: #E3B85A;
+      --tierra: #8A6A4A;
+      --cream: #F4F1E8;
+      --gray: #F7F8F5;
+      --line: #E4DECB;
+      --ink-soft: #5A7A6A;
+      --shadow: 0 8px 24px rgba(0,0,0,0.05);
+      --radio: 16px;
+      --transicion: 0.2s ease;
+    }
+
+    /* ========== ESTILOS GENERALES ========== */
+    .sec {
+      padding: 60px 40px;
+    }
+    .wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .sec-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--tierra);
+      margin-bottom: 10px;
+    }
+    .sec-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.7rem);
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1.18;
+      margin-bottom: 14px;
+    }
+    .sec-sub {
+      color: var(--ink-soft);
+      line-height: 1.76;
+      max-width: 640px;
+      margin-bottom: 52px;
+      font-size: 0.97rem;
+    }
+
+    /* ========== CART SUMMARY ========== */
+    .cart-summary {
+      background: #fff;
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+    }
+    .pack-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #eaeaea;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .pack-name {
+      font-weight: 600;
+      color: var(--green);
+    }
+    .total-grande {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .rv.disc {
+      color: #c0392b;
+      font-weight: 600;
+    }
+    .rv.gold {
+      color: var(--gold);
+    }
+
+    /* ========== RES BANNER ========== */
+    .res-banner {
+      background: rgba(63,125,88,0.06);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .res-icon {
+      font-size: 2rem;
+    }
+    .res-title {
+      font-weight: 700;
+      color: var(--green);
+      font-size: 1rem;
+    }
+    .res-text {
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    /* ========== BOTONES ========== */
+    .btn-p {
+      display: inline-block;
+      background: var(--green);
+      color: #fff;
+      padding: 14px 30px;
+      border-radius: 7px;
+      font-weight: 600;
+      font-size: 0.93rem;
+      text-decoration: none;
+      transition: all 0.25s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-p:hover {
+      background: var(--mid);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(63,125,88,0.28);
+    }
+
+    .btn-s {
+      display: inline-block;
+      background: #fff;
+      color: var(--green);
+      padding: 14px 30px;
+      border-radius: 7px;
+      font-weight: 600;
+      font-size: 0.93rem;
+      text-decoration: none;
+      border: 2px solid var(--green);
+      transition: all 0.25s;
+      cursor: pointer;
+    }
+    .btn-s:hover {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .btn-pago {
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-pago:hover {
+      background: #b57c1a;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 720px) {
+      .sec {
+        padding: 40px 16px;
+      }
+      .cart-summary {
+        padding: 20px;
+      }
+      .pack-line {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+      .res-banner {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
   </style>
 </head>
 <body>
